@@ -12,14 +12,48 @@ Contains information on fileIds (unique key) and their respective tags. These ta
 
 # Endpoint Information:
 
-POST tag/:fileId/:work
+## POST tag/:fileId/:work
 
 - Adds a tag to a post using fileId.
-
-DELETE tag/:fileId
+- Request:
+```
+{
+	"fileId": "[unique idenitifier]",
+	"tag": "[String]"
+}
+```
+- Response:
+```
+{
+	"fileId": "[unique idenitifier]",
+	"tags": "[String]"
+}
+```
+- HTTP Status Codes:
+    - 200: OK
+    - 500: Internal Server Error
+---
+## DELETE tag/:fileId
 
 - Removes a tag from a file.
-
+- Request:
+```
+{
+	"fileId":"[unique idenitifier]",
+	"tag": "[String]"
+}
+```
+- Response:
+```
+{
+	"fileId": "[unique idenitifier]",
+	"tags": []
+}
+```
+- HTTP Status Codes:
+    - 200: OK
+    - 404: Not Found
+    - 500: Internal Server Error
 # How to run service:
 
 ### **Step 1: Prerequisites**
