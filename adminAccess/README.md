@@ -12,13 +12,44 @@ If user is deleted, remove userID if in admin list.
 
 # Endpoint Information: 
 
-POST admin/:userId
+## POST admin/:userId
 
 - Adds a user as an admin using userId. This should be a POST request.
-
-DELETE admin/:userId
+- Request:
+```
+{
+	"uId": "[unique identifier]"
+}
+```
+- Response:
+```
+{
+	"users": [{JSON USER}]
+}
+```
+- HTTP Status Codes: 
+    - 200: OK
+    - 500: Internal Server Error
+--- 
+## DELETE admin/:userId
 
 - Removes a user as an admin using userId. This should be a DELETE request.
+- Request: 
+```
+{
+	"users": [{JSON USER}]
+}
+```
+- Response:
+```
+{
+	"users": [{JSON USER}]
+}
+```
+- HTTP Status Codes:
+    - 200: OK
+    - 404: Not Found
+    - 500: Internal Server Error
 
 # How to run service:
 
