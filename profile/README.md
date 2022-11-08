@@ -16,22 +16,99 @@ Contains information on a user including userId (unique key), email, password, n
 
 # Endpoint Information:
 
-GET /profile/:userId
+## GET /profile/:userId
 
 - Gets profile details by userId.
+- Request: 
+```
+{
+	"uId": "[unique identifier]"
+}
+ ```
+ - Response:
+ ```
+{
+    "uId": "[unique identifier]",
+    "email" : "[unicode 64 characters max]",
+    "password": "[unicode 64 characters max]",
+    "name": "[String]",
+}
+ ```
+ - HTTP Status Codes:   
+    - 200: OK
+    - 404: Not Found
+    - 500: Internal Server Error
 
-PUT /profile/:userId
+---
+## PUT /profile/:userId
 
 - Updates a profile details by userId.
-
-POST /profile/:userId
+- Request: 
+```
+{
+	"uId": "[unique identifier]"
+}
+```
+- Response:
+```
+{
+    "uId": "[unique identifier]",
+    "email" : "[unicode 64 characters max]",
+    "password": "[unicode 64 characters max]",
+    "name": "[String]",
+}
+```
+- HTTP Status Codes: 
+    - 200: OK
+    - 304: Not Modified
+    - 404: Not Found
+    - 500: Internal Server Error
+---
+## POST /profile/:userId
 
 - Creates a profile details by userId.
-
-DELETE /profile/:userId
+- Request:
+```
+{
+	"uId": "[unique identifier]"
+}
+```
+- Response:
+```
+{
+    "uId": "[unique identifier]",
+    "email" : "[unicode 64 characters max]",
+    "password": "[unicode 64 characters max]",
+    "name": "[String]",
+}
+```
+- HTTP Status Codes:
+    - 200: OK
+    - 500: Internal Server Error
+---
+## DELETE /profile/:userId
 
 - Creates a profile details by userId.
-
+- Request:
+```
+{
+	"uId": "[unique identifier]"
+}
+```
+- Response:
+```
+{
+    "uId": "[unique identifier]",
+    "email" : "[unicode 64 characters max]",
+    "password": "[unicode 64 characters max]",
+    "name": "[String]",
+}
+```
+- HTTP Status Codes: 
+    - 200: OK
+    - 404: Not Found
+    - 500: Internal Server Error
+---
 # How to run service:
 
 ### **Step 1: Prerequisites**
