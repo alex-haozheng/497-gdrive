@@ -32,6 +32,9 @@ app.get('/login/forgotpw', async (req, res) => {
 				message: 'NOT FOUND'
 			}); return;
 		}
+
+		// right around here add a await call to another endpoint to change the password and mark a flag
+
 		// let's create the transport (it's the postman/delivery-man who will send your emails)
 		const myTransport = nodemailer.createTransport({
 			service: 'Gmail',
