@@ -1,5 +1,7 @@
 ## **Document Time Logger Microservice (Justin)**
 
+### Port: 4010
+
 - `GET /files/:fileId/time`
     - Description: Gets the time of a file by id. This should be a GET request to the server that queries the database for the file and then returns the time stamp.
     - Request: 

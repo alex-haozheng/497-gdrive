@@ -1,5 +1,7 @@
 # **Upload and Download Microservice (Justin)**
 
+### Port: 4011
+
 - `GET /files/:fileId/download`
     - Description: Downloads a file by id. This should be a GET request to the server that queries the database for the file and then downloads it.
     - Request: 

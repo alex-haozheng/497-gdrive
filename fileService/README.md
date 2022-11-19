@@ -1,5 +1,7 @@
 ## **Files Microservice (Justin)**
 
+### Port: 4009
+
 - `GET /files`
     - Description: Gets all files. This endpoint should query the database for all files and return them in a JSON array.
     - Request: None
