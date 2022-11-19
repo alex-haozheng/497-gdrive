@@ -1,72 +1,43 @@
-# Author: 
-Alex Zheng
+## **Document Time Logger Microservice (Justin)**
 
-# Github: 
-sazzle2
-
-# Service Description: 
-This service will handle the event in which a user loses their account information via password, the plan is to allow users to use a one time password then allow them to change their old password, basically trying to imitate the process online when a user forgets their password. Users will enter the email through the UI, and receive an email with their one time password to login
-
-# Interaction with other services: 
-will send events to the users endpoint to change the change password flag or something so that users are forced to change their password before continuing. In addition, they will send a change password event to the users endpoint
-
-# Endpoint Information: 
-
-`GET /login/:email/forgotpw`
-
-Description: This endpoint will send an email out to the recipients with the following account information
-
-- will add endpoints as I go
-
-# How to run service:
-
-### **Step 1: Prerequisites**
-
-- [Node](https://nodejs.org/en/)
-- [NPM](https://www.npmjs.com/)
-- [VSCode](https://code.visualstudio.com/)
-    - Install the appropriate language support for each language used in the project.
-- [React.js](https://reactjs.org/)
-- [Git](https://git-scm.com/)
-- [Express.js](https://expressjs.com/)
-- [MongoDB](https://www.mongodb.com/)
-- [Docker](https://www.docker.com/)
-- [Kubernetes](https://kubernetes.io/)
-
-### **Step 2: Clone the Repository**
-
-- Navigate to the desired project directory on your computer.
-
-- Clone the repository from [GitHub](https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git) using the `git clone` command.
-
-    ```bash
-    $ git clone https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git
+- `GET /files/:fileId/time`
+    - Description: Gets the time of a file by id. This should be a GET request to the server that queries the database for the file and then returns the time stamp.
+    - Request: 
+    ```json
+    {
+        "fileId": "ab03b4c5"
+    }
     ```
-
-- Navigate to the cloned repository directory.
-
-    ```bash
-    $ cd name-of-cloned-repository
+    - Response: 
+    ```json
+    {
+        "fileId": "ab03b4c5",       
+        "name": "file.txt",
+        "time": "2019-01-01T00:00:00.000Z"
+    }
     ```
-### **Step 3: Install Dependencies**
-
-- Check that the terminal is in the correct directory.
-
-    ```bash
-    $ pwd
+    - HTTP Status Codes:
+        - 200: OK
+        - 404: Not Found
+        - 500: Internal Server Error
+- `PUT /files/:fileId/time`
+    - Description: Updates the time of a file by id. This should be a PUT request to the server that queries the database for the file and then updates the time stamp.
+    - Request: 
+    ```json
+    {
+        "fileId": "ab03b4c5"
+    }
     ```
-
-- Install the dependencies using the `npm install` command.
-
-    ```bash
-    $ npm install
+    - Response: 
+    ```json
+    {
+        "fileId": "ab03b4c5",
+        "name": "file.txt",
+        "time": "2019-01-01T00:00:00.000Z"
+    }
     ```
-### **Step 4: Run the Application**
-
-- Run the application using the `npm start` command.
-
-    ```bash
-    $ npm start
-    ```
-### **Step 5: View the Application**
-- The command from Step 4 will locally host the website on `http://localhost:3000`.
+    - HTTP Status Codes:
+        - 200: OK
+        - 304: Not Modified
+        - 404: Not Found
+        - 500: Internal Server Error

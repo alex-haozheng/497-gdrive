@@ -1,72 +1,131 @@
-# Author: 
-Alex Zheng
+## **Files Microservice (Justin)**
 
-# Github: 
-sazzle2
-
-# Service Description: 
-This service will handle the event in which a user loses their account information via password, the plan is to allow users to use a one time password then allow them to change their old password, basically trying to imitate the process online when a user forgets their password. Users will enter the email through the UI, and receive an email with their one time password to login
-
-# Interaction with other services: 
-will send events to the users endpoint to change the change password flag or something so that users are forced to change their password before continuing. In addition, they will send a change password event to the users endpoint
-
-# Endpoint Information: 
-
-`GET /login/:email/forgotpw`
-
-Description: This endpoint will send an email out to the recipients with the following account information
-
-- will add endpoints as I go
-
-# How to run service:
-
-### **Step 1: Prerequisites**
-
-- [Node](https://nodejs.org/en/)
-- [NPM](https://www.npmjs.com/)
-- [VSCode](https://code.visualstudio.com/)
-    - Install the appropriate language support for each language used in the project.
-- [React.js](https://reactjs.org/)
-- [Git](https://git-scm.com/)
-- [Express.js](https://expressjs.com/)
-- [MongoDB](https://www.mongodb.com/)
-- [Docker](https://www.docker.com/)
-- [Kubernetes](https://kubernetes.io/)
-
-### **Step 2: Clone the Repository**
-
-- Navigate to the desired project directory on your computer.
-
-- Clone the repository from [GitHub](https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git) using the `git clone` command.
-
-    ```bash
-    $ git clone https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git
+- `GET /files`
+    - Description: Gets all files. This endpoint should query the database for all files and return them in a JSON array.
+    - Request: None
+    - Response: 
+    ```json
+    {
+        "files": [
+            {
+                "fileId": "ab03b4c5",
+                "name": "file.txt",
+                "size": 100,
+                "tags": [
+                    "tag1",
+                    "tag2"
+                ],
+                "type": "text/plain",
+                "date": "2019-01-01T00:00:00.000Z",
+                "content": "This is file content."
+            },
+            {
+                "fileId": "ab03b4c6",
+                "name": "file2.txt",
+                "size": 100,
+                "tags": [
+                    "tag1",
+                ],
+                "type": "text/plain",
+                "date": "2019-01-01T00:00:00.000Z",
+                "content": "This is file content."
+            }
+        ]
+    }
     ```
-
-- Navigate to the cloned repository directory.
-
-    ```bash
-    $ cd name-of-cloned-repository
+    - HTTP Status Codes:
+        - 200: OK
+        - 500: Internal Server Error
+- `GET /files/:id`
+    - Description: Gets a file by fileId from the database. This endpoint should query the database for a file with the given fileId and return it in a JSON object.
+    - Request: 
+    ```json
+    {
+        "fileId": "ab03b4c5"
+    }
     ```
-### **Step 3: Install Dependencies**
-
-- Check that the terminal is in the correct directory.
-
-    ```bash
-    $ pwd
+    - Response: 
+    ```json
+    {
+        "fileId": "ab03b4c5",
+        "name": "file.txt",
+        "size": 100,
+        "tags": [
+            "tag1",
+            "tag2"
+        ],
+        "type": "text/plain",
+        "date": "2019-01-01T00:00:00.000Z",
+        "content": "This is file content."
+    }
     ```
-
-- Install the dependencies using the `npm install` command.
-
-    ```bash
-    $ npm install
+    - HTTP Status Codes:
+        - 200: OK
+        - 404: Not Found
+        - 500: Internal Server Error
+- `POST /files`
+    - Description: Creates and uploads a file to the database. This endpoint should upload a file to the database and return the fileId of the file in a JSON object.
+    - Request: 
+    ```json
+    {
+        "fileId": "ab03b4c5",
+        "content": "This is file content."
+    }
     ```
-### **Step 4: Run the Application**
-
-- Run the application using the `npm start` command.
-
-    ```bash
-    $ npm start
+    - Response: 
+    ```json
+    {
+        "fileId": "ab03b4c5",
+        "name": "file.txt",
+        "size": 100,
+        "tags": [],
+        "type": "text/plain",
+        "date": "2019-01-01T00:00:00.000Z",
+        "content": "This is file content."
+    }
+    - HTTP Status Codes:
+        - 200: OK
+        - 400: Bad Request
+        - 409: Conflict
+        - 500: Internal Server Error        
+- `DELETE /files/:fileId`
+    - Description: Deletes a file by fileId. This endpoint should delete a file with the given fileId from the database and return the fileId of the file in a JSON object.
+    - Request: 
+    ```json
+    {
+        "id": "ab03b4c5"
+    }
     ```
-### **Step 5: View the Application**
-- The command from Step 4 will locally host the website on `http://localhost:3000`.
+    - Response: 
+    ```json
+    {
+        "fileId": "ab03b4c5",
+        "name": "file.txt"
+    }
+    ```
+    - HTTP Status Codes:
+        - 200: OK
+        - 404: Not Found
+        - 500: Internal Server Error
+- `PUT /files/:fileId`
+    - Description: Updates a file by fileId. This endpoint should update a file with the given fileId from the database and return the fileId of the file in a JSON object.
+    - Request: 
+    ```json
+    {
+        "fileId": "ab03b4c5",
+        "content": "This is the updated file content."
+    }
+    ```
+    - Response: 
+    ```json
+    {
+        "fileId": "ab03b4c5",
+        "name": "file.txt",
+        "time": "2019-01-01T00:00:00.000Z",
+        "content": "This is the updated file content."
+    }
+    - HTTP Status Codes:
+        - 200: OK
+        - 400: Bad Request
+        - 404: Not Found
+        - 500: Internal Server Error
