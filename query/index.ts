@@ -8,6 +8,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
 
+// users : file
 const userFiles = {};
 
 app.get('/users/list', (req, res) => {
@@ -66,6 +67,8 @@ app.get('user/:uid/files/search', (req, res) => {
 		res.status(500).send(e);
 	}
 });
+
+// TODO: two app.delete (users and files)
 
 app.listen(4000, () => {
 	console.log('Listening on 4000');

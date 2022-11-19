@@ -11,6 +11,7 @@ app.use(express.json());
 app.use(cors());
 
 //holds a collection of all emails that are registered
+// store uid along with email
 const vEmails = new Set();
 
 // username: team0.clouddrive@gmail.com
