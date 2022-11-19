@@ -3,7 +3,6 @@ import logger from 'morgan';
 import cors from 'cors';
 import nodemailer from 'nodemailer';
 import { faker } from '@faker-js/faker';
-import axios from 'axios';
 
 const app = express();
 
