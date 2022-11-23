@@ -38,6 +38,15 @@ function stringDistance(s: string, t: string): number {
     return dp[m][n];
 };
 
+app.post('/blacklist/add/:word', async (req, res) => {
+    if (req.params.word === undefined) {
+        res.status(404).send({});
+        return;
+    }
+    blacklist.push(req.body.word);
+    res.status(200).send({});
+});
+
 app.delete('/blacklist/remove/:word', async (req, res) => {
     if (req.params.word === undefined) {
         res.status(404).send({});
@@ -51,17 +60,6 @@ app.delete('/blacklist/remove/:word', async (req, res) => {
     blacklist.splice(i, 1);
     res.status(200).send({});
 });
-
-
-app.post('/blacklist/add/:word', async (req, res) => {
-    if (req.params.word === undefined) {
-        res.status(404).send({});
-        return;
-    }
-    blacklist.push(req.body.word);
-    res.status(200).send({});
-});
-
 
 app.put('/blacklist/update/threshold', async (req, res) => {
     if (req.body.threshold === undefined) {

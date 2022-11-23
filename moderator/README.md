@@ -5,30 +5,53 @@ Kays Laouar
 kayslaouar
 
 # Service Description: 
-service for getting insight data stored on the system including the number of users on the platform, the number of files on the platform, etc.
+Service scans all documents added to the system for any blacklisted words. 
+Uses edit distance dp algorithm to determine if a word is too similar to a blacklisted word.
 
 # Interaction with other services: 
 Listens for communication from event bus. Event type "adminanalytics". displays data on browser.
 
 # Endpoint Information: 
 
-## GET /count/users
-- admin request to get all users
-- response: 
+## POST /blacklist/add/:word
+- adds a word to the blacklist
+
+## DELETE /blacklist/remove/:word
+- removes a word from the blacklist
+
+## PUT /blacklist/update/threshold
+- update threshold of what is too similar to a blacklisted word. If distance is below threshold, words are too similar and word gets blacklisted. Admins can update the threshold if its too harsh or not catching enough bad words
+- request:
 ```json
 {
-	numUsers: 1000000
+	"threshold": 0.5
 }
 ```
 
-## GET /count/files
-- admin request to get all users
-- response: 
+## POST /events
+- listens for FileCreated and FileUpdated events from the event bus. Sends FileModerated event with status
+- request: 
 ```json
 {
-	numFiles: 1000000
+	"type": "FileCreated" | "FileUpdated",
+	"data": {
+		"id": "123",
+		"content": "hola",
+		"postId": "456"
+	}
 }
 ```
+- response:
+```json
+{
+	"type": "FileModerated",
+	"data": {
+		"id": "123",
+		"content": "hola",
+		"postId": "456",
+        "status": "accepted" | "rejected"
+	}
+}
 
 # How to run service:
 
