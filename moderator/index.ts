@@ -8,7 +8,7 @@ app.use(express.json());
 const blacklist: string[] = ['fork', 'raptor', 'java', 'jrk', 'mcboatface']; // list of words to disallow from comments
 const accepted: string = 'accepted'; // hard code to prevent mistypes. ideally would import from status file and use globally across all files
 const rejected: string = 'rejected';
-let threshold = .2;
+let threshold: number = .2;
 
 interface File {
 	id: string,
