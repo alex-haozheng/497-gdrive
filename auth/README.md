@@ -12,10 +12,9 @@ Authentication service gets notified by event bus when settings are changed. If 
 
 # Endpoint Information: 
 
-## Login
-
+## POST /login
 - login to account
-- POST /login
+- request: 
 ```json
 {
 	username: "abcde",
@@ -23,16 +22,12 @@ Authentication service gets notified by event bus when settings are changed. If 
 }
 ```
 
-## Logout
-
+## POST /logout
 - logout of account
-- POST /logout
 
-## Signup
-
+## POST /signup
 - create an account
-- POST /signup
-
+- request: 
 ```json
 {
 	username: "abcde",
