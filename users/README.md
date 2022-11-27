@@ -12,30 +12,25 @@ Listens for communication from event bus. Updates user data if users change it. 
 
 # Endpoint Information: 
 
-## Login
-
-- login to account
-- POST /login
+## GET /users
+- admin request to get all users
+- response: 
 ```json
-{
-	username: "abcde",
-	password: "*****"
-}
+[
+	{
+		username: "gjier"
+	}
+]
 ```
 
-## Logout
+## GET /users/:userId
 
-- logout of account
-- POST /logout
-
-## Signup
-
-- create an account
-- POST /signup
-
+## POST /user/create
+- create a new user
+- request: 
 ```json
 {
-	username: "abcde",
+	username: "gjier",
 	password: "*****"
 }
 ```
