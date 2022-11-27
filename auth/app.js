@@ -6,7 +6,6 @@ const routes = require('./routes');
 const connection = require('./config/database');
 require('./config/passport');
 const flash = require('connect-flash');
-const { application } = require('express');
 
 const MongoStore = require('connect-mongo')(session);
 
