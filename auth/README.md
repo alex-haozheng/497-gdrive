@@ -81,3 +81,6 @@ $ npm start
 ```
 ### **Step 5: View the Application**
 - The command from Step 4 will locally host the website on `http://localhost:3000`.
+
+# References:
+- https://www.youtube.com/watch?v=F-sFp_AvHc8
