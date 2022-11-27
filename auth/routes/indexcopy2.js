@@ -11,7 +11,7 @@ router.post('/register', async (req, res) => {
 	if (!req.body.username || !req.body.password) {
 		// missing required fields
 		res.redirect('/register');
-	} else if (await User.findOne({ username: req.body.username }) !== null) {
+	} else if (User.findOne({ username: req.body.username })) {
 		// user already exists in database
 		res.redirect('/login');
 	} else {
@@ -22,9 +22,7 @@ router.post('/register', async (req, res) => {
 			salt: salt,
 			admin: true
 		});
-		newUser.save().then((user) => {
-            console.log(user);
-        });
+		await newUser.save();
 		res.redirect('/login');
 	}
 });

@@ -5,7 +5,6 @@ const cors = require('cors');
 const routes = require('./routes');
 const connection = require('./config/database');
 require('./config/passport');
-const flash = require('connect-flash');
 
 const MongoStore = require('connect-mongo')(session);
 
@@ -30,6 +29,5 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(flash());
 app.use(routes);
 app.listen(3999);

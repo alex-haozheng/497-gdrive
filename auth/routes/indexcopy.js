@@ -4,16 +4,31 @@ const generatePassword = require('../utils/utils').generatePassword;
 const User = require('../config/database').models.User;
 const isAuth = require('./authMiddleware').isAuth;
 const isAdmin = require('./authMiddleware').isAdmin;
+const axios = require('axios');
+const { authenticate } = require('passport');
 
 router.post('/login', passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: '/login-success' }));
 
-router.post('/register', async (req, res) => {
+router.post('/signin', async (req, res) => {
 	if (!req.body.username || !req.body.password) {
 		// missing required fields
-		res.redirect('/register');
-	} else if (await User.findOne({ username: req.body.username }) !== null) {
+		res.setHeader('Content-Type', 'text/html');
+		res.write('<h3>Username or Password Missing</h3>');
+		res.write(signupinHTML);
+		res.end();
+		return;
+	} else if (User.findOne({ username: req.body.username })) {
 		// user already exists in database
-		res.redirect('/login');
+		const status = await passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: '/login-success' });
+		if (status) {
+			res.send(successHTML);
+		} else {
+			res.setHeader('Content-Type', 'text/html');
+			res.write('<h3>Incorrect username or password</h3>');
+			res.write(signupinHTML);
+			res.end();
+		}
+		return;
 	} else {
 		const { hash, salt } = generatePassword(req.body.password);
 		const newUser = new User({
@@ -22,27 +37,14 @@ router.post('/register', async (req, res) => {
 			salt: salt,
 			admin: true
 		});
-		newUser.save().then((user) => {
-            console.log(user);
-        });
-		res.redirect('/login');
+		await newUser.save();
+		await passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: '/login-success' });
+		res.send(successHTML);
 	}
 });
 
-router.get('/register', (req, res) => {
-	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/register.html');
-});
-
-router.get('/login', (req, res) => {
-	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/login.html');
-});
-
 router.get('/', (req, res) => {
-	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/pre.html');
-});
-
-router.get('/dashboard', isAuth, (req, res) => {
-	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/success.html');
+	res.send(signupinHTML);
 });
 
 router.get('/auth-route', isAuth, (req, res) => {
@@ -55,15 +57,15 @@ router.get('/admin-route', isAdmin, (req, res) => {
 
 router.get('/logout', (req, res) => {
 	req.logout();
-	res.redirect('/login');
+	res.redirect('/');
 });
 
 router.get('/login-success', (req, res) => {
-	res.redirect('/dashboard');
+	res.send(true);
 });
 
 router.get('/login-failure', (req, res) => {
-	res.redirect('login');
+	res.send(false);
 });
 
 module.exports = router;
