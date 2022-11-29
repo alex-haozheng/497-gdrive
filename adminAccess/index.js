@@ -11,6 +11,34 @@ app.use(cors());
 
 const admins = {};
 
+// Returns if a specific user is an admin or not an admin
+app.get('/admin', (req, res) => {
+    const { uId } = req.body;
+    
+    if(
+        Object.keys(req.body).length !== 1 ||
+        uId === "" ||
+        uId === undefined ||
+        typeof uId !== "string"
+    ){
+        res.status(400).send({ message: 'BAD REQUEST' });
+    } else if(
+        admins[uId] !== undefined
+    ){
+        try{
+            res.status(201).send({ data: true });
+        } catch (error){
+            res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
+        }
+    } else{
+        try{
+        res.status(201).send({ data: false});
+        } catch (error){
+            res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
+        }
+    }
+});
+
 // Give a user admin access
 app.post('/admin', (req, res) => {
     const { uId } = req.body;
