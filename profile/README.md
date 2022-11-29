@@ -9,20 +9,40 @@ flffamlln
 
 # Service Description: 
 
-Contains information on a user including userId (unique key), email, password, name and misc. information such as a user’s status / bio. This service can create, read, update and delete profile details of a user given a userId.
+Contains information on a user including userId (unique key), email, password, name and misc. information like bio and a fun fact. This service can create, read, update and delete profile details of a user given a userId.
 
 # Interaction with other services: 
 
-- If user deleted, remove their profile.
-
-- If password updated, update password in profile.
+- If a user deleted event is heard, remove their profile.
+- If a password updated event is heard, update password in profile.
 
 # Port #:
 Port 4002
 
 # Endpoint Information:
 
-## GET /profile/:userId
+## GET /profile 
+- Returns all uIds that have a profile.
+- Request: 
+```
+{
+}
+ ```
+ - Response:
+ ```
+{
+    "data": "[array of unique identifier values]"
+}
+ ```
+ - HTTP Status Codes:   
+    - 201: OK
+    - 400: Not Found
+    - 500: Internal Server Error
+
+---
+
+
+## GET /profile/:uId
 
 - Gets profile details by userId.
 - Request: 
@@ -34,67 +54,92 @@ Port 4002
  - Response:
  ```
 {
-    "uId": "[unique identifier]",
-    "email" : "[unicode 64 characters max]",
-    "password": "[unicode 64 characters max]",
-    "name": "[String]",
+    "data": {
+        "uId": "[unique identifier]",
+        "email" : "[unicode 64 characters max]",
+        "password": "[unicode 64 characters max]",
+        "name": "[String]",
+        "bio": "[String]",
+        "funFact": "[String]"
+    }
 }
  ```
  - HTTP Status Codes:   
-    - 200: OK
-    - 404: Not Found
-    - 500: Internal Server Error
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: USER NOT FOUND
+    - 500: INTERNAL SERVER ERROR
 
 ---
-## PUT /profile/:userId
+## PUT /profile/:uId
 
 - Updates a profile details by userId.
 - Request: 
 ```
 {
-	"uId": "[unique identifier]"
+	"uId": "[unique identifier]",
+    "name": "[string]",
+    "email": "[unicode 64 characters max]",
+    "password": "[unicode 64 characters max]"
+    "bio": "[String]",
+    "funFact": "[String]"
 }
 ```
 - Response:
 ```
 {
-    "uId": "[unique identifier]",
-    "email" : "[unicode 64 characters max]",
-    "password": "[unicode 64 characters max]",
-    "name": "[String]",
+    "data": {
+        "uId": "[unique identifier]",
+        "email" : "[unicode 64 characters max]",
+        "password": "[unicode 64 characters max]",
+        "name": "[String]",
+        "bio": "[String]",
+        "funFact": "[String]"
+    }
 }
 ```
 - HTTP Status Codes: 
-    - 200: OK
-    - 304: Not Modified
-    - 404: Not Found
-    - 500: Internal Server Error
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: PROFILE NOT FOUND
+    - 500: INTERNAL SERVER ERROR
 ---
-## POST /profile/:userId
+## POST /profile/:uId
 
-- Creates a profile details by userId.
+- Adds new profile to database.
 - Request:
 ```
 {
-	"uId": "[unique identifier]"
+	"uId": "[unique identifier]",
+    "name": "[string]",
+    "email": "[unicode 64 characters max]",
+    "password": "[unicode 64 characters max]"
+    "bio": "[String]",
+    "funFact": "[String]"
 }
 ```
 - Response:
 ```
 {
-    "uId": "[unique identifier]",
-    "email" : "[unicode 64 characters max]",
-    "password": "[unicode 64 characters max]",
-    "name": "[String]",
+    "data": {
+        "uId": "[unique identifier]",
+        "email" : "[unicode 64 characters max]",
+        "password": "[unicode 64 characters max]",
+        "name": "[String]",
+        "bio": "[String]",
+        "funFact": "[String]"
+    }
 }
 ```
 - HTTP Status Codes:
-    - 200: OK
-    - 500: Internal Server Error
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: PROFILE ALREADY EXISTS
+    - 500: INTERNAL SERVER ERROR
 ---
-## DELETE /profile/:userId
+## DELETE /profile/:uId
 
-- Creates a profile details by userId.
+- Deletes a user's profile from database
 - Request:
 ```
 {
@@ -104,16 +149,14 @@ Port 4002
 - Response:
 ```
 {
-    "uId": "[unique identifier]",
-    "email" : "[unicode 64 characters max]",
-    "password": "[unicode 64 characters max]",
-    "name": "[String]",
+    "message": "DELETED"
 }
 ```
 - HTTP Status Codes: 
-    - 200: OK
-    - 404: Not Found
-    - 500: Internal Server Error
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: PROFILE NOT FOUND
+    - 500: INTERNAL SERVER ERROR
 ---
 # How to run service:
 
