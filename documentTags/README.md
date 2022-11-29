@@ -1,3 +1,6 @@
+# Service:
+Document Tags
+
 # Author: 
 Yuri Kim
 
@@ -9,6 +12,9 @@ Contains information on fileIds (unique key) and their respective tags. These ta
 
 # Interaction with other services: 
 - If document deleted, remove document from index.
+
+# Port #:
+Port 4001
 
 # Endpoint Information:
 

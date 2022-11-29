@@ -1,3 +1,6 @@
+# Service:
+Profile
+
 # Author: 
 Yuri Kim
 
@@ -13,6 +16,9 @@ Contains information on a user including userId (unique key), email, password, n
 - If user deleted, remove their profile.
 
 - If password updated, update password in profile.
+
+# Port #:
+Port 4002
 
 # Endpoint Information:
 

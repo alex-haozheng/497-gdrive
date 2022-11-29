@@ -1,3 +1,6 @@
+# Service:
+Admin Access
+
 # Author: 
 Yuri Kim
 
@@ -9,6 +12,9 @@ Contains information on which users are admins. Thinking of having the Admin ser
 
 # Interaction with other services: 
 If user is deleted, remove userID if in admin list.
+
+# Port #:
+Port 4000
 
 # Endpoint Information: 
 
