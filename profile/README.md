@@ -9,7 +9,7 @@ flffamlln
 
 # Service Description: 
 
-Contains information on a user including userId (unique key), email, password, name and misc. information. This service can create, read, update and delete profile details of a user given a userId.
+Contains information on a user including userId (unique key), email, password, name and misc. information like bio and a fun fact. This service can create, read, update and delete profile details of a user given a userId.
 
 # Interaction with other services: 
 
@@ -59,6 +59,8 @@ Port 4002
         "email" : "[unicode 64 characters max]",
         "password": "[unicode 64 characters max]",
         "name": "[String]",
+        "bio": "[String]",
+        "funFact": "[String]"
     }
 }
  ```
@@ -79,6 +81,8 @@ Port 4002
     "name": "[string]",
     "email": "[unicode 64 characters max]",
     "password": "[unicode 64 characters max]"
+    "bio": "[String]",
+    "funFact": "[String]"
 }
 ```
 - Response:
@@ -89,6 +93,8 @@ Port 4002
         "email" : "[unicode 64 characters max]",
         "password": "[unicode 64 characters max]",
         "name": "[String]",
+        "bio": "[String]",
+        "funFact": "[String]"
     }
 }
 ```
@@ -108,6 +114,8 @@ Port 4002
     "name": "[string]",
     "email": "[unicode 64 characters max]",
     "password": "[unicode 64 characters max]"
+    "bio": "[String]",
+    "funFact": "[String]"
 }
 ```
 - Response:
@@ -118,6 +126,8 @@ Port 4002
         "email" : "[unicode 64 characters max]",
         "password": "[unicode 64 characters max]",
         "name": "[String]",
+        "bio": "[String]",
+        "funFact": "[String]"
     }
 }
 ```

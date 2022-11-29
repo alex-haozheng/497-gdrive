@@ -58,7 +58,7 @@ app.get('/profile', async (req, res) => {
 
 // Updates a user's profile details
 app.put('/profile', async (req, res) => {
-    const { uId, name, email, password } = req.body;
+    const { uId, name, email, password, bio, funFact } = req.body;
     
     if(
         Object.keys(req.body).length !== 4 ||
@@ -73,7 +73,13 @@ app.put('/profile', async (req, res) => {
         typeof email !== "string" ||
         password === "" ||
         password === undefined ||
-        typeof password !== "string"
+        typeof password !== "string" ||
+        bio === "" ||
+        bio === undefined ||
+        typeof bio !== "string" ||
+        funFact === "" ||
+        funFact === undefined ||
+        typeof funFact !== "string"
     ){
         res.status(400).send({ message: 'BAD REQUEST' });
     } else if(
@@ -82,13 +88,15 @@ app.put('/profile', async (req, res) => {
         res.status(404).send({ message: 'Profile not found' });
     } else{
         try{
-            const data = await updateProfile(uId, name, email, password);
+            const data = await updateProfile(uId, name, email, password, bio, funFact);
             
             let updated = {};
             updated["uId"] = uId;
             updated["name"] = name;
             updated["email"] = email;
             updated["password"] = password;
+            updated["bio"] = bio;
+            updated["funFact"] = funFact;
             profiles[uId] = updated;
             const data1 = profiles[uId];
 
@@ -101,7 +109,7 @@ app.put('/profile', async (req, res) => {
 
 // Adds new profile to database
 app.post('/profile', async (req, res) => {
-    const { uId, name, email, password } = req.body;
+    const { uId, name, email, password, bio, funFact } = req.body;
     
     if(
         Object.keys(req.body).length !== 4 ||
@@ -116,7 +124,13 @@ app.post('/profile', async (req, res) => {
         typeof email !== "string" ||
         password === "" ||
         password === undefined ||
-        typeof password !== "string"
+        typeof password !== "string" ||
+        bio === "" ||
+        bio === undefined ||
+        typeof bio !== "string" ||
+        funFact === "" ||
+        funFact === undefined ||
+        typeof funFact !== "string"
     ){
         res.status(400).send({ message: 'BAD REQUEST' });
     } else if(
@@ -125,13 +139,15 @@ app.post('/profile', async (req, res) => {
         res.status(404).send({ message: 'Profile already exists' });
     } else{
         try{
-            const data = await addProfile(uId, name, email, password);
+            const data = await addProfile(uId, name, email, password, bio, funFact);
 
             let updated = {};
             updated["uId"] = uId;
             updated["name"] = name;
             updated["email"] = email;
             updated["password"] = password;
+            updated["bio"] = bio;
+            updated["funFact"] = funFact;
             profiles[uId] = updated;
             const data1 = profiles[uId];
 
