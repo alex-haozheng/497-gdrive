@@ -94,7 +94,7 @@ app.post('/events', (req, res) => {
                 ){
                     res.status(400).send({ message: 'BAD REQUEST' });
                 } else if (admins[uId] === undefined){ 
-                    res.status(404).send({ message: 'USER NOT FOUND' });
+                    res.status(404).send({ message: 'USER NOT FOUND IN ADMINS DB' });
                 } else{
                     delete admins[uId];
                     res.status(201).send({ message: "Removed user's admin access" });
@@ -188,7 +188,7 @@ app.delete('/admin', (req, res) => {
     ){
         res.status(400).send({ message: 'BAD REQUEST' });
     } else if( admins[uId] === undefined ){
-        res.status(404).send({ message: 'USER NOT FOUND' });
+        res.status(404).send({ message: 'USER NOT FOUND IN ADMIN DB' });
     } else{
         try{
             delete admins[uId];

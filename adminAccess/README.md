@@ -10,7 +10,6 @@ flffamlln
 # Service Description: 
 Contains actions and information on admins. This Admin Access service stores which users have admin access and endpoints to give a user admin access, remove admin access from a user, check if a user has admin access and deleting a user and deleting a post (admin powers).
 
-
 # Interaction with other services: 
 If user is deleted, remove user from admin access DB if user was an admin.
 
@@ -19,9 +18,113 @@ Port 4000
 
 # Endpoint Information: 
 
-## POST admin/:userId
+## POST admin/deleteUser:uId
 
-- Adds a user as an admin using userId. This should be a POST request.
+- Sends DeleteUser event message to event-bus service with uId of user that needs to be deleted. 
+- Request: 
+```
+{
+	"uId": "[unique identifier]"
+}
+```
+- Response:
+```
+{
+	"message": "Remove user event message sent"
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 500: Internal Server Error
+---
+## POST admin/deleteFile:fileId
+
+- Sends DeleteFile event message to event-bus service with fileId of file that needs to be deleted. 
+- Request: 
+```
+{
+	"fileId": "[unique identifier]"
+}
+```
+- Response:
+```
+{
+	"message": "Remove file event message sent"
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 500: Internal Server Error
+---
+## POST events
+
+- Listens for a user deleted event message. If a user has been deleted, removes user from admins database.
+- Request: 
+```
+{
+	"type": "[unique identifier]",
+    "data": {
+        "uId": "[unique identifier]"
+    }
+}
+```
+- Response:
+```
+{
+	"message": "Removed user's admin access"
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: USER NOT FOUND IN ADMINS DB
+    - 500: Internal Server Error
+---
+## GET admin:uId
+
+- Returns whether a specific user is an admin or not.
+- Request: 
+```
+{
+    "uId": "[unique identifier]"
+}
+```
+- Response:
+```
+{
+	"data": [boolean value]
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 500: Internal Server Error
+---
+## GET admin/all
+
+- Returns all users that are admins.
+- Request: 
+```
+{
+    
+}
+```
+- Response:
+```
+{
+	"data": [array of unique identifiers]
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 500: Internal Server Error
+---
+## POST admin/:uId
+
+- Adds a user as an admin using uId.
 - Request:
 ```
 {
@@ -31,32 +134,35 @@ Port 4000
 - Response:
 ```
 {
-	"users": [{JSON USER}]
+	"message": "User added as an admin"
 }
 ```
 - HTTP Status Codes: 
-    - 200: OK
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: User is already an admin
     - 500: Internal Server Error
 --- 
 ## DELETE admin/:userId
 
-- Removes a user as an admin using userId. This should be a DELETE request.
+- Removes a user as an admin using userId.
 - Request: 
 ```
 {
-	"users": [{JSON USER}]
+	"uId": "[unique identifier]"
 }
 ```
 - Response:
 ```
 {
-	"users": [{JSON USER}]
+	"message": "Removed user's admin access"
 }
 ```
 - HTTP Status Codes:
-    - 200: OK
-    - 404: Not Found
-    - 500: Internal Server Error
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: USER NOT FOUND IN ADMIN DB
+    - 500: INTERNAL SERVER ERROR
 
 # How to run service:
 
