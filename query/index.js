@@ -11,6 +11,34 @@ app.use(cors());
 // users : file
 const userFiles = {};
 
+app.post('/events', (req, res) => {
+	const {type, data} = req.body;
+	if (type === 'AccountCreated') {
+		const { uid, _ } = data;
+		userFiles[uid] = [];
+	} else if (type === 'AccountDeleted') {
+		const {uid, _ } = data;
+		delete userFiles[uid];
+		res.status(201).json(uid)
+	} else if (type === 'FileCreated') {
+		const { uid, fileName } = data;
+		if (userFiles.has(uid)) {
+			userFiles[uid].push(fileName);
+			res.status(201).json(uid)
+		} else {
+			res.status(400).json({ message: 'NOT FOUND'});
+		}
+	} else if (type === 'FileDeleted') {
+		const { uid, fileName } = data;
+		if (userFiles.has(uid)) {
+			delete userFiles[uid][userFiles[uid].indexOf(fileName)];
+			res.status(201).json(uid)
+		} else {
+			res.status(400).json({ message: 'NOT FOUND'});
+		}
+	}
+});
+
 app.get('/users/list', (req, res) => {
 	try {
 		res.status(200).send({
@@ -49,7 +77,7 @@ app.get('user/:uid/files/search', (req, res) => {
 		const { keyword } = req.body;
 		if (uid in userFiles) {
 			const files = userFiles[uid];
-			const arr : string[] = [];
+			const arr = [];
 			for (const s of files) {
 				if (s.includes(keyword)) {
 					arr.push(s);
@@ -69,6 +97,9 @@ app.get('user/:uid/files/search', (req, res) => {
 });
 
 // TODO: two app.delete (users and files)
+app.delete('user/:uid/files/delete', (req, res) => {
+	
+})
 
 app.listen(4000, () => {
 	console.log('Listening on 4000');
