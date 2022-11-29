@@ -3,6 +3,8 @@ import logger from 'morgan';
 import cors from 'cors';
 import axios from 'axios';
 
+import { addUser, removeUser, getUsers, checkUser } from './database.js';
+
 const app = express();
 
 app.use(logger('dev'));
@@ -109,7 +111,7 @@ app.post('/events', (req, res) => {
 });
 
 // Returns if a specific user is an admin or not an admin
-app.get('/admin', (req, res) => {
+app.get('/admin', async (req, res) => {
     const { uId } = req.body;
     
     if(
@@ -123,7 +125,9 @@ app.get('/admin', (req, res) => {
         admins[uId] !== undefined
     ){
         try{
-            res.status(201).send({ data: true });
+            const data = await checkUser(uId);
+            const data1 = true;
+            res.status(201).send({ data: data });
         } catch (error){
             res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
         }
@@ -137,14 +141,16 @@ app.get('/admin', (req, res) => {
 });
 
 // Returns all users that are admins
-app.get('/admin/all', (req, res) => {    
+app.get('/admin/all', async (req, res) => {    
     if(
         Object.keys(req.body).length !== 0
     ){
         res.status(400).send({ message: 'BAD REQUEST' });
     } else{
         try{
-            res.status(201).send({ data: Object.keys(admins) });
+            const data = await getUsers();
+            const data1 = Object.keys(admins);
+            res.status(201).send({ data: data });
         } catch (error){
             res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
         }
@@ -152,7 +158,7 @@ app.get('/admin/all', (req, res) => {
 });
 
 // Give a user admin access
-app.post('/admin', (req, res) => {
+app.post('/admin', async (req, res) => {
     const { uId } = req.body;
     
     if(
@@ -169,6 +175,7 @@ app.post('/admin', (req, res) => {
     } else{
         try{
             admins[uId] = true;
+            await addUser(uId);
             res.status(201).send({ message: 'User added as an admin'});
         } catch (error){
             res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
@@ -177,7 +184,7 @@ app.post('/admin', (req, res) => {
 });
 
 // Removes admin access from a user
-app.delete('/admin', (req, res) => {
+app.delete('/admin', async (req, res) => {
     const { uId } = req.body;
     
     if(
@@ -192,6 +199,7 @@ app.delete('/admin', (req, res) => {
     } else{
         try{
             delete admins[uId];
+            await removeUser(uId);
             res.status(201).send({ message: "Removed user's admin access" });
         } catch (error){
             res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
