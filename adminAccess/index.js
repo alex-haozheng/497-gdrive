@@ -11,6 +11,43 @@ app.use(cors());
 
 const admins = {};
 
+// If a user has been deleted, remove user from admins db
+app.post('/events', (req, res) => {
+    const { type, data } = req.body;
+
+    // Send 400 Error if Bad Request (no type string, type of type not string, etc)
+    if(
+        Object.keys(req.body).length !== 2 ||
+        type === "" ||
+        type === undefined || 
+        typeof type !== "string"
+    ){
+        res.status(400).send({message: 'BAD REQUEST'});
+    } else{
+        try{
+            if (type === "UserDeleted") {
+                const { uId } = data;
+                if (
+                    uId === "" ||
+                    uId === undefined ||
+                    typeof uId !== "string"
+                ){
+                    res.status(400).send({ message: 'BAD REQUEST' });
+                } else if (admins[uId] === undefined){ 
+                    res.status(404).send({ message: 'USER NOT FOUND' });
+                } else{
+                    delete admins[uId];
+                    res.status(201).send({ message: "Removed user's admin access" });
+                }
+            }
+            res.send({ status: 'OK' });
+        } catch (error){
+            // Send 500 Error if Internal Server Error
+            res.status(500).send({message: 'INTERNAL SERVER ERROR'});
+        }
+    }
+});
+
 // Returns if a specific user is an admin or not an admin
 app.get('/admin', (req, res) => {
     const { uId } = req.body;
