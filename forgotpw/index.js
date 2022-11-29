@@ -78,7 +78,7 @@ app.get('/login/forgotpw', async (req, res) => {
 app.post('/events', (req, res) => {
 	const {type, data } = req.body;
 	if (type === 'AccountCreated') {
-		const { email } = data;
+		const { _, email } = data;
 		vEmails.add(email);
 	} else if (type === 'AccountDeleted') {
 		const { email } = data;
