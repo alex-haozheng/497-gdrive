@@ -8,19 +8,80 @@ Yuri Kim
 flffamlln
 
 # Service Description: 
-Contains information on fileIds (unique key) and their respective tags. These tags are stored in an array and are in String format. This service allows users to add and remove tags to a file given a fileId.
+Contains information on fileIds (unique key) and their respective tags. These tags are stored in an array and are in String format. This service allows users to add and remove tags to a file given a fileId, get all files tagged with a specific tag and get all tags.
 
 # Interaction with other services: 
-- If document deleted, remove document from index.
+- If a file has been deleted and that file is in the tags DB, remove file from tags DB.
 
 # Port #:
 Port 4001
 
 # Endpoint Information:
 
-## POST tag/:fileId/:work
+## POST events
+- If a file is removed event message is heard, remove document from tags DB.
+- Request: 
+```
+{
+	"type": "[unique identifier]",
+    "data": {
+        "uId": "[unique identifier]"
+    }
+}
+```
+- Response:
+```
+{
+	"message": "Removed file from tags DB"
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 500: Internal Server Error
+---
+## GET tag/:tag
 
-- Adds a tag to a post using fileId.
+- Returns all fileIds tagged with a specific tag.
+- Request: 
+```
+{
+    "tag": "[unique identifier]"
+}
+```
+- Response:
+```
+{
+	"data": [array of unique identifiers]
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 500: Internal Server Error
+---
+## GET tag/all
+
+- Returns all tags.
+- Request: 
+```
+{
+}
+```
+- Response:
+```
+{
+	"data": [array of unique identifiers]
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 500: Internal Server Error
+---
+## POST tag/:fileId/:tag
+
+- Adds a tag to a file based on fileId.
 - Request:
 ```
 {
@@ -31,13 +92,13 @@ Port 4001
 - Response:
 ```
 {
-	"fileId": "[unique idenitifier]",
-	"tags": "[String]"
+	"message": "Added a tag to a document"
 }
 ```
 - HTTP Status Codes:
     - 200: OK
-    - 500: Internal Server Error
+    - 404: DOCUMENT ALREADY HAS THAT TAG
+    - 500: INTERNAL SERVER ERROR
 ---
 ## DELETE tag/:fileId
 
@@ -52,14 +113,14 @@ Port 4001
 - Response:
 ```
 {
-	"fileId": "[unique idenitifier]",
-	"tags": []
+	"message": "Removed tag from document"
 }
 ```
 - HTTP Status Codes:
     - 200: OK
-    - 404: Not Found
-    - 500: Internal Server Error
+    - 400: DOCUMENT DOES NOT HAVE THAT TAG
+    - 404: TAG NOT FOUND
+    - 500: INTERNAL SERVER ERROR
 # How to run service:
 
 ### **Step 1: Prerequisites**
