@@ -11,6 +11,66 @@ app.use(cors());
 
 const admins = {};
 
+// Remove user action
+app.post('/admin/removeUser', async (req, res) => {
+    const { uId } = req.body;
+  
+    // Send 400 Error if Bad Request 
+    if(
+      Object.keys(req.body).length !== 1 ||
+      uId === "" ||
+      uId === undefined ||
+      typeof uId !== "string"
+    ){
+      res.status(400).send({message: 'BAD REQUEST'});
+    } else{
+      try{
+      
+        await axios.post('http://event-bus:4012/events', {
+          type: "RemoveUser",
+          data: {
+            uId
+          },
+        });
+      
+        res.status(201).send({ message: 'Remove user event message sent'});
+      } catch (error){
+        // Send 500 Error if Internal Server Error
+        res.status(500).send({message: 'INTERNAL SERVER ERROR'});
+      }
+    }
+});
+
+// Remove file action
+app.post('/admin/removeFile', async (req, res) => {
+    const { fileId } = req.body;
+  
+    // Send 400 Error if Bad Request 
+    if(
+      Object.keys(req.body).length !== 1 ||
+      fileId === "" ||
+      fileId === undefined ||
+      typeof fileId !== "string"
+    ){
+      res.status(400).send({message: 'BAD REQUEST'});
+    } else{
+      try{
+      
+        await axios.post('http://event-bus:4012/events', {
+          type: "RemoveFile",
+          data: {
+            fileId
+          },
+        });
+      
+        res.status(201).send({ message: 'Remove file event message sent'});
+      } catch (error){
+        // Send 500 Error if Internal Server Error
+        res.status(500).send({message: 'INTERNAL SERVER ERROR'});
+      }
+    }
+});
+
 // If a user has been deleted, remove user from admins db
 app.post('/events', (req, res) => {
     const { type, data } = req.body;
