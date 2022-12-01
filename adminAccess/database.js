@@ -27,17 +27,17 @@ const removeUser = async (uId) => {
 };
 
 const getUsers = async () => {
-  const query = 'SELECT uid FROM admin;';
-  const values = [uId];
+  const query = 'SELECT * FROM admin;';
+  const values = [];
   const result = await pool.query(query, values);
   return result;
 };
 
 const checkUser = async (uId) => {
-  const query = 'SELECT exists(SELECT 1 FROM admin WHERE uid = $1);';
+  const query = 'SELECT COUNT(*) FROM admin WHERE uid = $1;';
   const values = [uId];
   const result = await pool.query(query, values);
-  return result;
+  return result.rows[0].count > 0;
 };
 
 export { addUser, removeUser, getUsers, checkUser };

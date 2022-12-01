@@ -11,8 +11,6 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
 
-const admins = {};
-
 // Delete user action
 app.post('/admin/deleteUser', async (req, res) => {
     const { uId } = req.body;
@@ -74,7 +72,7 @@ app.post('/admin/deleteFile', async (req, res) => {
 });
 
 // If a user has been deleted, remove user from admins db
-app.post('/events', (req, res) => {
+app.post('/events', async (req, res) => {
     const { type, data } = req.body;
 
     // Send 400 Error if Bad Request (no type string, type of type not string, etc)
@@ -95,10 +93,12 @@ app.post('/events', (req, res) => {
                     typeof uId !== "string"
                 ){
                     res.status(400).send({ message: 'BAD REQUEST' });
-                } else if (admins[uId] === undefined){ 
+                } else if (
+                    await checkUser(uId)
+                ){ 
                     res.status(404).send({ message: 'USER NOT FOUND IN ADMINS DB' });
                 } else{
-                    delete admins[uId];
+                    await removeUser(uId);
                     res.status(201).send({ message: "Removed user's admin access" });
                 }
             }
@@ -121,19 +121,10 @@ app.get('/admin', async (req, res) => {
         typeof uId !== "string"
     ){
         res.status(400).send({ message: 'BAD REQUEST' });
-    } else if(
-        admins[uId] !== undefined
-    ){
+    } else {
         try{
-            const data = await checkUser(uId);
-            const data1 = true;
+            let data = await checkUser(uId);
             res.status(201).send({ data: data });
-        } catch (error){
-            res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
-        }
-    } else{
-        try{
-        res.status(201).send({ data: false});
         } catch (error){
             res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
         }
@@ -149,8 +140,11 @@ app.get('/admin/all', async (req, res) => {
     } else{
         try{
             const data = await getUsers();
-            const data1 = Object.keys(admins);
-            res.status(201).send({ data: data });
+            const dataArray = [];
+            for(let i = 0; i < data.rows.length; i++){
+                dataArray.push(data.rows[i].uid);
+            }
+            res.status(201).send({ data: dataArray });
         } catch (error){
             res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
         }
@@ -169,12 +163,11 @@ app.post('/admin', async (req, res) => {
     ){
         res.status(400).send({ message: 'BAD REQUEST' });
     } else if(
-        admins[uId] !== undefined
+        await checkUser(uId)
     ){
-        res.status(404).send({ message: 'User is already an admin' });
+        res.status(304).send({ message: 'User is already an admin' });
     } else{
         try{
-            admins[uId] = true;
             await addUser(uId);
             res.status(201).send({ message: 'User added as an admin'});
         } catch (error){
@@ -194,11 +187,12 @@ app.delete('/admin', async (req, res) => {
         typeof uId !== "string"
     ){
         res.status(400).send({ message: 'BAD REQUEST' });
-    } else if( admins[uId] === undefined ){
-        res.status(404).send({ message: 'USER NOT FOUND IN ADMIN DB' });
+    } else if( 
+        !await checkUser(uId) 
+    ){
+        res.status(304).send({ message: 'User is not an admin' });
     } else{
         try{
-            delete admins[uId];
             await removeUser(uId);
             res.status(201).send({ message: "Removed user's admin access" });
         } catch (error){
