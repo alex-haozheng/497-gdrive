@@ -71,15 +71,15 @@ app.get('user/:uid/files/search', (req, res) => {
 app.post('/events', (req, res) => {
 	const {type, data} = req.body;
 	if (type === 'AccountCreated') {
-		const { uid, _ } = data;
+		const { uid } = data;
 		userFiles[uid] = [];
 	} else if (type === 'AccountDeleted') {
-		const {uid, _ } = data;
+		const { uid } = data;
 		delete userFiles[uid];
 		res.status(201).json(uid)
 	} else if (type === 'FileCreated') {
 		const { uid, fileName } = data;
-		if (userFiles.has(uid)) {
+		if (uid in userFiles) {
 			userFiles[uid].push(fileName);
 			res.status(201).json(uid)
 		} else {
