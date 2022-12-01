@@ -38,7 +38,7 @@
     - HTTP Status Codes:
         - 200: OK
         - 500: Internal Server Error
-- `GET /files/:id`
+- `GET /files/:fileId`
     - Description: Gets a file by fileId from the database. This endpoint should query the database for a file with the given fileId and return it in a JSON object.
     - Request: 
     ```json
