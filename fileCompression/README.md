@@ -10,18 +10,26 @@ The endpoint will handle the file compression, whenever an update is made on the
 # Interaction with other services: 
 This server will handle opening and closing files and handling the changes made 
 
-# Endpoint Information: 
+## **Endpoint Information:**
 
-`POST /event`
+- `POST /event`
 
-Description: Listens to file events and returns the compressed version (or updates on a file)
+    - Description: Listens to file events and returns the compressed version (or updates on a file)
 
-`GET user/:id/file/:fileName`
+### **Events:**
+- `fileOpened`
+    Description: decompress whats in the database and return it
+- `fileChanged`
+    Description: compress the content and push into database
 
-Description: returns the file associated with the user with the id of the file decompressed
-
-- will add endpoints as I go
-
+- `GET user/:id/file/zip` 
+    - Description: downloads a zip functionality for users
+    - Request:
+    ```json
+    {
+        "fileid": "ab03b4c5" 
+    } 
+    ```
 # How to run service:
 
 ### **Step 1: Prerequisites**
