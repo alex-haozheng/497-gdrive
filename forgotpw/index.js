@@ -11,29 +11,36 @@ app.use(express.json());
 app.use(cors());
 
 //holds a collection of all emails that are registered
-const vEmails = new Set();
+// store uid along with email
+const db = {};
 
 // username: team0.clouddrive@gmail.com
 // password: ourpassword
 
 // return the verified emails (used for account creation with existing email)
 app.get('/emails', (req, res) => {
-	res.send(vEmails);
+	res.send(Object.keys(db));
 });
 
 app.get('/login/forgotpw', async (req, res) => {
 	try {
-		const { email } = req.body;
+		const { uid, email } = req.body;
 		const otp = faker.internet.password();
 		
-		if (!vEmails.has(email)) {
+		if (!(uid in db)) {
 			res.status(400).json({
 				message: 'NOT FOUND'
 			}); return;
 		}
 
 		// right around here add a await call to another endpoint to change the password and mark a flag
-
+		await axios.post('http://event-bus:4012/events', {
+			type: "ChangePassword",
+			data: {
+				uid,
+				email
+			}
+		});
 		// let's create the transport (it's the postman/delivery-man who will send your emails)
 		const myTransport = nodemailer.createTransport({
 			service: 'Gmail',
@@ -77,11 +84,11 @@ app.get('/login/forgotpw', async (req, res) => {
 app.post('/events', (req, res) => {
 	const {type, data } = req.body;
 	if (type === 'AccountCreated') {
-		const { email } = data;
-		vEmails.add(email);
+		const { uid , email } = data;
+		db[uid] = email;
 	} else if (type === 'AccountDeleted') {
-		const { email } = data;
-		vEmails.delete(email);
+		const { uid, email } = data;
+		delete db[uid];
 	}
 	res.send({status: 'ok'});
 });

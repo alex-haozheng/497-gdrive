@@ -5,35 +5,53 @@ Kays Laouar
 kayslaouar
 
 # Service Description: 
-This service handles user authentication. We may combine different tiers of access (admin/user) into an authorization service that affects what users have access to/what UI components they see based on what tier they are in. Authentication will allow users to access their files, and ensure that the identity trying to access the account is truly the account owner (by using username/password, passport.js). May use authentication token for privileged operations in interacting with other services. May use cookies/local storage to keep track of who is logged in.
+Service scans all documents added to the system for any blacklisted words. 
+Uses edit distance dp algorithm to determine if a word is too similar to a blacklisted word.
 
 # Interaction with other services: 
-Authentication service gets notified by event bus when settings are changed. If username, password, or 2FA credentials are changed, Authentication service is notified and updates internal data accordingly. Privileged operations are unlocked in higher tiers, and this affects the UI and API access. For example, deleting files is a privileged operation reserved for admin. A basic  tier user won’t see a UI component for deleting files, and they won’t have access to the API either.
+Listens for communication from event bus. Event type "adminanalytics". displays data on browser.
 
 # Endpoint Information: 
 
-## POST /login
-- login to account
-- request: 
+## POST /blacklist/add/:word
+- adds a word to the blacklist
+
+## DELETE /blacklist/remove/:word
+- removes a word from the blacklist
+
+## PUT /blacklist/update/threshold
+- update threshold of what is too similar to a blacklisted word. If distance is below threshold, words are too similar and word gets blacklisted. Admins can update the threshold if its too harsh or not catching enough bad words
+- request:
 ```json
 {
-	username: "abcde",
-	password: "*****"
+	"threshold": 0.5
 }
 ```
 
-## POST /logout
-- logout of account
-
-## POST /signup
-- create an account
+## POST /events
+- listens for FileCreated and FileUpdated events from the event bus. Sends FileModerated event with status
 - request: 
 ```json
 {
-	username: "abcde",
-	password: "*****"
+	"type": "FileCreated" | "FileUpdated",
+	"data": {
+		"id": "123",
+		"content": "hola",
+		"postId": "456"
+	}
 }
 ```
+- response:
+```json
+{
+	"type": "FileModerated",
+	"data": {
+		"id": "123",
+		"content": "hola",
+		"postId": "456",
+        "status": "accepted" | "rejected"
+	}
+}
 
 # How to run service:
 
@@ -81,6 +99,3 @@ $ npm start
 ```
 ### **Step 5: View the Application**
 - The command from Step 4 will locally host the website on `http://localhost:3000`.
-
-# References:
-- https://www.youtube.com/watch?v=F-sFp_AvHc8
