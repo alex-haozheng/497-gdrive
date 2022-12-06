@@ -8,7 +8,7 @@ const isAdmin = require('./authMiddleware').isAdmin;
 router.post('/login', passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: '/login-success' }));
 
 router.post('/register', async (req, res) => {
-	if (!req.body.username || !req.body.password) {
+	if (!req.body.username || !req.body.email || !req.body.password) {
 		// missing required fields
 		res.redirect('/register');
 	} else if (await User.findOne({ username: req.body.username }) !== null) {
@@ -22,6 +22,14 @@ router.post('/register', async (req, res) => {
 			salt: salt,
 			admin: true
 		});
+		axios.post('http://event-bus:4005/events', {
+    		type: 'UserCreated',
+    		data: {
+      			username: req.body.username,
+				email: req.body.email,
+				password: req.body.password,
+    		},
+  		});
 		newUser.save().then((user) => {
             console.log(user);
         });
@@ -64,6 +72,10 @@ router.get('/login-success', (req, res) => {
 
 router.get('/login-failure', (req, res) => {
 	res.redirect('login');
+});
+
+router.post('/events', (req, res) => { // user deleted, password changed
+	res.send({});
 });
 
 module.exports = router;
