@@ -38,7 +38,7 @@ app.get('/login/forgotpw', async (req, res) => {
 			type: "ChangePassword",
 			data: {
 				uid,
-				email
+				otp
 			}
 		});
 		// let's create the transport (it's the postman/delivery-man who will send your emails)
