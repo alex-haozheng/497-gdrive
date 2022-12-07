@@ -42,7 +42,7 @@ app.post('/events', async (req, res) => {
                     res.status(201).send({ message: "Removed user's admin access" });
                 }
             }
-            res.send({ status: 'OK' });
+            res.send({  istatus: 'OK' });
         } catch (error){
             // Send 500 Error if Internal Server Error
             res.status(500).send({message: 'INTERNAL SERVER ERROR'});
@@ -107,6 +107,12 @@ app.post('/admin', async (req, res) => {
     ){
         res.status(304).send({ message: 'User is already an admin' });
     } else{
+        axios.post('http://event-bus:4005/events', {
+            type: 'AdminAdded',
+            data: {
+                uId: uId
+            }
+        });
         try{
             await addUser(uId);
             res.status(201).send({ message: 'User added as an admin'});
@@ -132,6 +138,12 @@ app.delete('/admin', async (req, res) => {
     ){
         res.status(304).send({ message: 'User is not an admin' });
     } else{
+        axios.post('http://event-bus:4005/events', {
+            type: 'AdminRemoved',
+            data: {
+                uId: uId
+            }
+        });
         try{
             await removeUser(uId);
             res.status(201).send({ message: "Removed user's admin access" });

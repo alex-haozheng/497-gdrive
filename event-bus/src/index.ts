@@ -103,6 +103,14 @@ interface GetWordAnalytics {
   }
 }
 
+interface AdminAdded {
+  type: 'AdminAdded'
+}
+
+interface AdminRemoved {
+  type: 'AdminRemoved'
+}
+
 // JUSTIN:
 // TODO
 /* interface ShootFileAnalytics {

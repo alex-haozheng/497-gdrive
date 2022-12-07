@@ -81,6 +81,8 @@ router.post('/events', async (req, res) => {
 			if (err) console.log(err);
 			console.log('Successful Account Deletion');
 		});
+	} else if () {
+
 	} else if (req.body.type === 'ChangePassword') {
 		const username = req.body.data.uid;
 		const password = req.body.data.otp;
