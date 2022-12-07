@@ -87,10 +87,17 @@ interface FileAnalytics {
   }
 }
 
+interface WordAnalytics {
+  type: 'WordAnalytics',
+  data: {
+    badwords: []
+  }
+}
+
 // JUSTIN:
 // TODO
 
-type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | FileOpened | ChangedPassword | FileAnalytics;
+type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | FileOpened | ChangedPassword | WordAnalytics | FileAnalytics;
 
 app.post('/events', (req, res) => {
   const event : MESSAGETYPE = req.body;
