@@ -56,7 +56,6 @@ interface FileOpened {
 }
 
 // KAYS:
-//fileCompression 
 interface FileModified {
   type: 'FileModified',
   data: {
@@ -77,18 +76,28 @@ interface ChangedPassword {
   }
 }
 
-interface FileAnalytics {
+interface File {
+  fileId: string,
+  content: string
+}
+
+interface ShootFileAnalytics {
+  type: 'FileAnalytics'
+}
+
+interface GetFileAnalytics {
   type: 'FileAnalytics',
   data: {
-    file: {
-      fileId: string,
-      content: string
-    }
+    files: File[]
   }
 }
 
-interface WordAnalytics {
-  type: 'WordAnalytics',
+interface ShootWordAnalytics {
+  type: 'ShootWordAnalytics'
+}
+
+interface GetWordAnalytics {
+  type: 'GetWordAnalytics',
   data: {
     badwords: []
   }
@@ -96,8 +105,11 @@ interface WordAnalytics {
 
 // JUSTIN:
 // TODO
+/* interface ShootFileAnalytics {
+  type: 'ShootFileAnalytics'
+} */ // need you to just 
 
-type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | FileOpened | ChangedPassword | WordAnalytics | FileAnalytics;
+type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | FileOpened | ChangedPassword | ShootWordAnalytics | GetWordAnalytics | ShootFileAnalytics | GetFileAnalytics;
 
 app.post('/events', (req, res) => {
   const event : MESSAGETYPE = req.body;
@@ -143,6 +155,9 @@ app.post('/events', (req, res) => {
 
   // justin's service 
   // TODO
+
+
+  res.send({}); // don't delete. if res doesn't send a response, requests never get satisfied
 });
 
 app.listen(4012, () => {

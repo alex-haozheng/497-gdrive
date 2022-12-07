@@ -1,25 +1,25 @@
 # Service:
-Admin
+This service is the admin service.
 
 # Author: 
-Yuri Kim
+This service's author is Yuri Kim.
 
 # Github: 
-flffamlln
+This service's author's Github is flffamlln.
 
 # Service Description: 
-Contains actions and information on admins. This Admin service stores which users have admin access and endpoints to give a user admin access, remove admin access from a user, check if a user has admin access and deleting a user and deleting a post (admin powers).
+This admin service contains which users are admins. It has endpoints to give a user admin access, remove admin access from a user, check if a user has admin access, removing a user from admin db if a user has been deleted and more. Admins have the abilities including changing admin access for other users,
 
 # Interaction with other services: 
-If user is deleted, remove user from admin access DB if user was an admin.
+This admin service listens for an AccountDeleted event. If it hears one, it removes that user from admin database if the user is in admin database because the user's account has been deleted.
 
 # Port #:
-Port 4000
+This service runs on port 4000.
 
 # Endpoint Information: 
 ## POST events
 
-- Listens for a user deleted event message. If a user has been deleted, removes user from admins database.
+- This endpoint listens for a user deleted event message. If a user's account has been deleted, it removes user from admins database if it is there.
 - Request: 
 ```
 {

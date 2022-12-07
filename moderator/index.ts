@@ -9,13 +9,14 @@ app.use(express.json());
 app.use(cors());
 
 const blacklist: string[] = ['fork', 'raptor', 'java', 'jrk', 'mcboatface']; // list of words to disallow from comments
-const badfiles: Set<string> = new Set();
-let threshold: number = .2;
 
 interface File {
 	fileId: string,
 	content: string
 }
+
+const badfiles: Map<string, File> = new Map();
+let threshold: number = .2;
 
 function stringDistance(s: string, t: string): number {
     const m: number = s.length, n: number = t.length;
@@ -40,21 +41,28 @@ function stringDistance(s: string, t: string): number {
 };
 
 app.post('/events', async (req, res) => {
-	const { type, data }: { type: string; data: File } = req.body;
+	const { type, data }: { type: string; data: { file: File } } = req.body;
+    const file: File = data.file;
     if (type === 'FileModified') {
-        if (data.content === undefined) {
-            res.send({}); //?! do you have to send a response before a return. Also does function end execution after response?
-            return;
-        }
-		for (let fword of data.content.split(/[^a-zA-Z\d]/)) { // split file string by punctuation or whitespace
+		for (let fword of file.content.split(/[^a-zA-Z\d]/)) { // split file string by punctuation or whitespace
             for (const bword of blacklist) {
                 if (stringDistance(fword, bword) / ((fword.length + bword.length) >> 1) <= threshold) { // strings too similar, status = rejected
-                    badfiles.add(data.fileId); // status rejected if word from blacklist found in comment
+                    badfiles.set(file.fileId, {
+                        fileId: file.fileId,
+                        content: file.content
+                    }); // status rejected if word from blacklist found in comment
                     break;
                 }
             }
 		}
-	}
+	} else if (type === 'ShootWordAnalytics') {
+        axios.post('http://event-bus:4005/events', {
+            type: 'GetWordAnalytics',
+            data: {
+                badfiles: badfiles
+            }
+        });
+    }
 	res.send({});
 });
 
