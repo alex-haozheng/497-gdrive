@@ -1,0 +1,55 @@
+version: '3.9'
+services:
+  client:
+    build: client
+    ports:
+      - "3000:3000"
+  admin:
+    build: admin
+    ports:
+      - "4000:4000"
+  tag:
+    build: tag
+    ports:
+      - "4001:4001"
+  profile:
+    build: profile
+    ports:
+      - "4002:4002"
+  auth:
+    build: auth
+    ports:
+      - "4003:4003"
+  analytics:
+    build: analytics
+    ports:
+      - "4004:4004"
+  moderator:
+    build: moderator
+  forgotpw:
+    build: forgotpw
+    ports:
+      - "4006:4006"
+  query:
+    build: query
+  filecompression:
+    build: filecompression
+    ports:
+      - "4008:4008"
+  # JUSTIN: TODO
+  # posts:
+  #   build: posts
+  #   ports:
+  #     - "4000:4000"
+  # posts:
+  #   build: posts
+  #   ports:
+  #     - "4000:4000"
+  # posts:
+  #   build: posts
+  #   ports:
+  #     - "4000:4000"
+  event-bus:
+    build: event-bus
+    ports:
+      - "4012:4012"

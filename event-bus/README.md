@@ -3,6 +3,8 @@ Event bus
 
 # Authors + Githubs: 
 Yuri Kim (flffamlln) 
+Alex Zheng (sazzle2)
+Kays Laouar (kayslaouar)
 
 # Service Description: 
 Contains message receiving and sending to all services with event message types declared and documented. 
@@ -18,12 +20,38 @@ Port 4012
 - If an event message is sent to event bus, relay to all other services.
 - Request: 
 ```
-type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | FileModerated | ChangedPassword;
+type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | ChangedPassword;
+
+interface AccountCreated {
+  type: 'AccountCreated',
+  data: {
+    uid: string,
+    email: string
+  }
+}
 
 interface AccountDeleted {
   type: 'AccountDeleted',
   data: {
     uid: string
+  }
+}
+
+interface FileCreated {
+  type: 'FileCreated',
+  data: {
+    uid: string,
+    fileId: string
+  }
+}
+
+interface FileModified {
+  type: 'FileModified',
+  data: {
+    file: {
+      fileId: string,
+      content: string
+    }
   }
 }
 
@@ -36,7 +64,15 @@ interface FileDeleted {
 }
 
 
-```
+interface ChangedPassword {
+  type: 'ChangedPassword',
+  data: {
+    file: {
+      fileId: string,
+      content: string
+    }
+  }
+}
 
 ```
 
