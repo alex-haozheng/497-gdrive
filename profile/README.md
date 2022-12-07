@@ -158,6 +158,30 @@ Port 4002
     - 404: PROFILE NOT FOUND
     - 500: INTERNAL SERVER ERROR
 ---
+## POST /events
+
+- Listens for AccountDeleted event, then deletes a that user's profile from database
+- Request:
+```
+{
+	"type": "AccountDeleted",
+    "data": {
+        "uId": "[unique identifier]"
+    }
+}
+```
+- Response:
+```
+{
+    "message": "Removed user's profile"
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: PROFILE NOT FOUND
+    - 500: INTERNAL SERVER ERROR
+---
 # How to run service:
 
 ### **Step 1: Prerequisites**

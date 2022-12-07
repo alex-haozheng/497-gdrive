@@ -58,7 +58,7 @@ app.get('/profile', async (req, res) => {
 
 // Updates a user's profile details
 app.put('/profile', async (req, res) => {
-    const { uId, name, email, password, bio, funFact } = req.body;
+    const { uId, name, email, bio, funFact } = req.body;
     
     if(
         Object.keys(req.body).length !== 4 ||
@@ -71,9 +71,6 @@ app.put('/profile', async (req, res) => {
         email === "" ||
         email === undefined ||
         typeof email !== "string" ||
-        password === "" ||
-        password === undefined ||
-        typeof password !== "string" ||
         bio === "" ||
         bio === undefined ||
         typeof bio !== "string" ||
@@ -88,13 +85,12 @@ app.put('/profile', async (req, res) => {
         res.status(404).send({ message: 'Profile not found' });
     } else{
         try{
-            const data = await updateProfile(uId, name, email, password, bio, funFact);
+            const data = await updateProfile(uId, name, email, bio, funFact);
             
             let updated = {};
             updated["uId"] = uId;
             updated["name"] = name;
             updated["email"] = email;
-            updated["password"] = password;
             updated["bio"] = bio;
             updated["funFact"] = funFact;
             profiles[uId] = updated;
@@ -109,7 +105,7 @@ app.put('/profile', async (req, res) => {
 
 // Adds new profile to database
 app.post('/profile', async (req, res) => {
-    const { uId, name, email, password, bio, funFact } = req.body;
+    const { uId, name, email, bio, funFact } = req.body;
     
     if(
         Object.keys(req.body).length !== 4 ||
@@ -122,9 +118,6 @@ app.post('/profile', async (req, res) => {
         email === "" ||
         email === undefined ||
         typeof email !== "string" ||
-        password === "" ||
-        password === undefined ||
-        typeof password !== "string" ||
         bio === "" ||
         bio === undefined ||
         typeof bio !== "string" ||
@@ -139,13 +132,12 @@ app.post('/profile', async (req, res) => {
         res.status(404).send({ message: 'Profile already exists' });
     } else{
         try{
-            const data = await addProfile(uId, name, email, password, bio, funFact);
+            const data = await addProfile(uId, name, email, bio, funFact);
 
             let updated = {};
             updated["uId"] = uId;
             updated["name"] = name;
             updated["email"] = email;
-            updated["password"] = password;
             updated["bio"] = bio;
             updated["funFact"] = funFact;
             profiles[uId] = updated;
@@ -182,6 +174,46 @@ app.delete('/profile', async (req, res) => {
         }
     }
 });
+
+// If a user has been deleted, remove user from profile db
+app.post('/events', async (req, res) => {
+    const { type, data } = req.body;
+
+    // Send 400 Error if Bad Request (no type string, type of type not string, etc)
+    if(
+        Object.keys(req.body).length !== 2 ||
+        type === "" ||
+        type === undefined || 
+        typeof type !== "string"
+    ){
+        res.status(400).send({message: 'BAD REQUEST'});
+    } else{
+        try{
+            if (type === "AccountDeleted") {
+                const { uId } = data;
+                if (
+                    uId === "" ||
+                    uId === undefined ||
+                    typeof uId !== "string"
+                ){
+                    res.status(400).send({ message: 'BAD REQUEST' });
+                } else if (
+                    await checkUser(uId)
+                ){ 
+                    res.status(404).send({ message: 'USER NOT FOUND IN PROFILE DB' });
+                } else{
+                    await removeUser(uId);
+                    res.status(201).send({ message: "Removed user's profile" });
+                }
+            }
+            res.send({ status: 'OK' });
+        } catch (error){
+            // Send 500 Error if Internal Server Error
+            res.status(500).send({message: 'INTERNAL SERVER ERROR'});
+        }
+    }
+});
+
 
 app.listen(4002, () => {
     console.log('Listening on port 4002');

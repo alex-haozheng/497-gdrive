@@ -23,7 +23,7 @@ Port 4000
 - Request: 
 ```
 {
-	"type": "[unique identifier]",
+	"type": "AccountDeleted",
     "data": {
         "uId": "[unique identifier]"
     }

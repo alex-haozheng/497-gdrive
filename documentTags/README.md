@@ -23,9 +23,10 @@ Port 4001
 - Request: 
 ```
 {
-	"type": "[unique identifier]",
+	"type": "FileDeleted",
     "data": {
-        "uId": "[unique identifier]"
+        "uId": "[unique identifier]",
+        "fileId": "[String]"
     }
 }
 ```
