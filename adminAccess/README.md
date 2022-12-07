@@ -17,47 +17,6 @@ If user is deleted, remove user from admin access DB if user was an admin.
 Port 4000
 
 # Endpoint Information: 
-
-## POST admin/deleteUser:uId
-
-- Sends DeleteUser event message to event-bus service with uId of user that needs to be deleted. 
-- Request: 
-```
-{
-	"uId": "[unique identifier]"
-}
-```
-- Response:
-```
-{
-	"message": "Remove user event message sent"
-}
-```
-- HTTP Status Codes: 
-    - 201: OK
-    - 400: BAD REQUEST
-    - 500: Internal Server Error
----
-## POST admin/deleteFile:fileId
-
-- Sends DeleteFile event message to event-bus service with fileId of file that needs to be deleted. 
-- Request: 
-```
-{
-	"fileId": "[unique identifier]"
-}
-```
-- Response:
-```
-{
-	"message": "Remove file event message sent"
-}
-```
-- HTTP Status Codes: 
-    - 201: OK
-    - 400: BAD REQUEST
-    - 500: Internal Server Error
----
 ## POST events
 
 - Listens for a user deleted event message. If a user has been deleted, removes user from admins database.
