@@ -23,11 +23,10 @@ router.post('/register', async (req, res) => {
 			admin: true
 		});
 		axios.post('http://event-bus:4005/events', {
-    		type: 'UserCreated',
+    		type: 'AccountCreated',
     		data: {
       			uid: req.body.username,
-				email: req.body.email,
-				password: req.body.password,
+				email: req.body.email
     		},
   		});
 		newUser.save().then((user) => {
