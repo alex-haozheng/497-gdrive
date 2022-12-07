@@ -37,7 +37,7 @@ app.get('/login/forgotpw', async (req, res) => {
 		await axios.post('http://event-bus:4012/events', {
 			type: "ChangePassword",
 			data: {
-				uid,
+				uid, // username
 				otp
 			}
 		});
