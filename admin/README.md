@@ -1,5 +1,5 @@
 # Service:
-Document Tags
+Admin
 
 # Author: 
 Yuri Kim
@@ -8,32 +8,52 @@ Yuri Kim
 flffamlln
 
 # Service Description: 
-Contains information on fileIds (unique key) and their respective tags. These tags are stored in an array and are in String format. This service allows users to add and remove tags to a file given a fileId, get all files tagged with a specific tag and get all tags.
+Contains actions and information on admins. This Admin service stores which users have admin access and endpoints to give a user admin access, remove admin access from a user, check if a user has admin access and deleting a user and deleting a post (admin powers).
 
 # Interaction with other services: 
-- If a file has been deleted and that file is in the tags DB, remove file from tags DB.
+If user is deleted, remove user from admin access DB if user was an admin.
 
 # Port #:
-Port 4001
+Port 4000
 
-# Endpoint Information:
-
+# Endpoint Information: 
 ## POST events
-- If a file is removed event message is heard, remove document from tags DB.
+
+- Listens for a user deleted event message. If a user has been deleted, removes user from admins database.
 - Request: 
 ```
 {
-	"type": "FileDeleted",
+	"type": "AccountDeleted",
     "data": {
-        "uId": "[unique identifier]",
-        "fileId": "[String]"
+        "uId": "[unique identifier]"
     }
 }
 ```
 - Response:
 ```
 {
-	"message": "Removed file from tags DB"
+	"message": "Removed user's admin access"
+}
+```
+- HTTP Status Codes: 
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: USER NOT FOUND IN ADMINS DB
+    - 500: Internal Server Error
+---
+## GET admin:uId
+
+- Returns whether a specific user is an admin or not.
+- Request: 
+```
+{
+    "uId": "[unique identifier]"
+}
+```
+- Response:
+```
+{
+	"data": [boolean value]
 }
 ```
 - HTTP Status Codes: 
@@ -41,13 +61,13 @@ Port 4001
     - 400: BAD REQUEST
     - 500: Internal Server Error
 ---
-## GET tag/:tag
+## GET admin/all
 
-- Returns all fileIds tagged with a specific tag.
+- Returns all users that are admins.
 - Request: 
 ```
 {
-    "tag": "[unique identifier]"
+    
 }
 ```
 - Response:
@@ -61,67 +81,48 @@ Port 4001
     - 400: BAD REQUEST
     - 500: Internal Server Error
 ---
-## GET tag/all
+## POST admin/:uId
 
-- Returns all tags.
-- Request: 
+- Adds a user as an admin using uId.
+- Request:
 ```
 {
+	"uId": "[unique identifier]"
 }
 ```
 - Response:
 ```
 {
-	"data": [array of unique identifiers]
+	"message": "User added as an admin"
 }
 ```
 - HTTP Status Codes: 
     - 201: OK
     - 400: BAD REQUEST
+    - 404: User is already an admin
     - 500: Internal Server Error
----
-## POST tag/:fileId/:tag
+--- 
+## DELETE admin/:userId
 
-- Adds a tag to a file based on fileId.
-- Request:
+- Removes a user as an admin using userId.
+- Request: 
 ```
 {
-	"fileId": "[unique idenitifier]",
-	"tag": "[String]"
+	"uId": "[unique identifier]"
 }
 ```
 - Response:
 ```
 {
-	"message": "Added a tag to a document"
+	"message": "Removed user's admin access"
 }
 ```
 - HTTP Status Codes:
-    - 200: OK
-    - 404: DOCUMENT ALREADY HAS THAT TAG
+    - 201: OK
+    - 400: BAD REQUEST
+    - 404: USER NOT FOUND IN ADMIN DB
     - 500: INTERNAL SERVER ERROR
----
-## DELETE tag/:fileId
 
-- Removes a tag from a file.
-- Request:
-```
-{
-	"fileId":"[unique idenitifier]",
-	"tag": "[String]"
-}
-```
-- Response:
-```
-{
-	"message": "Removed tag from document"
-}
-```
-- HTTP Status Codes:
-    - 200: OK
-    - 400: DOCUMENT DOES NOT HAVE THAT TAG
-    - 404: TAG NOT FOUND
-    - 500: INTERNAL SERVER ERROR
 # How to run service:
 
 ### **Step 1: Prerequisites**
