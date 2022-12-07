@@ -1,6 +1,8 @@
 import * as express from 'express';
 import axios from 'axios';
 import cors from 'cors';
+import { isAuth, isAdmin } from './auth.js';
+import stringDistance from './utils.js';
 
 const app = express();
 
@@ -18,34 +20,12 @@ interface File {
 	postId: string
 }
 
-function stringDistance(s: string, t: string): number {
-    const m: number = s.length, n: number = t.length;
-    if (n * m === 0) return m + n;
-    const dp: number[][] = new Array(m + 1).fill(null).map(() => new Array(n + 1).fill(0));
-    for (let i = 0; i <= m; ++i) {
-        dp[i][0] = i;
-    }
-    for (let j = 0; j <= n; ++j) {
-        dp[0][j] = j;
-    }
-    for (let i = 1; i <= m; ++i) {
-        for (let j = 1; j <= n; ++j) {
-            if (s[i - 1] === t[j - 1]) {
-                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1] - 1);
-            } else {
-                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-            }
-        }
-    }
-    return dp[m][n];
-};
-
-app.post('/blacklist/add/:word', async (req, res) => {
+app.post('/blacklist/add/:word', isAdmin, async (req, res) => {
     blacklist.push(req.body.word);
     res.status(200).send({});
 });
 
-app.delete('/blacklist/remove/:word', async (req, res) => {
+app.delete('/blacklist/remove/:word', isAdmin, async (req, res) => {
     const i = blacklist.indexOf(req.body.word);
     if (i === -1) {
         res.status(404).send({});
@@ -55,7 +35,7 @@ app.delete('/blacklist/remove/:word', async (req, res) => {
     res.status(200).send({});
 });
 
-app.put('/blacklist/update/threshold', async (req, res) => {
+app.put('/blacklist/update/threshold', isAdmin, async (req, res) => {
     if (req.body.threshold === undefined) {
         res.status(404).send({});
         return;

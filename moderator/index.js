@@ -49,43 +49,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var express = require("express");
 var axios_1 = require("axios");
+var cors_1 = require("cors");
+var auth_js_1 = require("./auth.js");
+var utils_js_1 = require("./utils.js");
 var app = express();
 app.use(express.json());
+app.use((0, cors_1["default"])());
 var blacklist = ['fork', 'raptor', 'java', 'jrk', 'mcboatface']; // list of words to disallow from comments
 var accepted = 'accepted'; // hard code to prevent mistypes. ideally would import from status file and use globally across all files
 var rejected = 'rejected';
 var threshold = .2;
-function stringDistance(s, t) {
-    var m = s.length, n = t.length;
-    if (n * m === 0)
-        return m + n;
-    var dp = new Array(m + 1).fill(null).map(function () { return new Array(n + 1).fill(0); });
-    for (var i = 0; i <= m; ++i) {
-        dp[i][0] = i;
-    }
-    for (var j = 0; j <= n; ++j) {
-        dp[0][j] = j;
-    }
-    for (var i = 1; i <= m; ++i) {
-        for (var j = 1; j <= n; ++j) {
-            if (s[i - 1] === t[j - 1]) {
-                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1] - 1);
-            }
-            else {
-                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-            }
-        }
-    }
-    return dp[m][n];
-}
-;
-app["delete"]('/blacklist/remove/:word', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.post('/blacklist/add/:word', auth_js_1.isAdmin, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        blacklist.push(req.body.word);
+        res.status(200).send({});
+        return [2 /*return*/];
+    });
+}); });
+app["delete"]('/blacklist/remove/:word', auth_js_1.isAdmin, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var i;
     return __generator(this, function (_a) {
-        if (req.params.word === undefined) {
-            res.status(404).send({});
-            return [2 /*return*/];
-        }
         i = blacklist.indexOf(req.body.word);
         if (i === -1) {
             res.status(404).send({});
@@ -96,18 +79,7 @@ app["delete"]('/blacklist/remove/:word', function (req, res) { return __awaiter(
         return [2 /*return*/];
     });
 }); });
-app.post('/blacklist/add/:word', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        if (req.params.word === undefined) {
-            res.status(404).send({});
-            return [2 /*return*/];
-        }
-        blacklist.push(req.body.word);
-        res.status(200).send({});
-        return [2 /*return*/];
-    });
-}); });
-app.put('/blacklist/update/threshold', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.put('/blacklist/update/threshold', auth_js_1.isAdmin, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         if (req.body.threshold === undefined) {
             res.status(404).send({});
@@ -134,7 +106,7 @@ app.post('/events', function (req, res) { return __awaiter(void 0, void 0, void 
                     fword = _b[_i];
                     for (_c = 0, blacklist_1 = blacklist; _c < blacklist_1.length; _c++) {
                         bword = blacklist_1[_c];
-                        if (stringDistance(fword, bword) / ((fword.length + bword.length) >> 1) <= threshold) { // strings too similar, status = rejected
+                        if ((0, utils_js_1["default"])(fword, bword) / ((fword.length + bword.length) >> 1) <= threshold) { // strings too similar, status = rejected
                             status_1 = rejected; // status rejected if word from blacklist found in comment
                             break;
                         }
