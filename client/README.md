@@ -1,3 +1,45 @@
+# Service:
+This is our client (front-end) service.
+
+# Authors + Githubs:
+The authors and Githubs of this service are: 
+Yuri Kim (flffamlln) 
+Alex Zheng (sazzle2)
+Kays Laouar (kayslaouar)
+
+# Service Description: 
+Client is a front-end service that has UI components and talks to our other services to retrieve information and complete user actions.
+
+Admin UI will allow adding of an admin and removing of an admin.
+
+Profile UI will allow viewing a user's profile details and editing parts of a user's profile details.
+
+The Forgot Password UI will allow the client to access the forgotpw endpoint.
+
+The File Compression UI will allow the client to download files onto their local machine.
+
+Auth UI will allow people to register/login/out.
+
+Analytics UI will allow admins to see aggregate data about all files in the app.
+
+# Interaction with other services: 
+Client service interacts with other services to create UI components.
+
+Admin UI interacts with admin service and user service to show users that are admins.
+
+Profile UI interacts with profile service to show user's profile details.
+
+FileCompression UI interacts with the file service to update the status (opened / closed) of current selected files.
+
+Forgot Password UI interacts with the authentication service as it changes the password on the database followed by an email. 
+
+Auth UI interacts with auth service (sends it username, email, password for registration, username password for login).
+
+Analytics UI interacts with analytics service. Displays analytics that service provides.
+
+# Port #:
+This service runs on port 3000.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
