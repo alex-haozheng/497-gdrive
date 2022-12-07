@@ -1,23 +1,20 @@
 # Service:
-Profile
+This service is the profile service.
 
 # Author: 
-Yuri Kim
+This service's author is Yuri Kim.
 
 # Github: 
-flffamlln
+This service's author's Github is flffamlln.
 
 # Service Description: 
-
-Contains information on a user including userId (unique key), email, password, name and misc. information like bio and a fun fact. This service can create, read, update and delete profile details of a user given a userId.
+This profile service contains profiles of user accounts. It stores information including userId, email, name and misc. information like a bio and a fun fact. This service can create, read, update and delete profile details of a user given a userId.
 
 # Interaction with other services: 
-
-- If a user deleted event is heard, remove their profile.
-- If a password updated event is heard, update password in profile.
+This profile service listens for an AccountDeleted event. If it hears one, it removes that user from profile database if the user has a profile because the user's account has been deleted.
 
 # Port #:
-Port 4002
+This service runs on port 4002.
 
 # Endpoint Information:
 
