@@ -25,7 +25,7 @@ router.post('/register', async (req, res) => {
 		axios.post('http://event-bus:4005/events', {
     		type: 'UserCreated',
     		data: {
-      			username: req.body.username,
+      			uid: req.body.username,
 				email: req.body.email,
 				password: req.body.password,
     		},

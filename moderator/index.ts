@@ -60,7 +60,7 @@ app.post('/events', async (req, res) => {
                 }
             }
 		}
-		await axios.post('http://event-bus:4015/events', {
+		await axios.post('http://event-bus:4012/events', {
 			type: 'FileModerated',
 			data: {
 				...data, // spread data object contents
@@ -71,6 +71,6 @@ app.post('/events', async (req, res) => {
 	res.send({});
 });
 
-app.listen(4003, () => {
-	console.log('Listening on 4003');
+app.listen(4005, () => {
+	console.log('Listening on 4005');
 });
