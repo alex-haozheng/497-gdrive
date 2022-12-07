@@ -30,7 +30,7 @@ app.get('user/:id/file/zip', (req, res) => {
 
 app.post('/events', (req, res) => {
 	const {type, data} = req.body;
-	if (type === 'fileOpened') {
+	if (type === 'FileOpened') {
 		try {
 			const { fileid } = data;
 			if (fileid in db) {
@@ -42,7 +42,7 @@ app.post('/events', (req, res) => {
 		} catch (e) {
 			res.status(500).send(e);
 		}
-	} else if (type === 'fileChanged') {
+	} else if (type === 'FileModified') {
 		try {
 			const { fileid, content } = data;
 			if (fileid in db) {
