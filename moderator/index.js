@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -48,84 +37,61 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var express = require("express");
-var axios_1 = require("axios");
 var cors_1 = require("cors");
-var auth_js_1 = require("./auth.js");
-var utils_js_1 = require("./utils.js");
 var app = express();
 app.use(express.json());
 app.use((0, cors_1["default"])());
 var blacklist = ['fork', 'raptor', 'java', 'jrk', 'mcboatface']; // list of words to disallow from comments
-var accepted = 'accepted'; // hard code to prevent mistypes. ideally would import from status file and use globally across all files
-var rejected = 'rejected';
+var badfiles = new Set();
 var threshold = .2;
-app.post('/blacklist/add/:word', auth_js_1.isAdmin, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        blacklist.push(req.body.word);
-        res.status(200).send({});
-        return [2 /*return*/];
-    });
-}); });
-app["delete"]('/blacklist/remove/:word', auth_js_1.isAdmin, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var i;
-    return __generator(this, function (_a) {
-        i = blacklist.indexOf(req.body.word);
-        if (i === -1) {
-            res.status(404).send({});
-            return [2 /*return*/];
+function stringDistance(s, t) {
+    var m = s.length, n = t.length;
+    if (n * m === 0)
+        return m + n;
+    var dp = new Array(m + 1).fill(null).map(function () { return new Array(n + 1).fill(0); });
+    for (var i = 0; i <= m; ++i) {
+        dp[i][0] = i;
+    }
+    for (var j = 0; j <= n; ++j) {
+        dp[0][j] = j;
+    }
+    for (var i = 1; i <= m; ++i) {
+        for (var j = 1; j <= n; ++j) {
+            if (s[i - 1] === t[j - 1]) {
+                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1] - 1);
+            }
+            else {
+                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+            }
         }
-        blacklist.splice(i, 1);
-        res.status(200).send({});
-        return [2 /*return*/];
-    });
-}); });
-app.put('/blacklist/update/threshold', auth_js_1.isAdmin, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        if (req.body.threshold === undefined) {
-            res.status(404).send({});
-            return [2 /*return*/];
-        }
-        threshold = req.body.threshold;
-        res.status(200).send({});
-        return [2 /*return*/];
-    });
-}); });
+    }
+    return dp[m][n];
+}
+;
 app.post('/events', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, type, data, status_1, _i, _b, fword, _c, blacklist_1, bword;
+    var _a, type, data, _i, _b, fword, _c, blacklist_1, bword;
     return __generator(this, function (_d) {
-        switch (_d.label) {
-            case 0:
-                _a = req.body, type = _a.type, data = _a.data;
-                if (!(type === 'FileCreated' || type === 'FileUpdated')) return [3 /*break*/, 2];
-                status_1 = accepted;
-                if (data.content === undefined) {
-                    res.send({}); //?! do you have to send a response before a return
-                    return [2 /*return*/];
-                }
-                for (_i = 0, _b = data.content.split(/[^a-zA-Z\d]/); _i < _b.length; _i++) { // split file string by punctuation or whitespace
-                    fword = _b[_i];
-                    for (_c = 0, blacklist_1 = blacklist; _c < blacklist_1.length; _c++) {
-                        bword = blacklist_1[_c];
-                        if ((0, utils_js_1["default"])(fword, bword) / ((fword.length + bword.length) >> 1) <= threshold) { // strings too similar, status = rejected
-                            status_1 = rejected; // status rejected if word from blacklist found in comment
-                            break;
-                        }
+        _a = req.body, type = _a.type, data = _a.data;
+        if (type === 'FileModified') {
+            if (data.content === undefined) {
+                res.send({}); //?! do you have to send a response before a return. Also does function end execution after response?
+                return [2 /*return*/];
+            }
+            for (_i = 0, _b = data.content.split(/[^a-zA-Z\d]/); _i < _b.length; _i++) { // split file string by punctuation or whitespace
+                fword = _b[_i];
+                for (_c = 0, blacklist_1 = blacklist; _c < blacklist_1.length; _c++) {
+                    bword = blacklist_1[_c];
+                    if (stringDistance(fword, bword) / ((fword.length + bword.length) >> 1) <= threshold) { // strings too similar, status = rejected
+                        badfiles.add(data.fileId); // status rejected if word from blacklist found in comment
+                        break;
                     }
                 }
-                return [4 /*yield*/, axios_1["default"].post('http://event-bus:4015/events', {
-                        type: 'FileModerated',
-                        data: __assign(__assign({}, data), { // spread data object contents
-                            status: status_1 })
-                    })];
-            case 1:
-                _d.sent();
-                _d.label = 2;
-            case 2:
-                res.send({});
-                return [2 /*return*/];
+            }
         }
+        res.send({});
+        return [2 /*return*/];
     });
 }); });
-app.listen(4003, function () {
-    console.log('Listening on 4003');
+app.listen(4005, function () {
+    console.log('Listening on 4005');
 });

@@ -1,20 +1,20 @@
 # Service:
-Document Tags
+This service is the tag service.
 
 # Author: 
-Yuri Kim
+This service's author is Yuri Kim.
 
 # Github: 
-flffamlln
+This service's author's Github is flffamlln.
 
 # Service Description: 
-Contains information on fileIds (unique key) and their respective tags. These tags are stored in an array and are in String format. This service allows users to add and remove tags to a file given a fileId, get all files tagged with a specific tag and get all tags.
+This tag service contains which tags and docIds of documents that were tagged with those tags. It contains information on fileIds (unique key) and their respective tags. This service allows users to add and remove tags to a file given a fileId, get all files tagged with a specific tag and get all tags.
 
 # Interaction with other services: 
-- If a file has been deleted and that file is in the tags DB, remove file from tags DB.
+This tag service listens for a FileDeleted event. If it hears one, it removes that file from tag database if the file is in tag database because the file has been deleted.
 
 # Port #:
-Port 4001
+This service runs on port 4001.
 
 # Endpoint Information:
 
@@ -23,9 +23,10 @@ Port 4001
 - Request: 
 ```
 {
-	"type": "[unique identifier]",
+	"type": "FileDeleted",
     "data": {
-        "uId": "[unique identifier]"
+        "uId": "[unique identifier]",
+        "fileId": "[String]"
     }
 }
 ```
