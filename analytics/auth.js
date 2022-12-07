@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 function isAdmin(req, res, next) {
     if (req.isAuthenticated() && req.user.admin) {
         next();
@@ -8,4 +8,4 @@ function isAdmin(req, res, next) {
         res.status(401).send('Unauthorized admin access');
     }
 }
-exports.default = isAdmin;
+exports["default"] = isAdmin;

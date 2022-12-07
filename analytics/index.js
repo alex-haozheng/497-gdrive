@@ -1,38 +1,12 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var express = __importStar(require("express"));
-var cors_1 = __importDefault(require("cors"));
-var axios_1 = __importDefault(require("axios"));
+exports.__esModule = true;
+var express = require("express");
+var cors_1 = require("cors");
+var axios_1 = require("axios");
 var app = express();
-var auth_js_1 = __importDefault(require("./auth.js"));
+var auth_js_1 = require("./auth.js");
 app.use(express.json());
-app.use((0, cors_1.default)());
+app.use((0, cors_1["default"])());
 var files;
 var badfiles;
 var analytics = {
@@ -71,10 +45,10 @@ function condense(data) {
 } // condense same data to one point and count. Ex: 1 1 1 1 2 2 2 => { 1: 4, 2: 3 }
 setInterval(function () {
     Promise.all([
-        axios_1.default.post('http://event-bus:4012/events', {
+        axios_1["default"].post('http://event-bus:4012/events', {
             type: 'ShootFileAnalytics'
         }),
-        axios_1.default.post('http://event-bus:4012/events', {
+        axios_1["default"].post('http://event-bus:4012/events', {
             type: 'ShootWordAnalytics'
         })
     ]);
@@ -93,7 +67,7 @@ app.post('/events', function (req, res) {
         files = req.body.data.files;
     }
 });
-app.get('/analytics', auth_js_1.default, function (req, res) {
+app.get('/analytics', auth_js_1["default"], function (req, res) {
     res.send(analytics);
 });
 app.listen(4004, function () {
