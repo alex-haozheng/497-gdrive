@@ -14,7 +14,7 @@ app.use(cors());
 // store uid along with email
 const db = {};
 
-// username: team0.clouddrive@gmail.com
+// uid: team0.clouddrive@gmail.com
 // password: ourpassword
 
 // return the verified emails (used for account creation with existing email)
@@ -37,7 +37,7 @@ app.get('/login/forgotpw', async (req, res) => {
 		await axios.post('http://event-bus:4012/events', {
 			type: "ChangePassword",
 			data: {
-				uid,
+				uid, // username
 				otp
 			}
 		});
@@ -87,12 +87,12 @@ app.post('/events', (req, res) => {
 		const { uid , email } = data;
 		db[uid] = email;
 	} else if (type === 'AccountDeleted') {
-		const { uid, email } = data;
+		const { uid } = data;
 		delete db[uid];
 	}
 	res.send({status: 'ok'});
 });
 
-app.listen(4004, () => {
-	console.log('Listening on 4004');
+app.listen(4006, () => {
+	console.log('Listening on 4006');
 });
