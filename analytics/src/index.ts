@@ -17,13 +17,6 @@ let analytics: Analytics = {
   badfiles: badfiles
 };
 
-// for Justin to add to event-bus
-/* app.post('/events', (req, res) => {
-	if (req.body.type === 'Analytics') {
-		res.send(files);
-	}
-}); */
-
 function processFiles(): number[] {
   const indexes: number[] = [];
   for (const file of files) {
@@ -63,10 +56,12 @@ setInterval(() => {
 		})
 	]);
 
-	const indexes: number[] = processFiles();
-  analytics.numFiles = files.length;
-	analytics.readabilityDistribution = condense(indexes);
-  analytics.badfiles = badfiles;
+  setTimeout(() => {
+    const indexes: number[] = processFiles();
+    analytics.numFiles = files.length;
+	  analytics.readabilityDistribution = condense(indexes);
+    analytics.badfiles = badfiles;
+  }, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly. 
 }, 1000 * 60 * 60 * 24); // run once a day
 
 app.post('/events', (req, res) => {
