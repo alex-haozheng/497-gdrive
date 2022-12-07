@@ -78,17 +78,17 @@ app.post('/events', (req, res) => {
 		delete userFiles[uid];
 		res.status(201).json(uid)
 	} else if (type === 'FileCreated') {
-		const { uid, fileName } = data;
+		const { uid, fileId } = data;
 		if (uid in userFiles) {
-			userFiles[uid].push(fileName);
+			userFiles[uid].push(fileId);
 			res.status(201).json(uid)
 		} else {
 			res.status(400).json({ message: 'NOT FOUND'});
 		}
 	} else if (type === 'FileDeleted') {
-		const { uid, fileName } = data;
+		const { uid, fileId } = data;
 		if (userFiles.has(uid)) {
-			delete userFiles[uid][userFiles[uid].indexOf(fileName)];
+			delete userFiles[uid][userFiles[uid].indexOf(fileId)];
 			res.status(201).json(uid)
 		} else {
 			res.status(400).json({ message: 'NOT FOUND'});
