@@ -77,10 +77,20 @@ interface ChangedPassword {
   }
 }
 
+interface FileAnalytics {
+  type: 'FileAnalytics',
+  data: {
+    file: {
+      fileId: string,
+      content: string
+    }
+  }
+}
+
 // JUSTIN:
 // TODO
 
-type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | ChangedPassword;
+type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | FileOpened | ChangedPassword | FileAnalytics;
 
 app.post('/events', (req, res) => {
   const event : MESSAGETYPE = req.body;
