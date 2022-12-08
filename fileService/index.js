@@ -104,7 +104,7 @@ app.post('/files', (req, res) => {
     }
 });
 
-app.put('/files/:fileId', (req, res) => {
+app.put('/files/:fileId', async (req, res) => {
     const {fileId, content} = req.body;
     //if the file doesn't exist, return 404
     if(!readFromFileById(req.params.fileId)){
@@ -127,6 +127,12 @@ app.put('/files/:fileId', (req, res) => {
             };
             updateFile(fileId, file);
             res.status(200).send(file);
+            axios.post('http://event-bus:4012/events', {
+                type: 'GetFileAnalytics',
+                data: {
+                    files: await readFromFileById(fileId)
+                },
+            });
         }
         else{
             res.status(400).send('Bad request');
@@ -150,22 +156,30 @@ app.delete('/files/:fileId', (req, res) => {
     }
 });
 
-app.post('/events', (req, res) => {
+app.post('/events', async (req, res) => {
     const {type, data} = req.body;
     if(type === 'FileCreated'){
-        axios.post('http://localhost:4005/events', {
+        axios.post('http://event-bus:4012/events', {
             type: 'FileCreated',
             data,
         });
     }
+    if(type === 'ShootFileAnalytics'){
+        axios.post('http://event-bus:4012/events', {
+            type: 'GetFileAnalytics',
+            data: {
+                files: await readFromFile()
+            },
+        });
+    }
     else if(type === 'FileUpdated'){
-        axios.post('http://localhost:4005/events', {
+        axios.post('http://event-bus:4012/events', {
             type: 'FileUpdated',
             data,
         });
     }
     else if(type === 'FileDeleted'){
-        axios.post('http://localhost:4005/events', {
+        axios.post('http://event-bus:4012/events', {
             type: 'FileDeleted',
             data,
         });
