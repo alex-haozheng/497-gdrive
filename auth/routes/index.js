@@ -36,6 +36,21 @@ router.post('/register', async (req, res) => {
 	}
 });
 
+router.post('/unregister', isAuth, async (req, res) => {
+	const username = req.body.username;
+	await User.deleteOne({ username }, (err) => {
+		if (err) console.log(err);
+		console.log('Successful Account Deletion');
+	});
+	axios.post('http://event-bus:4005/events', {
+		type: 'AccountDeleted',
+		data: {
+			uid: username
+		}
+	});
+	res.redirect('/login');
+});
+
 router.get('/register', (req, res) => {
 	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/register.html');
 });
@@ -75,13 +90,7 @@ router.get('/login-failure', (req, res) => {
 
 router.post('/events', async (req, res) => {
 	// user deleted, password changed
-	if (req.body.type === 'AccountDeleted') {
-		const username = req.body.data.uid;
-		await User.deleteOne({ username }, (err) => {
-			if (err) console.log(err);
-			console.log('Successful Account Deletion');
-		});
-	} else if (req.body.type === 'AdminAdded') {
+	if (req.body.type === 'AdminAdded') {
 		const username = req.body.data.uId;
 		await User.findOneAndUpdate({ username: username }, { admin: true });
 	} else if (req.body.type === 'AdminRemoved') {
