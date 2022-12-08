@@ -146,7 +146,7 @@ app.delete('/files/:fileId', (req, res) => {
             res.status(404).send('File not found');
         }
     } catch (err) {
-        res.status.send(err);
+        res.status(500).send(err);
     }
 });
 
