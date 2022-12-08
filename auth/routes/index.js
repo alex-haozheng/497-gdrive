@@ -4,6 +4,7 @@ const generatePassword = require('../utils/utils').generatePassword;
 const User = require('../config/database').models.User;
 const isAuth = require('./authMiddleware').isAuth;
 const isAdmin = require('./authMiddleware').isAdmin;
+const axios = require('axios');
 
 router.post('/login', passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: '/login-success' }));
 
@@ -22,18 +23,33 @@ router.post('/register', async (req, res) => {
 			salt: salt,
 			admin: true
 		});
-		axios.post('http://event-bus:4005/events', {
+		/* axios.post('http://event-bus:4005/events', {
 			type: 'AccountCreated',
 			data: {
 				uid: req.body.username,
 				email: req.body.email
 			}
-		});
+		}); */
 		newUser.save().then(user => {
 			console.log(user);
 		});
 		res.redirect('/login');
 	}
+});
+
+router.post('/unregister', isAuth, async (req, res) => {
+	const username = req.body.username;
+	await User.deleteOne({ username }, (err) => {
+		if (err) console.log(err);
+		console.log('Successful Account Deletion');
+	});
+	/* axios.post('http://event-bus:4005/events', {
+		type: 'AccountDeleted',
+		data: {
+			uid: username
+		}
+	}); */
+	res.redirect('/login');
 });
 
 router.get('/register', (req, res) => {
@@ -75,12 +91,12 @@ router.get('/login-failure', (req, res) => {
 
 router.post('/events', async (req, res) => {
 	// user deleted, password changed
-	if (req.body.type === 'AccountDeleted') {
-		const username = req.body.data.uid;
-		await User.deleteOne({ username }, (err) => {
-			if (err) console.log(err);
-			console.log('Successful Account Deletion');
-		});
+	if (req.body.type === 'AdminAdded') {
+		const username = req.body.data.uId;
+		await User.findOneAndUpdate({ username: username }, { admin: true });
+	} else if (req.body.type === 'AdminRemoved') {
+		const username = req.body.data.uId;
+		await User.findOneAndUpdate({ username: username }, { admin: false });
 	} else if (req.body.type === 'ChangePassword') {
 		const username = req.body.data.uid;
 		const password = req.body.data.otp;

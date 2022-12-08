@@ -1,9 +1,8 @@
 {
   "name": "y",
   "version": "1.0.0",
-  "description": "Alex Zheng",
-  "main": "index.js",
-  "type": "module",
+  "description": "Justin Baltazar",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

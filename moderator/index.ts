@@ -16,7 +16,6 @@ interface File {
 }
 
 const badfiles: Map<string, File> = new Map();
-let threshold: number = .2;
 
 function stringDistance(s: string, t: string): number {
     const m: number = s.length, n: number = t.length;
@@ -46,7 +45,7 @@ app.post('/events', async (req, res) => {
     if (type === 'FileModified') {
 		for (let fword of file.content.split(/[^a-zA-Z\d]/)) { // split file string by punctuation or whitespace
             for (const bword of blacklist) {
-                if (stringDistance(fword, bword) / ((fword.length + bword.length) >> 1) <= threshold) { // strings too similar, status = rejected
+                if (stringDistance(fword, bword) / ((fword.length + bword.length) >> 1) <= .2) { // strings too similar, status = rejected
                     badfiles.set(file.fileId, {
                         fileId: file.fileId,
                         content: file.content
@@ -62,7 +61,7 @@ app.post('/events', async (req, res) => {
                 badfiles: badfiles
             }
         });
-    }
+    } 
 	res.send({});
 });
 

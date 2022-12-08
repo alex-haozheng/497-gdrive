@@ -19,7 +19,7 @@ app.use(express.urlencoded({extended: true}));
 // use database for persistent storage of session. use secret to encrypt cookies. maxage for cookie expiration
 const sessionStore = new MongoStore({ mongooseConnection: connection, collection: 'sessions' });
 app.use(session({
-    secret: process.env.SECRET,
+    secret: 'f62165d78af7861ba67ffa6f1ea065547f39a52102eadfe0941698d5437e5902', // random bytes
     resave: false,
     saveUninitialized: true,
     store: sessionStore,
