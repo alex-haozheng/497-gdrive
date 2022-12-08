@@ -1,6 +1,6 @@
 import * as express from 'express';
 import axios from 'axios';
-import cors from 'cors';
+import * as cors from 'cors';
 import { MongoClient } from 'mongodb';
 import { stringDistance } from './utils.js';
 import { File } from './interfaces.js';

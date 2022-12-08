@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var axios_1 = require("axios");
-var cors_1 = require("cors");
+var cors = require("cors");
 var mongodb_1 = require("mongodb");
 var utils_js_1 = require("./utils.js");
 function connectDB() {
@@ -139,7 +139,7 @@ function start() {
                 case 4:
                     blacklist = _a.sent();
                     app.use(express.json());
-                    app.use((0, cors_1.default)());
+                    app.use(cors());
                     app.post('/events', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
                         var _a, type, data, file, badfile, _i, _b, fword, _c, blacklist_1, bword, badfiles;
                         return __generator(this, function (_d) {
