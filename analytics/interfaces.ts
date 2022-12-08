@@ -5,7 +5,7 @@ export interface File {
 
 export interface Analytics {
 	numFiles: number;
-	readabilityDistribution: {
+	readability: {
 		[key: string | number]: number;
 	},
   badfiles: File[];
