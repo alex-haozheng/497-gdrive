@@ -37,19 +37,18 @@ services:
     build: filecompression
     ports:
       - "4008:4008"
-  # JUSTIN: TODO
-  # posts:
-  #   build: posts
-  #   ports:
-  #     - "4000:4000"
-  # posts:
-  #   build: posts
-  #   ports:
-  #     - "4000:4000"
-  # posts:
-  #   build: posts
-  #   ports:
-  #     - "4000:4000"
+  fileservice:
+    build: fileservice
+    ports:
+      - "4009:4009"
+  timelogger:
+    build: timelogger
+    ports:
+      - "4010:4010"
+  uploaddownload:
+    build: uploaddownload
+    ports:
+      - "4011:4011"
   event-bus:
     build: event-bus
     ports:
