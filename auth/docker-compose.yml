@@ -3,7 +3,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - "4003:4003"
     depends_on:
       - mongodb_container
     environment:
