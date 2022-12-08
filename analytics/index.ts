@@ -18,7 +18,7 @@ app.use(cors());
 let files: File[] = [];
 let badfiles: File[] = [];
 
-async function connectDB(): Promise<MongoClient> {
+async function connectDB() {
 	const uri = process.env.DATABASE_URL;
 	if (uri === undefined) {
 		throw Error('DATABASE_URL environment variable is not specified');
@@ -28,7 +28,7 @@ async function connectDB(): Promise<MongoClient> {
 	return await Promise.resolve(mongo);
 }
 
-async function initDB(mongo: MongoClient) {
+async function initDB(mongo) {
 	const analytics = mongo.db().collection('analytics');
 	await analytics.insertOne({
 		key: 'analytics', numFiles: 0, readability: {}, badfiles: []
@@ -53,7 +53,7 @@ async function start() {
 		analytics = mongo.db().collection('analytics');
 
 		setTimeout(async () => {
-			const indexes: number[] = processFiles(files);
+			const indexes = processFiles(files);
 			analytics.updateOne(
 				{ key: 'analytics' },
 				{
@@ -70,8 +70,7 @@ async function start() {
 	// TODO: uncomment isAdmin
 	app.get('/analytics', /* isAdmin ,*/ async (req, res) => {
 		const results = await analytics.findOne({ key: 'analytics' });
-		console.log(results);
-		res.send(results);
+		res.send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
 	});
 
 	app.post('/events', (req, res) => {

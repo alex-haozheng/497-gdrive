@@ -35,63 +35,174 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
-var cors_1 = require("cors");
-var app = express();
-app.use(express.json());
-app.use((0, cors_1["default"])());
-var blacklist = ['fork', 'raptor', 'java', 'jrk', 'mcboatface']; // list of words to disallow from comments
-var badfiles = new Set();
-var threshold = .2;
-function stringDistance(s, t) {
-    var m = s.length, n = t.length;
-    if (n * m === 0)
-        return m + n;
-    var dp = new Array(m + 1).fill(null).map(function () { return new Array(n + 1).fill(0); });
-    for (var i = 0; i <= m; ++i) {
-        dp[i][0] = i;
-    }
-    for (var j = 0; j <= n; ++j) {
-        dp[0][j] = j;
-    }
-    for (var i = 1; i <= m; ++i) {
-        for (var j = 1; j <= n; ++j) {
-            if (s[i - 1] === t[j - 1]) {
-                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1] - 1);
-            }
-            else {
-                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-            }
-        }
-    }
-    return dp[m][n];
-}
-;
-app.post('/events', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, type, data, _i, _b, fword, _c, blacklist_1, bword;
-    return __generator(this, function (_d) {
-        _a = req.body, type = _a.type, data = _a.data;
-        if (type === 'FileModified') {
-            if (data.content === undefined) {
-                res.send({}); //?! do you have to send a response before a return. Also does function end execution after response?
-                return [2 /*return*/];
-            }
-            for (_i = 0, _b = data.content.split(/[^a-zA-Z\d]/); _i < _b.length; _i++) { // split file string by punctuation or whitespace
-                fword = _b[_i];
-                for (_c = 0, blacklist_1 = blacklist; _c < blacklist_1.length; _c++) {
-                    bword = blacklist_1[_c];
-                    if (stringDistance(fword, bword) / ((fword.length + bword.length) >> 1) <= threshold) { // strings too similar, status = rejected
-                        badfiles.add(data.fileId); // status rejected if word from blacklist found in comment
-                        break;
+var axios_1 = require("axios");
+var cors = require("cors");
+var mongodb_1 = require("mongodb");
+var utils_js_1 = require("./utils.js");
+function connectDB() {
+    return __awaiter(this, void 0, void 0, function () {
+        var uri, mongo;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    uri = process.env.DATABASE_URL;
+                    if (uri === undefined) {
+                        throw Error('DATABASE_URL environment variable is not specified');
                     }
-                }
+                    mongo = new mongodb_1.MongoClient(uri);
+                    return [4 /*yield*/, mongo.connect()];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, Promise.resolve(mongo)];
+                case 2: return [2 /*return*/, _a.sent()];
             }
-        }
-        res.send({});
-        return [2 /*return*/];
+        });
     });
-}); });
-app.listen(4005, function () {
-    console.log('Listening on 4005');
-});
+}
+function initBlacklistDB(mongo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var db, blacklist;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    db = mongo.db();
+                    blacklist = db.collection('blacklist');
+                    return [4 /*yield*/, blacklist.insertOne({ key: 'blacklist', blacklist: ['fork', 'raptor', 'java', 'jrk', 'mcboatface'] })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/, blacklist];
+            }
+        });
+    });
+}
+function initBadfilesDB(mongo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var db, badfiles;
+        return __generator(this, function (_a) {
+            db = mongo.db();
+            badfiles = db.collection('badfiles');
+            return [2 /*return*/, badfiles];
+        });
+    });
+}
+function getBlacklist(blacklistDB) {
+    return __awaiter(this, void 0, void 0, function () {
+        var blacklistObj;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, blacklistDB.findOne({ key: 'blacklist' })];
+                case 1:
+                    blacklistObj = _a.sent();
+                    return [2 /*return*/, blacklistObj.blacklist || []];
+            }
+        });
+    });
+}
+function getBadfiles(badfilesDB) {
+    return __awaiter(this, void 0, void 0, function () {
+        var badfilesObj, badfiles;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, badfilesDB.find()];
+                case 1:
+                    badfilesObj = _a.sent();
+                    badfiles = [];
+                    return [4 /*yield*/, badfilesObj.forEach(function (doc) {
+                            badfiles.push({ fileId: doc.fileId, content: doc.content });
+                        })];
+                case 2:
+                    _a.sent();
+                    return [2 /*return*/, badfiles];
+            }
+        });
+    });
+}
+var app = express();
+function start() {
+    return __awaiter(this, void 0, void 0, function () {
+        var mongo, blacklistDB, badfilesDB, blacklist;
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connectDB()];
+                case 1:
+                    mongo = _a.sent();
+                    return [4 /*yield*/, initBlacklistDB(mongo)];
+                case 2:
+                    blacklistDB = _a.sent();
+                    return [4 /*yield*/, initBadfilesDB(mongo)];
+                case 3:
+                    badfilesDB = _a.sent();
+                    return [4 /*yield*/, getBlacklist(blacklistDB)];
+                case 4:
+                    blacklist = _a.sent();
+                    app.use(express.json());
+                    app.use(cors());
+                    app.post('/events', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, type, data, file, badfile, _i, _b, fword, _c, blacklist_1, bword, badfiles;
+                        return __generator(this, function (_d) {
+                            switch (_d.label) {
+                                case 0:
+                                    _a = req.body, type = _a.type, data = _a.data;
+                                    file = data.file;
+                                    if (!(type === 'FileModified')) return [3 /*break*/, 11];
+                                    return [4 /*yield*/, badfilesDB.findOne({ fileId: file.fileId })];
+                                case 1:
+                                    badfile = _d.sent();
+                                    _i = 0, _b = file.content.split(/[^a-zA-Z\d]/);
+                                    _d.label = 2;
+                                case 2:
+                                    if (!(_i < _b.length)) return [3 /*break*/, 10];
+                                    fword = _b[_i];
+                                    _c = 0, blacklist_1 = blacklist;
+                                    _d.label = 3;
+                                case 3:
+                                    if (!(_c < blacklist_1.length)) return [3 /*break*/, 9];
+                                    bword = blacklist_1[_c];
+                                    if (!((0, utils_js_1.stringDistance)(fword, bword) / ((fword.length + bword.length) >> 1) <= 0.2)) return [3 /*break*/, 8];
+                                    if (!badfile) return [3 /*break*/, 5];
+                                    return [4 /*yield*/, badfilesDB.updateOne({ fileId: file.fileId }, { content: file.content })];
+                                case 4:
+                                    _d.sent();
+                                    return [3 /*break*/, 7];
+                                case 5: return [4 /*yield*/, badfilesDB.insertOne({ fileId: file.fileId, content: file.content })];
+                                case 6:
+                                    _d.sent();
+                                    _d.label = 7;
+                                case 7: return [3 /*break*/, 9];
+                                case 8:
+                                    _c++;
+                                    return [3 /*break*/, 3];
+                                case 9:
+                                    _i++;
+                                    return [3 /*break*/, 2];
+                                case 10: return [3 /*break*/, 13];
+                                case 11:
+                                    if (!(type === 'ShootWordAnalytics')) return [3 /*break*/, 13];
+                                    return [4 /*yield*/, getBadfiles(badfilesDB)];
+                                case 12:
+                                    badfiles = _d.sent();
+                                    axios_1.default.post('http://event-bus:4005/events', {
+                                        type: 'GetWordAnalytics',
+                                        data: {
+                                            files: badfiles
+                                        }
+                                    });
+                                    _d.label = 13;
+                                case 13:
+                                    res.send({});
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    app.listen(4005, function () {
+                        console.log('Listening on 4005');
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+start();
