@@ -3,6 +3,7 @@ import logger from 'morgan';
 import cors from 'cors';
 import axios from 'axios';
 import fs from 'fs';
+import crypto from 'crypto';
 
 const app = express();
 
@@ -80,12 +81,12 @@ app.get('/files/:fileId', (req, res) => {
 });
 
 app.post('/files', (req, res) => {
-    const {fileId, content} = req.body;
+    const {name, content} = req.body;
     try{
-        if(fileId && content){
+        if(name && content){
             const file = {
-                fileId,
-                name: `${fileId}.txt`,
+                fileId: crypto.randomBytes(8).toString('hex'),
+                name: `${name}.txt`,
                 size: content.length,
                 tags: [],
                 type: 'text/plain',

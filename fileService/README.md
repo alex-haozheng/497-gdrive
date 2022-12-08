@@ -70,7 +70,7 @@
     - Request: 
     ```json
     {
-        "fileId": "ab03b4c5",
+        "name": "sample",
         "content": "This is file content."
     }
     ```
@@ -78,8 +78,8 @@
     ```json
     {
         "fileId": "ab03b4c5",
-        "name": "file.txt",
-        "size": 100,
+        "name": "sample.txt",
+        "size": 21,
         "tags": [],
         "type": "text/plain",
         "date": "2019-01-01T00:00:00.000Z",
