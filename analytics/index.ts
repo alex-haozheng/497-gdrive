@@ -6,7 +6,11 @@ import { Analytics, File } from './interfaces.js';
 import { isAdmin, processFiles, condense } from './utils.js';
 import { MongoClient } from 'mongodb';
 
+// TODO questions:
 //! questions about design, global database
+// how to look inside database inside container
+// composable docker compose files?
+// also tell justin to trim down the file service. Too many attributes too ambitious too little time
 
 app.use(express.json());
 app.use(cors());
@@ -37,14 +41,14 @@ async function start() {
 	let analytics = await initDB(mongo);
 
 	setInterval(async () => {
-		Promise.all([
+		/* Promise.all([
 			axios.post('http://event-bus:4012/events', {
 				type: 'ShootFileAnalytics'
 			}),
 			axios.post('http://event-bus:4012/events', {
 				type: 'ShootWordAnalytics'
 			})
-		]);
+		]); */
 
 		analytics = mongo.db().collection('analytics');
 
@@ -63,8 +67,11 @@ async function start() {
 		}, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly.
 	}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin. 
 
-	app.get('/analytics', isAdmin, (req, res) => {
-		res.send(analytics.findOne({ key: 'analytics' }));
+	// TODO: uncomment isAdmin
+	app.get('/analytics', /* isAdmin ,*/ async (req, res) => {
+		const results = await analytics.findOne({ key: 'analytics' });
+		console.log(results);
+		res.send(results);
 	});
 
 	app.post('/events', (req, res) => {

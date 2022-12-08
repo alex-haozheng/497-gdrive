@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.condense = exports.processFiles = exports.isAdmin = void 0;
 function isAdmin(req, res, next) {
-    if (req.isAuthenticated() && req.user.admin) {
+    if (req.isAuthenticated !== undefined && req.user !== undefined && req.isAuthenticated() && req.user.admin) {
         next();
     }
     else {
