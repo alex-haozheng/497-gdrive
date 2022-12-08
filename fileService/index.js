@@ -3,6 +3,7 @@ import logger from 'morgan';
 import cors from 'cors';
 import axios from 'axios';
 import fs from 'fs';
+import crypto from 'crypto';
 
 const app = express();
 
@@ -80,12 +81,12 @@ app.get('/files/:fileId', (req, res) => {
 });
 
 app.post('/files', (req, res) => {
-    const {fileId, content} = req.body;
+    const {name, content} = req.body;
     try{
-        if(fileId && content){
+        if(name && content){
             const file = {
-                fileId,
-                name: `${fileId}.txt`,
+                fileId: crypto.randomBytes(8).toString('hex'),
+                name: `${name}.txt`,
                 size: content.length,
                 tags: [],
                 type: 'text/plain',
@@ -145,8 +146,31 @@ app.delete('/files/:fileId', (req, res) => {
             res.status(404).send('File not found');
         }
     } catch (err) {
-        res.status.send(err);
+        res.status(500).send(err);
     }
+});
+
+app.post('/events', (req, res) => {
+    const {type, data} = req.body;
+    if(type === 'FileCreated'){
+        axios.post('http://localhost:4005/events', {
+            type: 'FileCreated',
+            data,
+        });
+    }
+    else if(type === 'FileUpdated'){
+        axios.post('http://localhost:4005/events', {
+            type: 'FileUpdated',
+            data,
+        });
+    }
+    else if(type === 'FileDeleted'){
+        axios.post('http://localhost:4005/events', {
+            type: 'FileDeleted',
+            data,
+        });
+    }
+    res.status(200).send({});
 });
 
 app.listen(4009, () => {
