@@ -45,8 +45,8 @@ services:
     build: timelogger
     ports:
       - "4010:4010"
-  uploadDownload:
-    build: uploadDownload
+  uploaddownload:
+    build: uploaddownload
     ports:
       - "4011:4011"
   event-bus:
