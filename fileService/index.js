@@ -150,6 +150,29 @@ app.delete('/files/:fileId', (req, res) => {
     }
 });
 
+app.post('/events', (req, res) => {
+    const {type, data} = req.body;
+    if(type === 'FileCreated'){
+        axios.post('http://localhost:4005/events', {
+            type: 'FileCreated',
+            data,
+        });
+    }
+    else if(type === 'FileUpdated'){
+        axios.post('http://localhost:4005/events', {
+            type: 'FileUpdated',
+            data,
+        });
+    }
+    else if(type === 'FileDeleted'){
+        axios.post('http://localhost:4005/events', {
+            type: 'FileDeleted',
+            data,
+        });
+    }
+    res.status(200).send({});
+});
+
 app.listen(4009, () => {
     console.log('fileService listening on port 4009');
 });
