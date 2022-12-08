@@ -2,14 +2,8 @@ import * as express from 'express';
 import axios from 'axios';
 import cors from 'cors';
 import { MongoClient } from 'mongodb';
-import { isIntersectionTypeNode } from 'typescript';
-
-const app = express();
-
-interface File {
-	fileId: string;
-	content: string;
-}
+import { stringDistance } from './utils.js';
+import { File } from './interfaces.js';
 
 async function connectDB() {
 	const uri = process.env.DATABASE_URL;
@@ -48,7 +42,10 @@ async function getBadfiles(badfilesDB) {
     return badfiles;
 }
 
+const app = express();
+
 async function start() {
+
 	const mongo = await connectDB();
 	
     const blacklistDB = await initBlacklistDB(mongo);
@@ -91,29 +88,6 @@ async function start() {
 	app.listen(4005, () => {
 		console.log('Listening on 4005');
 	});
-}
-
-function stringDistance(s: string, t: string): number {
-	const m: number = s.length,
-		n: number = t.length;
-	if (n * m === 0) return m + n;
-	const dp: number[][] = new Array(m + 1).fill(null).map(() => new Array(n + 1).fill(0));
-	for (let i = 0; i <= m; ++i) {
-		dp[i][0] = i;
-	}
-	for (let j = 0; j <= n; ++j) {
-		dp[0][j] = j;
-	}
-	for (let i = 1; i <= m; ++i) {
-		for (let j = 1; j <= n; ++j) {
-			if (s[i - 1] === t[j - 1]) {
-				dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1] - 1);
-			} else {
-				dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-			}
-		}
-	}
-	return dp[m][n];
 }
 
 start();
