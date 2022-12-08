@@ -4,6 +4,7 @@ const generatePassword = require('../utils/utils').generatePassword;
 const User = require('../config/database').models.User;
 const isAuth = require('./authMiddleware').isAuth;
 const isAdmin = require('./authMiddleware').isAdmin;
+const axios = require('axios');
 
 router.post('/login', passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: '/login-success' }));
 
@@ -22,13 +23,13 @@ router.post('/register', async (req, res) => {
 			salt: salt,
 			admin: true
 		});
-		axios.post('http://event-bus:4005/events', {
+		/* axios.post('http://event-bus:4005/events', {
 			type: 'AccountCreated',
 			data: {
 				uid: req.body.username,
 				email: req.body.email
 			}
-		});
+		}); */
 		newUser.save().then(user => {
 			console.log(user);
 		});
@@ -42,12 +43,12 @@ router.post('/unregister', isAuth, async (req, res) => {
 		if (err) console.log(err);
 		console.log('Successful Account Deletion');
 	});
-	axios.post('http://event-bus:4005/events', {
+	/* axios.post('http://event-bus:4005/events', {
 		type: 'AccountDeleted',
 		data: {
 			uid: username
 		}
-	});
+	}); */
 	res.redirect('/login');
 });
 
