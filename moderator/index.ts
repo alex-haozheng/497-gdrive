@@ -58,7 +58,7 @@ async function start() {
 	app.post('/events', async (req, res) => {
 		const { type, data }: { type: string; data: { file: File } } = req.body;
 		const file: File = data.file;
-		if (type === 'FileModified') {
+		if (type === 'FileUpdated') {
             const badfile = await badfilesDB.findOne({ fileId: file.fileId });
 			for (let fword of file.content.split(/[^a-zA-Z\d]/)) {
 				// split file string by punctuation or whitespace
