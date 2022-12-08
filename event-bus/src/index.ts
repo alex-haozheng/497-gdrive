@@ -56,8 +56,8 @@ interface FileOpened {
 }
 
 // KAYS:
-interface FileModified {
-  type: 'FileModified',
+interface FileUpdated {
+  type: 'FileUpdated',
   data: {
     file: {
       fileId: string,
@@ -117,7 +117,7 @@ interface AdminRemoved {
   type: 'ShootFileAnalytics'
 } */ // need you to just 
 
-type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | FileOpened | ChangedPassword | ShootWordAnalytics | GetWordAnalytics | ShootFileAnalytics | GetFileAnalytics;
+type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileUpdated | FileDeleted | FileOpened | ChangedPassword | ShootWordAnalytics | GetWordAnalytics | ShootFileAnalytics | GetFileAnalytics;
 
 app.post('/events', (req, res) => {
   const event : MESSAGETYPE = req.body;
