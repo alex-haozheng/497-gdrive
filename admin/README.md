@@ -190,4 +190,4 @@ volumes:
     ```
 ### **Step 5: Test endpoints with Thunder Client**
 - The command from Step 4 will locally host the website on `http://localhost:4000`.
-- There is a ThunderClient test collection called thunder-collection-admin.json in admin directory. Open this with ThunderClient extension and test endpoints with them.
+- Exceeds the expectation of this assignment portion: there is a ThunderClient test collection called thunder-collection-admin.json in admin directory. Open this with ThunderClient extension and test endpoints with them.

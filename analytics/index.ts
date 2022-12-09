@@ -19,58 +19,93 @@ let files: File[] = [];
 let badfiles: File[] = [];
 
 async function connectDB() {
-	const uri = process.env.DATABASE_URL;
-	if (uri === undefined) {
-		throw Error('DATABASE_URL environment variable is not specified');
+	try {
+		const uri = process.env.DATABASE_URL;
+		if (uri === undefined) {
+			throw Error('DATABASE_URL environment variable is not specified');
+		}
+		const mongo = new MongoClient(uri);
+		await mongo.connect();
+		return await Promise.resolve(mongo);
+	} catch (e) {
+		console.log(e);
+		return null;
 	}
-	const mongo = new MongoClient(uri);
-	await mongo.connect();
-	return await Promise.resolve(mongo);
 }
 
 async function initDB(mongo) {
-	const analytics = mongo.db().collection('analytics');
-	await analytics.insertOne({
-		key: 'analytics', numFiles: 0, readability: {}, badfiles: []
-	});
-	return analytics;
+	try {
+		const analytics = mongo.db().collection('analytics');
+		await analytics.insertOne({
+			key: 'analytics',
+			numFiles: 0,
+			readability: {},
+			badfiles: []
+		});
+		return analytics;
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
 }
 
 async function start() {
 	const mongo = await connectDB();
+	if (mongo === null) throw Error('Database connection failed');
 	let analytics = await initDB(mongo);
+	if (analytics === null) throw Error('Database initialization failed');
 
 	setInterval(async () => {
-		/* Promise.all([
-			axios.post('http://event-bus:4012/events', {
-				type: 'ShootFileAnalytics'
-			}),
-			axios.post('http://event-bus:4012/events', {
-				type: 'ShootWordAnalytics'
-			})
-		]); */
+		try {
+			Promise.all([
+				axios.post('http://event-bus:4012/events', {
+					type: 'ShootFileAnalytics'
+				}),
+				axios.post('http://event-bus:4012/events', {
+					type: 'ShootWordAnalytics'
+				})
+			]);
+		} catch (e) {
+			console.log(e);
+			return;
+		}
 
-		analytics = mongo.db().collection('analytics');
+		try {
+			analytics = mongo.db().collection('analytics');
+		} catch (e) {
+			console.log(e);
+			return;
+		}
 
 		setTimeout(async () => {
-			const indexes = processFiles(files);
-			analytics.updateOne(
-				{ key: 'analytics' },
-				{
-					$set: {
-						numFiles: files.length,
-						readability: condense(indexes),
-						badfiles: badfiles
+			try {
+				const indexes = processFiles(files);
+				analytics.updateOne(
+					{ key: 'analytics' },
+					{
+						$set: {
+							numFiles: files.length,
+							readability: condense(indexes),
+							badfiles: badfiles
+						}
 					}
-				}
-			);
+				);
+			} catch (e) {
+				console.log(e);
+				return;
+			}
 		}, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly.
-	}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin. 
+	}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
 
 	// TODO: uncomment isAdmin
 	app.get('/analytics', /* isAdmin ,*/ async (req, res) => {
-		const results = await analytics.findOne({ key: 'analytics' });
-		res.send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
+		try {
+			const results = await analytics.findOne({ key: 'analytics' });
+			res.status(200).send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
+		} catch(e) {
+			console.log(e);
+			res.status(500).send({});
+		}
 	});
 
 	app.post('/events', (req, res) => {
@@ -79,6 +114,7 @@ async function start() {
 		} else if (req.body.type === 'GetFileAnalytics') {
 			files = req.body.data.files;
 		}
+		res.send({});
 	});
 
 	app.listen(4004, () => {

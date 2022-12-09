@@ -1,10 +1,16 @@
 # Service:
-Event bus
+This service is the Event bus.
 
 # Authors + Githubs: 
+The names and Githubs of team members are:
+
 Yuri Kim (flffamlln) 
+
 Alex Zheng (sazzle2)
+
 Kays Laouar (kayslaouar)
+
+Justin Baltazar (justinmbaltazar)
 
 # Service Description: 
 Contains message receiving and sending to all services with event message types declared and documented. 
@@ -13,45 +19,21 @@ Contains message receiving and sending to all services with event message types 
 Event bus interacts with other services by relaying event messages it receives so other services can react to these event messages as necessary.
 
 # Port #:
-Port 4012
+This service runs on port 4012.
 
 # Endpoint Information:
+
 ## POST events
 - If an event message is sent to event bus, relay to all other services.
 - Request: 
-```
-type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileModified | FileDeleted | ChangedPassword;
 
-interface AccountCreated {
-  type: 'AccountCreated',
-  data: {
-    uid: string,
-    email: string
-  }
-}
+```
+type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileUpdated | FileDeleted | FileOpened | ChangedPassword | ShootWordAnalytics | GetWordAnalytics | ShootFileAnalytics | GetFileAnalytics | AdminAdded | AdminRemoved;
 
 interface AccountDeleted {
   type: 'AccountDeleted',
   data: {
     uid: string
-  }
-}
-
-interface FileCreated {
-  type: 'FileCreated',
-  data: {
-    uid: string,
-    fileId: string
-  }
-}
-
-interface FileModified {
-  type: 'FileModified',
-  data: {
-    file: {
-      fileId: string,
-      content: string
-    }
   }
 }
 
@@ -63,6 +45,38 @@ interface FileDeleted {
   }
 }
 
+interface AccountCreated {
+  type: 'AccountCreated',
+  data: {
+    uid: string,
+    email: string
+  }
+}
+
+interface FileCreated {
+  type: 'FileCreated',
+  data: {
+    uid: string,
+    fileId: string
+  }
+}
+
+interface FileOpened {
+  type: 'FileOpened',
+  data: {
+    fileId: string
+  }
+}
+
+interface FileUpdated {
+  type: 'FileUpdated',
+  data: {
+    file: {
+      fileId: string,
+      content: string
+    }
+  }
+}
 
 interface ChangedPassword {
   type: 'ChangedPassword',
@@ -74,6 +88,45 @@ interface ChangedPassword {
   }
 }
 
+interface File {
+  fileId: string,
+  content: string
+}
+
+interface ShootFileAnalytics {
+  type: 'FileAnalytics'
+}
+
+interface GetFileAnalytics {
+  type: 'FileAnalytics',
+  data: {
+    files: File[]
+  }
+}
+
+interface ShootWordAnalytics {
+  type: 'ShootWordAnalytics'
+}
+
+interface GetWordAnalytics {
+  type: 'GetWordAnalytics',
+  data: {
+    badwords: []
+  }
+}
+
+interface AdminAdded {
+  type: 'AdminAdded'
+}
+
+interface AdminRemoved {
+  type: 'AdminRemoved'
+}
+```
+
+- Response:
+```
+{}
 ```
 
 # How to run service:
@@ -97,34 +150,54 @@ interface ChangedPassword {
 
 - Clone the repository from [GitHub](https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git) using the `git clone` command.
 
-    ```bash
-    $ git clone https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git
-    ```
+```bash
+$ git clone https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git
+```
 
 - Navigate to the cloned repository directory.
+```bash
+$ cd name-of-cloned-repository
+```
 
-    ```bash
-    $ cd name-of-cloned-repository
-    ```
 ### **Step 3: Install Dependencies**
 
 - Check that the terminal is in the correct directory.
 
-    ```bash
-    $ pwd
-    ```
+```bash
+$ pwd
+```
 
-- Install the dependencies using the `npm install` command.
+# TODO: ADD DATABASE INFO ONCE DONE IN THIS FILE
+create a docker compose file with the following contents. Use docker compose to automatically install dependencies and start up a running containerized service
 
-    ```bash
-    $ npm install
-    ```
+```
+version: '3.9'
+services:
+  event-bus:
+    build: event-bus
+    ports:
+      - "4012:4012"
+```
+
+### OR
+
+- manually install the dependencies using the `npm install` command and run the service using the `npm start` command.
+
+```bash
+$ npm install
+```
+
 ### **Step 4: Run the Application**
 
-- Run the application using the `npm start` command.
+```bash
+$ docker compose up --build
+```
 
-    ```bash
-    $ npm start
-    ```
+### OR
+
+```bash
+$ npm start
+```
+
 ### **Step 5: View the Application**
-- The command from Step 4 will locally host the website on `http://localhost:3000`.
+- The command from Step 4 will locally host the website on `http://localhost:4012`.

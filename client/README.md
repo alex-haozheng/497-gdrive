@@ -6,6 +6,7 @@ The authors and Githubs of this service are:
 Yuri Kim (flffamlln) 
 Alex Zheng (sazzle2)
 Kays Laouar (kayslaouar)
+Justin Baltazar (justinmbaltazar)
 
 # Service Description: 
 Client is a front-end service that has UI components and talks to our other services to retrieve information and complete user actions.
@@ -23,9 +24,9 @@ Auth UI will allow people to register/login/out.
 Analytics UI will allow admins to see aggregate data about all files in the app.
 
 # Interaction with other services: 
-Client service interacts with other services to create UI components.
+Client service interacts with other services to create UI components. For example:
 
-Admin UI interacts with admin service and user service to show users that are admins.
+Admin UI interacts with admin service to show who are admins and who are not admins.
 
 Profile UI interacts with profile service to show user's profile details.
 

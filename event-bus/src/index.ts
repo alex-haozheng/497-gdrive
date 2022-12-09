@@ -113,9 +113,6 @@ interface AdminRemoved {
 
 // JUSTIN:
 // TODO
-/* interface ShootFileAnalytics {
-  type: 'ShootFileAnalytics'
-} */ // need you to just 
 
 type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileUpdated | FileDeleted | FileOpened | ChangedPassword | ShootWordAnalytics | GetWordAnalytics | ShootFileAnalytics | GetFileAnalytics | AdminAdded | AdminRemoved;
 
@@ -144,7 +141,7 @@ app.post('/events', (req, res) => {
     console.log(err.message);
   });
 
-  axios.post('http://profile:4005/events', event).catch((err: Error) => {
+  axios.post('http://moderator:4005/events', event).catch((err: Error) => {
     console.log(err.message);
   });
   
@@ -163,7 +160,17 @@ app.post('/events', (req, res) => {
 
   // justin's service 
   // TODO
+  axios.post('http://fileservice:4009/events', event).catch((err: Error) => {
+    console.log(err.message);
+  });
 
+  axios.post('http://timelogger:4010/events', event).catch((err: Error) => {
+    console.log(err.message);
+  });
+
+  axios.post('http://uploaddownload:4011/events', event).catch((err: Error) => {
+    console.log(err.message);
+  });
 
   res.send({}); // don't delete. if res doesn't send a response, requests never get satisfied
 });
