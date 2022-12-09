@@ -24,32 +24,39 @@ app.get('/users/list', (req: Request, res: Response) => {
 
 app.get('/users/find', (req: Request, res: Response) => {
 	try {
-		const { uid }: { uid: string } = req.body;
+		const { uId }: { uId: string } = req.body;
 		res.status(200).send({
-			'status': uid in userFiles
+			'status': uId in userFiles
 		});
 	} catch (e) {
 		res.status(500).send(e);
 	}
 });
 
-app.get('user/:uid/files', (req: Request, res: Response) => {
+app.get('/user/:uId/files', (req: Request, res: Response) => {
 	try {
-		const uid = req.params.uid;
-		res.status(200).send({
-			files: userFiles[uid]
-		});
+		const uId = req.params.uId;
+		console.log(uId);
+		if (uId in userFiles) {
+			res.status(200).send({
+				files: userFiles[uId]
+			});
+		} else {
+			res.status(404).send({
+				message: 'NOT FOUND'
+			});
+		}
 	} catch (e) {
 		res.status(500).send(e);
 	}
 });
 
-app.get('user/:uid/files/search', (req: Request, res: Response) => {
+app.get('/user/:uId/files/search', (req: Request, res: Response) => {
 	try {
-		const uid = req.params.uid;
+		const uId = req.params.uId;
 		const { keyword }: { keyword: string } = req.body;
-		if (uid in userFiles) {
-			const files = userFiles[uid];
+		if (uId in userFiles) {
+			const files = userFiles[uId];
 			const arr = [];
 			for (const s of files) {
 				if (s.includes(keyword)) {
@@ -72,25 +79,25 @@ app.get('user/:uid/files/search', (req: Request, res: Response) => {
 app.post('/events', (req: Request, res: Response) => {
 	const {type, data} = req.body;
 	if (type === 'AccountCreated') {
-		const { uid }: { uid: string } = data;
-		userFiles[uid] = [];
+		const { uId }: { uId: string } = data;
+		userFiles[uId] = [];
 	} else if (type === 'AccountDeleted') {
-		const { uid }: { uid: string } = data;
-		delete userFiles[uid];
-		res.status(201).json(uid)
+		const { uId }: { uId: string } = data;
+		delete userFiles[uId];
+		res.status(201).json(uId)
 	} else if (type === 'FileCreated') {
-		const { uid, fileId }: { uid: string, fileId: string } = data;
-		if (uid in userFiles) {
-			userFiles[uid].push(fileId);
-			res.status(201).json(uid)
+		const { uId, fileId }: { uId: string, fileId: string } = data;
+		if (uId in userFiles) {
+			userFiles[uId].push(fileId);
+			res.status(201).json(uId)
 		} else {
 			res.status(400).json({ message: 'NOT FOUND'});
 		}
 	} else if (type === 'FileDeleted') {
-		const { uid, fileId }: { uid: string, fileId: string } = data;
-		if (uid in userFiles) {
-			delete userFiles[uid][userFiles[uid].indexOf(fileId)];
-			res.status(201).json(uid)
+		const { uId, fileId }: { uId: string, fileId: string } = data;
+		if (uId in userFiles) {
+			delete userFiles[uId][userFiles[uId].indexOf(fileId)];
+			res.status(201).json(uId)
 		} else {
 			res.status(400).json({ message: 'NOT FOUND'});
 		}

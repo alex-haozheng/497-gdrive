@@ -2,10 +2,9 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import * as logger from 'morgan';
 import * as cors from 'cors';
-// import nodemailer from 'nodemailer';
+//import { nodemailer } from 'nodemailer';
 const nodemailer = require('nodemailer');
 import { faker } from '@faker-js/faker';
-import axios from 'axios';
 
 const app = express();
 
@@ -41,24 +40,24 @@ app.get('/login/forgotpw', async (req: Request, res: Response) => {
 		}
 
 		// right around here add a await call to another endpoint to change the password and mark a flag
-		await axios.post('http://event-bus:4012/events', {
-			type: "ChangePassword",
-			data: {
-				uid, // username
-				otp
-			}
-		});
+		// await axios.post('http://event-bus:4012/events', {
+		// 	type: "ChangePassword",
+		// 	data: {
+		// 		uid, // username
+		// 		otp
+		// 	}
+		// });
 		// let's create the transport (it's the postman/delivery-man who will send your emails)
 		const myTransport = nodemailer.createTransport({
 			service: 'Gmail',
 			auth: {
-				user: 'team0.clouddrive@gmail.com', // your gmail account which you'll use to send the emails
-				pass: 'ourpassword', // the password for your gmail account
+				user: 'team0cloud@hotmail.com', // your gmail account which you'll use to send the emails
+				pass: 'ourpassword!', // the password for your gmail account
 			}
 		});
 		// defining the content of the email (I mean, what will be on the email)
 		const mailOptions = {
-			from: 'team0cloud<team0.clouddrive@gmail.com>', // from where the email is going, you can type anything or any name here, it'll be displayed as the sender to the person who receives it
+			from: 'team0cloud@hotmail.com', // from where the email is going, you can type anything or any name here, it'll be displayed as the sender to the person who receives it
 			to: email, // the email address(es) where you want to send the emails to. If it's more than one person/email, seperate them with a comma, like here how I seperated the 3 users with a comma
 			
 			subject: 'Sending Some Freaking Email', // your email subject (optional but better to have it)

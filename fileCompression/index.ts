@@ -10,15 +10,21 @@ app.use(express.json());
 app.use(cors());
 
 // fileId: compressedContent
-const db = {}
+const db = {"xs": encode('test')}
 
-app.get('user/:id/file/zip', (req: Request, res: Response) => {
+app.get('/user/file/zip', async (req: Request, res: Response) => {
 	const { fileId }: { fileId: string } = req.body;
 	try {
 		if (fileId in db) {
 			const zip = new JSZip();
 			zip.file(fileId + '.txt', db[fileId]);
-			res.status(200);
+			var promise = null;
+			if (JSZip.support.uint8array) {
+				promise = await zip.generateAsync({type : "uint8array"});
+			} else {
+				promise = await zip.generateAsync({type : "string"});
+			}
+			res.status(200).send(promise);
 		} else {
 			res.status(400).json({message: 'NOT FOUND'});
 		}

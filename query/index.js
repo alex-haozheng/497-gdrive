@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var logger = require("morgan");
 var cors = require("cors");
@@ -21,32 +21,40 @@ app.get('/users/list', function (req, res) {
 });
 app.get('/users/find', function (req, res) {
     try {
-        var uid = req.body.uid;
+        var uId = req.body.uId;
         res.status(200).send({
-            'status': uid in userFiles
+            'status': uId in userFiles
         });
     }
     catch (e) {
         res.status(500).send(e);
     }
 });
-app.get('user/:uid/files', function (req, res) {
+app.get('/user/:uId/files', function (req, res) {
     try {
-        var uid = req.params.uid;
-        res.status(200).send({
-            files: userFiles[uid]
-        });
+        var uId = req.params.uId;
+        console.log(uId);
+        if (uId in userFiles) {
+            res.status(200).send({
+                files: userFiles[uId]
+            });
+        }
+        else {
+            res.status(404).send({
+                message: 'NOT FOUND'
+            });
+        }
     }
     catch (e) {
         res.status(500).send(e);
     }
 });
-app.get('user/:uid/files/search', function (req, res) {
+app.get('/user/:uId/files/search', function (req, res) {
     try {
-        var uid = req.params.uid;
+        var uId = req.params.uId;
         var keyword = req.body.keyword;
-        if (uid in userFiles) {
-            var files = userFiles[uid];
+        if (uId in userFiles) {
+            var files = userFiles[uId];
             var arr = [];
             for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
                 var s = files_1[_i];
@@ -71,29 +79,29 @@ app.get('user/:uid/files/search', function (req, res) {
 app.post('/events', function (req, res) {
     var _a = req.body, type = _a.type, data = _a.data;
     if (type === 'AccountCreated') {
-        var uid = data.uid;
-        userFiles[uid] = [];
+        var uId = data.uId;
+        userFiles[uId] = [];
     }
     else if (type === 'AccountDeleted') {
-        var uid = data.uid;
-        delete userFiles[uid];
-        res.status(201).json(uid);
+        var uId = data.uId;
+        delete userFiles[uId];
+        res.status(201).json(uId);
     }
     else if (type === 'FileCreated') {
-        var uid = data.uid, fileId = data.fileId;
-        if (uid in userFiles) {
-            userFiles[uid].push(fileId);
-            res.status(201).json(uid);
+        var uId = data.uId, fileId = data.fileId;
+        if (uId in userFiles) {
+            userFiles[uId].push(fileId);
+            res.status(201).json(uId);
         }
         else {
             res.status(400).json({ message: 'NOT FOUND' });
         }
     }
     else if (type === 'FileDeleted') {
-        var uid = data.uid, fileId = data.fileId;
-        if (uid in userFiles) {
-            delete userFiles[uid][userFiles[uid].indexOf(fileId)];
-            res.status(201).json(uid);
+        var uId = data.uId, fileId = data.fileId;
+        if (uId in userFiles) {
+            delete userFiles[uId][userFiles[uId].indexOf(fileId)];
+            res.status(201).json(uId);
         }
         else {
             res.status(400).json({ message: 'NOT FOUND' });

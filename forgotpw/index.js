@@ -35,22 +35,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
-var express_1 = require("express");
-var morgan_1 = require("morgan");
-var cors_1 = require("cors");
-// import nodemailer from 'nodemailer';
+Object.defineProperty(exports, "__esModule", { value: true });
+var express = require("express");
+var logger = require("morgan");
+var cors = require("cors");
+//import { nodemailer } from 'nodemailer';
 var nodemailer = require('nodemailer');
 var faker_1 = require("@faker-js/faker");
-var axios_1 = require("axios");
-var app = (0, express_1["default"])();
-app.use((0, morgan_1["default"])('dev'));
-app.use(express_1["default"].json());
-app.use((0, cors_1["default"])());
+var app = express();
+app.use(logger('dev'));
+app.use(express.json());
+app.use(cors());
 ;
 //holds a collection of all emails that are registered
 // store uid along with email
-var db = {};
+var db = { "x": "azheng@umass.edu" };
 // uid: team0.clouddrive@gmail.com
 // password: ourpassword
 // return the verified emails (used for account creation with existing email)
@@ -58,68 +57,53 @@ app.get('/emails', function (req, res) {
     res.send(Object.keys(db));
 });
 app.get('/login/forgotpw', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, uid, email, otp, myTransport, mailOptions, e_1;
+    var _a, uid, email, otp, myTransport, mailOptions;
     return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                _b.trys.push([0, 2, , 3]);
-                _a = req.body, uid = _a.uid, email = _a.email;
-                otp = faker_1.faker.internet.password();
-                if (!(uid in db)) {
-                    res.status(400).json({
-                        message: 'NOT FOUND'
-                    });
-                    return [2 /*return*/];
+        try {
+            _a = req.body, uid = _a.uid, email = _a.email;
+            otp = faker_1.faker.internet.password();
+            if (!(uid in db)) {
+                res.status(400).json({
+                    message: 'NOT FOUND'
+                });
+                return [2 /*return*/];
+            }
+            myTransport = nodemailer.createTransport({
+                service: 'Gmail',
+                auth: {
+                    user: 'team0cloud@hotmail.com',
+                    pass: 'ourpassword!', // the password for your gmail account
                 }
-                // right around here add a await call to another endpoint to change the password and mark a flag
-                return [4 /*yield*/, axios_1["default"].post('http://event-bus:4012/events', {
-                        type: "ChangePassword",
-                        data: {
-                            uid: uid,
-                            otp: otp
-                        }
-                    })];
-            case 1:
-                // right around here add a await call to another endpoint to change the password and mark a flag
-                _b.sent();
-                myTransport = nodemailer.createTransport({
-                    service: 'Gmail',
-                    auth: {
-                        user: 'team0.clouddrive@gmail.com',
-                        pass: 'ourpassword'
-                    }
-                });
-                mailOptions = {
-                    from: 'team0cloud<team0.clouddrive@gmail.com>',
-                    to: email,
-                    subject: 'Sending Some Freaking Email',
-                    text: "Hello there my sweetling! Let's send some freaking emails!\n Here is your one time password: ".concat(otp) // your email body in plain text format (optional) 
-                    // your email body in html format (optional)
-                    // if you want to send a customly and amazingly designed html body
-                    // instead of a boring plain text, then use this "html" property
-                    // instead of "text" property
-                    // html: `<h1 style="color: red;text-align:center">Hello there my sweetling!</h1>
-                    // 			<p style="text-align:center">Let's send some <span style="color: red">freaking</span> emails!</p>`,
-                };
-                // sending the email
-                myTransport.sendMail(mailOptions, function (err) {
-                    if (err) {
-                        console.log("Email failed to send!");
-                        console.error(err);
-                    }
-                    else {
-                        console.log("Email successfully sent!");
-                    }
-                });
-                // should probably change this output later (not necessary)
-                res.status(200).json(email);
-                return [3 /*break*/, 3];
-            case 2:
-                e_1 = _b.sent();
-                res.status(500).send(e_1);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+            });
+            mailOptions = {
+                from: 'team0cloud@hotmail.com',
+                to: email,
+                subject: 'Sending Some Freaking Email',
+                text: "Hello there my sweetling! Let's send some freaking emails!\n Here is your one time password: ".concat(otp) // your email body in plain text format (optional) 
+                // your email body in html format (optional)
+                // if you want to send a customly and amazingly designed html body
+                // instead of a boring plain text, then use this "html" property
+                // instead of "text" property
+                // html: `<h1 style="color: red;text-align:center">Hello there my sweetling!</h1>
+                // 			<p style="text-align:center">Let's send some <span style="color: red">freaking</span> emails!</p>`,
+            };
+            // sending the email
+            myTransport.sendMail(mailOptions, function (err) {
+                if (err) {
+                    console.log("Email failed to send!");
+                    console.error(err);
+                }
+                else {
+                    console.log("Email successfully sent!");
+                }
+            });
+            // should probably change this output later (not necessary)
+            res.status(200).json(email);
         }
+        catch (e) {
+            res.status(500).send(e);
+        }
+        return [2 /*return*/];
     });
 }); });
 app.post('/events', function (req, res) {
