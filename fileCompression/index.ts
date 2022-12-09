@@ -1,19 +1,18 @@
-import express, { request, response }from 'express';
-import logger from 'morgan';
-import cors from 'cors';
+import * as express from 'express';
+import { Request, Response } from 'express';
+import * as cors from 'cors';
 import { encode, decode } from 'lossless-text-compression';
 const JSZip = require('jszip');
 
 const app = express();
 
-app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
 
 // fileId: compressedContent
 const db = {}
 
-app.get('user/:id/file/zip', (req: request, res: response) => {
+app.get('user/:id/file/zip', (req: Request, res: Response) => {
 	const { fileId }: { fileId: string } = req.body;
 	try {
 		if (fileId in db) {
@@ -28,7 +27,7 @@ app.get('user/:id/file/zip', (req: request, res: response) => {
 	}
 });
 
-app.post('/events', (req: request, res: response) => {
+app.post('/events', (req: Request, res: Response) => {
 	const {type, data}: {type: string, data: { fileId: string, content?: string }} = req.body;
 	if (type === 'FileOpened') {
 		try {

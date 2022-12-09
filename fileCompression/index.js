@@ -1,14 +1,12 @@
 "use strict";
 exports.__esModule = true;
-var express_1 = require("express");
-var morgan_1 = require("morgan");
-var cors_1 = require("cors");
+var express = require("express");
+var cors = require("cors");
 var lossless_text_compression_1 = require("lossless-text-compression");
 var JSZip = require('jszip');
-var app = (0, express_1["default"])();
-app.use((0, morgan_1["default"])('dev'));
-app.use(express_1["default"].json());
-app.use((0, cors_1["default"])());
+var app = express();
+app.use(express.json());
+app.use(cors());
 // fileId: compressedContent
 var db = {};
 app.get('user/:id/file/zip', function (req, res) {
