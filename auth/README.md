@@ -170,10 +170,10 @@ $ cd name-of-cloned-repository
 ```
 version: '3.9'
 services:
-  analytics:
-    build: analytics
+  auth:
+    build: auth
     ports:
-      - "4004:4004"
+      - "4003:4003"
     depends_on:
       - mongodb_container
     environment:
@@ -203,5 +203,5 @@ $ docker compose up --build
 
 ### **Step 5: Test endpoints with Thunder Client**
 
--   The command from Step 4 will locally host the website on `http://localhost:4004`.
+-   The command from Step 4 will locally host the website on `http://localhost:4003`.
 -   There is a ThunderClient test collection called thunder-collection-admin.json in admin directory. Open this with ThunderClient extension and test endpoints with them.

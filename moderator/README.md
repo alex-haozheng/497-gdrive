@@ -1,101 +1,95 @@
-# Author: 
-Kays Laouar
+# **Moderator Microservice**
 
-# Github: 
-kayslaouar
+## Author: Kays Laouar
+
+## GitHub: kayslaouar
+
+### Port: 4005
+
+# Service:
+
+This service is the Moderator (moderator) service.
 
 # Service Description: 
-Service scans all documents added to the system for any blacklisted words. 
-Uses edit distance dp algorithm to determine if a word is too similar to a blacklisted word.
+The moderator service scans all files in the system for any blacklisted words. Uses edit distance dp algorithm to determine if a word is too similar to a blacklisted word. Adds the suspicious file to a database that admins can access through the analytics service. 
 
 # Interaction with other services: 
-Listens for communication from event bus. Event type "adminanalytics". displays data on browser.
+Every time a file is added, the file service sends a FileUpdated event that this moderator service listens for to scan the document for blacklisted words.
 
 # Endpoint Information: 
 
-## POST /blacklist/add/:word
-- adds a word to the blacklist
-
-## DELETE /blacklist/remove/:word
-- removes a word from the blacklist
-
-## PUT /blacklist/update/threshold
-- update threshold of what is too similar to a blacklisted word. If distance is below threshold, words are too similar and word gets blacklisted. Admins can update the threshold if its too harsh or not catching enough bad words
-- request:
-```json
-{
-	"threshold": 0.5
-}
-```
-
-## POST /events
-- listens for FileCreated and FileUpdated events from the event bus. Sends FileModerated event with status
-- request: 
-```json
-{
-	"type": "FileCreated" | "FileUpdated",
-	"data": {
-		"id": "123",
-		"content": "hola",
-		"postId": "456"
-	}
-}
-```
-- response:
-```json
-{
-	"type": "FileModerated",
-	"data": {
-		"id": "123",
-		"content": "hola",
-		"postId": "456",
-        "status": "accepted" | "rejected"
-	}
-}
+This service has no client facing endpoints. It operates entirely behind the scences and asynchrously and only listens for events from the event bus. More details about these events are found above or in the event-bus README.
 
 # How to run service:
 
 ### **Step 1: Prerequisites**
 
-- [Node](https://nodejs.org/en/)
-- [NPM](https://www.npmjs.com/)
-- [VSCode](https://code.visualstudio.com/)
-    - Install the appropriate language support for each language used in the project.
-- [React.js](https://reactjs.org/)
-- [Git](https://git-scm.com/)
-- [Express.js](https://expressjs.com/)
-- [MongoDB](https://www.mongodb.com/)
-- [Docker](https://www.docker.com/)
-- [Kubernetes](https://kubernetes.io/)
+-   [Node](https://nodejs.org/en/)
+-   [NPM](https://www.npmjs.com/)
+-   [VSCode](https://code.visualstudio.com/)
+    -   Install the appropriate language support for each language used in the project.
+-   [React.js](https://reactjs.org/)
+-   [Git](https://git-scm.com/)
+-   [Express.js](https://expressjs.com/)
+-   [MongoDB](https://www.mongodb.com/)
+-   [Docker](https://www.docker.com/)
+-   [Kubernetes](https://kubernetes.io/)
 
 ### **Step 2: Clone the Repository**
 
-- Navigate to the desired project directory on your computer.
-- Clone the repository from [GitHub](https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git) using the `git clone` command.
+-   Navigate to the desired project directory on your computer.
+
+-   Clone the repository from [GitHub](https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git) using the `git clone` command.
+
 ```bash
 $ git clone https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git
 ```
-- Navigate to the cloned repository directory.
+
+-   Navigate to the cloned repository directory.
+
 ```bash
 $ cd name-of-cloned-repository
 ```
 
-### **Step 3: Install Dependencies**
+### **Step 3: Comment out other service running code in docker-compose.yml**
 
-- Check that the terminal is in the correct directory.
-```bash
-$ pwd
+-   Uncommented code in docker-compose.yml should just have admin service, event-bus service and mongodbcontainer.
+
 ```
-- Install the dependencies using the `npm install` command.
-```bash
-$ npm install
+version: '3.9'
+services:
+  moderator:
+    build: moderator
+    ports:
+      - "4005:4005"
+    depends_on:
+      - mongodb_container
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  event-bus:
+    build: event-bus
+    ports:
+      - "4012:4012"
+  mongodb_container:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongodb_data_container:/data/db
+volumes:
+  mongodb_data_container:
 ```
 
-### **Step 4: Run the Application**
+### **Step 4: Run docker-compose up --build**
 
-- Run the application using the `npm start` command.
+-   Run the application using the `docker compose up --build` command.
+
 ```bash
-$ npm start
+$ docker compose up --build
 ```
-### **Step 5: View the Application**
-- The command from Step 4 will locally host the website on `http://localhost:3000`.
+
+### **Step 5: Test endpoints with Thunder Client**
+
+-   The command from Step 4 will locally host the website on `http://localhost:4005`.
+-   There is a ThunderClient test collection called thunder-collection-admin.json in admin directory. Open this with ThunderClient extension and test endpoints with them.
