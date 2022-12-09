@@ -160,7 +160,17 @@ app.post('/events', (req, res) => {
 
   // justin's service 
   // TODO
+  axios.post('http://fileservice:4009/events', event).catch((err: Error) => {
+    console.log(err.message);
+  });
 
+  axios.post('http://timelogger:4010/events', event).catch((err: Error) => {
+    console.log(err.message);
+  });
+
+  axios.post('http://uploaddownload:4011/events', event).catch((err: Error) => {
+    console.log(err.message);
+  });
 
   res.send({}); // don't delete. if res doesn't send a response, requests never get satisfied
 });

@@ -204,4 +204,4 @@ volumes:
     ```
 ### **Step 5: Test endpoints with Thunder Client**
 - The command from Step 4 will locally host the website on `http://localhost:4001`.
-- There is a ThunderClient test collection called thunder-collection_tag.json in tag directory. Open this with ThunderClient extension and test endpoints with them.
+- Exceeds the expectation of this assignment portion: There is a ThunderClient test collection called thunder-collection_tag.json in tag directory. Open this with ThunderClient extension and test endpoints with them.

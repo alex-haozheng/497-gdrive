@@ -1,7 +1,8 @@
 # Service:
-Event bus
+This service is the Event bus.
 
 # Authors + Githubs: 
+The names and Githubs of team members are:
 Yuri Kim (flffamlln) 
 Alex Zheng (sazzle2)
 Kays Laouar (kayslaouar)
@@ -14,7 +15,7 @@ Contains message receiving and sending to all services with event message types 
 Event bus interacts with other services by relaying event messages it receives so other services can react to these event messages as necessary.
 
 # Port #:
-Port 4012
+This service runs on port 4012.
 
 # Endpoint Information:
 
@@ -119,7 +120,10 @@ interface AdminRemoved {
 }
 ```
 
-- Response: None
+- Response:
+```
+{}
+```
 
 # How to run service:
 
