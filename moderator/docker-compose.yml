@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  app:
+  moderator:
     build: .
     ports:
       - "4005:4005"
