@@ -1,7 +1,9 @@
 import * as express from 'express';
 import { Request, Response } from 'express';
+import { MongoClient } from 'mongodb';
 import * as logger from 'morgan';
 import * as cors from 'cors';
+import { rmSync } from 'fs';
 
 const app = express();
 
@@ -12,97 +14,148 @@ app.use(cors());
 // users : file
 const userFiles = {};
 
-app.get('/users/list', (req: Request, res: Response) => {
-	try {
-		res.status(200).send({
-			"files": Object.getOwnPropertyNames(userFiles)
-		});
-	} catch (e) {
-		res.status(500).send(e);
-	}
-});
+async function connectDB(): Promise<MongoClient>{
+	const uri = process.env.DATABASE_URL;
 
-app.get('/users/find', (req: Request, res: Response) => {
-	try {
-		const { uId }: { uId: string } = req.body;
-		res.status(200).send({
-			'status': uId in userFiles
-		});
-	} catch (e) {
-		res.status(500).send(e);
+	if (uri === undefined) {
+			throw Error('DATABASE_URL environment variable is not specified');
 	}
-});
+	
+	const mongo = new MongoClient(uri);
+	await mongo.connect();
+	return await Promise.resolve(mongo);
+}
 
-app.get('/user/:uId/files', (req: Request, res: Response) => {
-	try {
-		const uId = req.params.uId;
-		console.log(uId);
-		if (uId in userFiles) {
+async function initDB(mongo: MongoClient) {
+const db = mongo.db();
+
+if (await db.listCollections({ name: 'query' }).hasNext()) {
+	db.collection('query').drop(function(err, delOK) {
+		if (err) throw err;
+		if (delOK) console.log("Collection deleted");
+	});
+	console.log('Collection deleted.');
+}
+
+if (await db.listCollections({ name: 'query' }).hasNext()) {
+	console.log('Collection already exists. Skipping initialization.');
+	return;
+}
+
+const query = db.collection('query');
+const result = await query.insertMany([
+	{ 'a': []},
+	{ 'b': []},
+	{ 'c': []},
+]);
+
+console.log(`Initialized ${result.insertedCount} query`);
+console.log(`Initialized:`);
+
+for (let key in result.insertedIds) {
+	console.log(`  Inserted user with ID ${result.insertedIds[key]}`);
+}
+}
+
+async function getUsers(mongo: MongoClient) {
+	const query = mongo.db().collection('query');
+	const result = query.find();
+
+	const ret = Object.getOwnPropertyNames(result);
+	return ret;
+}
+
+async function checkUsers(mongo: MongoClient, uId: string) {
+	const query = mongo.db().collection('query');
+	const result = query.find();
+
+	return uId in result;
+}
+
+async function addUser(mongo: MongoClient, uId: string) {
+	const query = mongo.db().collection('query');
+	query.insertOne({[uId]: []});
+	return;
+}
+
+async function removeUser(mongo: MongoClient, uId: string) {
+	const query = mongo.db().collection('query');
+	return query.updateOne({}, {$unset: { [uId]: ""}});
+}
+
+async function getFiles(mongo: MongoClient, uId: string) {
+	const query = mongo.db().collection('query');
+	return query.findOne()[uId];
+}
+
+async function addFile(mongo: MongoClient, uId: string, fileId: string) {
+	const query = mongo.db().collection('query');
+	return query.updateOne({}, {$push: { [uId]: fileId}});
+}
+
+async function removeFile(mongo: MongoClient, uId: string, fileId: string) {
+	const query = mongo.db().collection('query');
+	return query.updateOne({}, {$pull: { [uId]: fileId}});
+}
+
+async function start() {
+	const mongo = await connectDB();
+	await initDB(mongo);
+
+	app.get('/users/list', async (req: Request, res: Response) => {
+		try {
 			res.status(200).send({
-				files: userFiles[uId]
+				"files": await getUsers(mongo)
 			});
-		} else {
-			res.status(404).send({
-				message: 'NOT FOUND'
-			});
+		} catch (e) {
+			res.status(500).send(e);
 		}
-	} catch (e) {
-		res.status(500).send(e);
-	}
-});
+	});
 
-app.get('/user/:uId/files/search', (req: Request, res: Response) => {
-	try {
-		const uId = req.params.uId;
-		const { keyword }: { keyword: string } = req.body;
-		if (uId in userFiles) {
-			const files = userFiles[uId];
-			const arr = [];
-			for (const s of files) {
-				if (s.includes(keyword)) {
-					arr.push(s);
-				}
-			}
+	app.get('/users/find', async (req: Request, res: Response) => {
+		try {
+			const { uId }: { uId: string } = req.body;
 			res.status(200).send({
-				result: arr
+				'status': await checkUsers(mongo, uId)
 			});
-		} else {
-			res.status(404).send({
-				message: 'NOT FOUND'
-			});
+		} catch (e) {
+			res.status(500).send(e);
 		}
-	} catch (e) {
-		res.status(500).send(e);
-	}
-});
+	});
 
-app.post('/events', (req: Request, res: Response) => {
-	const {type, data} = req.body;
-	if (type === 'AccountCreated') {
-		const { uId }: { uId: string } = data;
-		userFiles[uId] = [];
-	} else if (type === 'AccountDeleted') {
-		const { uId }: { uId: string } = data;
-		delete userFiles[uId];
-		res.status(201).json(uId)
-	} else if (type === 'FileCreated') {
-		const { uId, fileId }: { uId: string, fileId: string } = data;
-		if (uId in userFiles) {
-			userFiles[uId].push(fileId);
-			res.status(201).json(uId)
-		} else {
-			res.status(400).json({ message: 'NOT FOUND'});
+	app.get('/user/:uId/files', async (req: Request, res: Response) => {
+		try {
+			const uId = req.params.uId;
+			const ret = await getFiles(mongo, uId);
+			res.status(201).json(ret);
+		} catch (e) {
+			res.status(500).send(e);
 		}
-	} else if (type === 'FileDeleted') {
-		const { uId, fileId }: { uId: string, fileId: string } = data;
-		if (uId in userFiles) {
-			delete userFiles[uId][userFiles[uId].indexOf(fileId)];
-			res.status(201).json(uId)
-		} else {
-			res.status(400).json({ message: 'NOT FOUND'});
+	});
+
+	app.post('/events', async (req: Request, res: Response) => {
+		const {type, data} = req.body;
+		if (type === 'AccountCreated') {
+			const { uId }: { uId: string } = data;
+			await addUser(mongo, uId);
+			res.status(201).json(uId);
+		} else if (type === 'AccountDeleted') {
+			const { uId }: { uId: string } = data;
+			const ret = await removeUser(mongo, uId);
+			res.status(201).json(ret);
+		} else if (type === 'FileCreated') {
+			const { uId, fileId }: { uId: string, fileId: string } = data;
+			const ret = await addFile(mongo, uId, fileId);
+			res.status(201).json(ret);
+		} else if (type === 'FileDeleted') {
+			const { uId, fileId }: { uId: string, fileId: string } = data;
+			const ret = await removeFile(mongo, uId, fileId);
+			res.status(201).json(ret);
 		}
-	}
-});
-app.listen(4007, () => {
-	console.log('Listening on 4007');
-});
+	});
+	app.listen(4007, () => {
+		console.log('Listening on 4007');
+	});
+}
+
+start();
