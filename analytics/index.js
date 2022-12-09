@@ -38,22 +38,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var cors = require("cors");
+var axios_1 = require("axios");
 var app = express();
 var utils_js_1 = require("./utils.js");
 var mongodb_1 = require("mongodb");
 // TODO questions:
 //! questions about design, global database
 // how to look inside database inside container
+// composable docker compose files?
+// also tell justin to trim down the file service. Too many attributes too ambitious too little time
 app.use(express.json());
 app.use(cors());
 var files = [];
 var badfiles = [];
 function connectDB() {
     return __awaiter(this, void 0, void 0, function () {
-        var uri, mongo;
+        var uri, mongo, e_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    _a.trys.push([0, 3, , 4]);
                     uri = process.env.DATABASE_URL;
                     if (uri === undefined) {
                         throw Error('DATABASE_URL environment variable is not specified');
@@ -64,23 +68,37 @@ function connectDB() {
                     _a.sent();
                     return [4 /*yield*/, Promise.resolve(mongo)];
                 case 2: return [2 /*return*/, _a.sent()];
+                case 3:
+                    e_1 = _a.sent();
+                    console.log(e_1);
+                    return [2 /*return*/, null];
+                case 4: return [2 /*return*/];
             }
         });
     });
 }
 function initDB(mongo) {
     return __awaiter(this, void 0, void 0, function () {
-        var analytics;
+        var analytics, e_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    _a.trys.push([0, 2, , 3]);
                     analytics = mongo.db().collection('analytics');
                     return [4 /*yield*/, analytics.insertOne({
-                            key: 'analytics', numFiles: 0, readability: {}, badfiles: []
+                            key: 'analytics',
+                            numFiles: 0,
+                            readability: {},
+                            badfiles: []
                         })];
                 case 1:
                     _a.sent();
                     return [2 /*return*/, analytics];
+                case 2:
+                    e_2 = _a.sent();
+                    console.log(e_2);
+                    return [2 /*return*/, null];
+                case 3: return [2 /*return*/];
             }
         });
     });
@@ -94,49 +112,78 @@ function start() {
                 case 0: return [4 /*yield*/, connectDB()];
                 case 1:
                     mongo = _a.sent();
+                    if (mongo === null)
+                        throw Error('Database connection failed');
                     return [4 /*yield*/, initDB(mongo)];
                 case 2:
                     analytics = _a.sent();
+                    if (analytics === null)
+                        throw Error('Database initialization failed');
                     setInterval(function () { return __awaiter(_this, void 0, void 0, function () {
                         var _this = this;
                         return __generator(this, function (_a) {
-                            /* Promise.all([
-                                axios.post('http://event-bus:4012/events', {
-                                    type: 'ShootFileAnalytics'
-                                }),
-                                axios.post('http://event-bus:4012/events', {
-                                    type: 'ShootWordAnalytics'
-                                })
-                            ]); */
-                            analytics = mongo.db().collection('analytics');
+                            try {
+                                Promise.all([
+                                    axios_1.default.post('http://event-bus:4012/events', {
+                                        type: 'ShootFileAnalytics'
+                                    }),
+                                    axios_1.default.post('http://event-bus:4012/events', {
+                                        type: 'ShootWordAnalytics'
+                                    })
+                                ]);
+                            }
+                            catch (e) {
+                                console.log(e);
+                                return [2 /*return*/];
+                            }
+                            try {
+                                analytics = mongo.db().collection('analytics');
+                            }
+                            catch (e) {
+                                console.log(e);
+                                return [2 /*return*/];
+                            }
                             setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
                                 var indexes;
                                 return __generator(this, function (_a) {
-                                    indexes = (0, utils_js_1.processFiles)(files);
-                                    analytics.updateOne({ key: 'analytics' }, {
-                                        $set: {
-                                            numFiles: files.length,
-                                            readability: (0, utils_js_1.condense)(indexes),
-                                            badfiles: badfiles
-                                        }
-                                    });
+                                    try {
+                                        indexes = (0, utils_js_1.processFiles)(files);
+                                        analytics.updateOne({ key: 'analytics' }, {
+                                            $set: {
+                                                numFiles: files.length,
+                                                readability: (0, utils_js_1.condense)(indexes),
+                                                badfiles: badfiles
+                                            }
+                                        });
+                                    }
+                                    catch (e) {
+                                        console.log(e);
+                                        return [2 /*return*/];
+                                    }
                                     return [2 /*return*/];
                                 });
                             }); }, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly.
                             return [2 /*return*/];
                         });
-                    }); }, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin. 
+                    }); }, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
                     // TODO: uncomment isAdmin
                     app.get('/analytics', /* isAdmin ,*/ function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                        var results;
+                        var results, e_3;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4 /*yield*/, analytics.findOne({ key: 'analytics' })];
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, analytics.findOne({ key: 'analytics' })];
                                 case 1:
                                     results = _a.sent();
-                                    console.log(results);
-                                    res.send(results);
-                                    return [2 /*return*/];
+                                    res.status(200).send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
+                                    return [3 /*break*/, 3];
+                                case 2:
+                                    e_3 = _a.sent();
+                                    console.log(e_3);
+                                    res.status(500).send({});
+                                    return [3 /*break*/, 3];
+                                case 3: return [2 /*return*/];
                             }
                         });
                     }); });
@@ -147,6 +194,7 @@ function start() {
                         else if (req.body.type === 'GetFileAnalytics') {
                             files = req.body.data.files;
                         }
+                        res.send({});
                     });
                     app.listen(4004, function () {
                         console.log('Running on 4004');
