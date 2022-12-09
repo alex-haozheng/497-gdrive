@@ -1,12 +1,12 @@
 "use strict";
 exports.__esModule = true;
-var express_1 = require("express");
-var morgan_1 = require("morgan");
-var cors_1 = require("cors");
-var app = (0, express_1["default"])();
-app.use((0, morgan_1["default"])('dev'));
-app.use(express_1["default"].json());
-app.use((0, cors_1["default"])());
+var express = require("express");
+var logger = require("morgan");
+var cors = require("cors");
+var app = express();
+app.use(logger('dev'));
+app.use(express.json());
+app.use(cors());
 // users : file
 var userFiles = {};
 app.get('/users/list', function (req, res) {
@@ -32,7 +32,7 @@ app.get('/users/find', function (req, res) {
 });
 app.get('user/:uid/files', function (req, res) {
     try {
-        var uid = req.params.uid.uid;
+        var uid = req.params.uid;
         res.status(200).send({
             files: userFiles[uid]
         });
@@ -43,7 +43,7 @@ app.get('user/:uid/files', function (req, res) {
 });
 app.get('user/:uid/files/search', function (req, res) {
     try {
-        var uid = req.params.uid.uid;
+        var uid = req.params.uid;
         var keyword = req.body.keyword;
         if (uid in userFiles) {
             var files = userFiles[uid];

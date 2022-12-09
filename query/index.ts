@@ -1,6 +1,7 @@
-import express from 'express';
-import logger from 'morgan';
-import cors from 'cors';
+import * as express from 'express';
+import { Request, Response } from 'express';
+import * as logger from 'morgan';
+import * as cors from 'cors';
 
 const app = express();
 
@@ -11,7 +12,7 @@ app.use(cors());
 // users : file
 const userFiles = {};
 
-app.get('/users/list', (req, res) => {
+app.get('/users/list', (req: Request, res: Response) => {
 	try {
 		res.status(200).send({
 			"files": Object.getOwnPropertyNames(userFiles)
@@ -21,7 +22,7 @@ app.get('/users/list', (req, res) => {
 	}
 });
 
-app.get('/users/find', (req, res) => {
+app.get('/users/find', (req: Request, res: Response) => {
 	try {
 		const { uid }: { uid: string } = req.body;
 		res.status(200).send({
@@ -32,9 +33,9 @@ app.get('/users/find', (req, res) => {
 	}
 });
 
-app.get('user/:uid/files', (req, res) => {
+app.get('user/:uid/files', (req: Request, res: Response) => {
 	try {
-		const { uid }: { uid: string } = req.params.uid;
+		const uid = req.params.uid;
 		res.status(200).send({
 			files: userFiles[uid]
 		});
@@ -43,9 +44,9 @@ app.get('user/:uid/files', (req, res) => {
 	}
 });
 
-app.get('user/:uid/files/search', (req, res) => {
+app.get('user/:uid/files/search', (req: Request, res: Response) => {
 	try {
-		const { uid }: { uid: string } = req.params.uid;
+		const uid = req.params.uid;
 		const { keyword }: { keyword: string } = req.body;
 		if (uid in userFiles) {
 			const files = userFiles[uid];
@@ -68,7 +69,7 @@ app.get('user/:uid/files/search', (req, res) => {
 	}
 });
 
-app.post('/events', (req, res) => {
+app.post('/events', (req: Request, res: Response) => {
 	const {type, data} = req.body;
 	if (type === 'AccountCreated') {
 		const { uid }: { uid: string } = data;

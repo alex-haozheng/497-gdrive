@@ -1,6 +1,7 @@
-import express from 'express';
-import logger from 'morgan';
-import cors from 'cors';
+import * as express from 'express';
+import { Request, Response } from 'express';
+import * as logger from 'morgan';
+import * as cors from 'cors';
 // import nodemailer from 'nodemailer';
 const nodemailer = require('nodemailer');
 import { faker } from '@faker-js/faker';
@@ -24,11 +25,11 @@ const db: database = {};
 // password: ourpassword
 
 // return the verified emails (used for account creation with existing email)
-app.get('/emails', (req, res) => {
+app.get('/emails', (req: Request, res: Response) => {
 	res.send(Object.keys(db));
 });
 
-app.get('/login/forgotpw', async (req, res) => {
+app.get('/login/forgotpw', async (req: Request, res: Response) => {
 	try {
 		const { uid, email }: { uid: string, email: string } = req.body;
 		const otp: string = faker.internet.password();
@@ -87,7 +88,7 @@ app.get('/login/forgotpw', async (req, res) => {
 	}
 });
 
-app.post('/events', (req, res) => {
+app.post('/events', (req: Request, res: Response) => {
 	const {type, data }: {type: string, data: { uid: string, email?: string }} = req.body;
 	if (type === 'AccountCreated') {
 		const { uid , email }: { uid: string, email?: string } = data;
