@@ -1,86 +1,207 @@
-# Author: 
-Kays Laouar
+# **Authentication Microservice**
 
-# Github: 
-kayslaouar
+## Author: Kays Laouar
 
-# Service Description: 
-This service handles user authentication. We may combine different tiers of access (admin/user) into an authorization service that affects what users have access to/what UI components they see based on what tier they are in. Authentication will allow users to access their files, and ensure that the identity trying to access the account is truly the account owner (by using username/password, passport.js). May use authentication token for privileged operations in interacting with other services. May use cookies/local storage to keep track of who is logged in.
+## GitHub: kayslaouar
 
-# Interaction with other services: 
-Authentication service gets notified by event bus when settings are changed. If username, password, or 2FA credentials are changed, Authentication service is notified and updates internal data accordingly. Privileged operations are unlocked in higher tiers, and this affects the UI and API access. For example, deleting files is a privileged operation reserved for admin. A basic  tier user won’t see a UI component for deleting files, and they won’t have access to the API either.
+### Port: 4003
 
-# Endpoint Information: 
+# Service:
 
-## POST /login
-- login to account
-- request: 
+This service is the Authentication (auth) service.
+
+# Service Description:
+
+This service allows users to register an account, log in and log out, and use authorized-only routes/services. The service also keeps track of whether a user is an admin. The service provides two APIs to other services for restricted access to only authorized users. The service uses passport js, local strategy, and creates a session for the user to stay logged in.
+
+# Interaction with other services:
+
+The authentication service sends out an account created event when a user registers and an account deleted event when a user decides to delete their account through the profile service. The authentication service listens for AdminAdded and AdminRemoved events from the admin service and updates the database accordingly. The service also listens for a ChangePassword event from the forgot password service.
+
+-   `POST /login`
+    -   Description: logs the user into the application.
+    -   Request: 
 ```json
 {
-	username: "abcde",
-	password: "*****"
+	"username": "kays",
+	"password": "****"
 }
 ```
+	-   Response:
+```html
+<html>
+	<h3>Success!</h3>
+    <br />
+	<a href="/auth-route">Go to authorized-only route</a>
+	<br />
+	<a href="/auth-route">Go to admin-only route</a>
+</html>
+```
 
-## POST /logout
-- logout of account
+-   `GET /login`
+    -   Description: delivers static HTML login page
+    -   Request: None
+	-   Response:
+```html
+<html>
+	<h1>Log In</h1>
+	<form method="POST" action="/login">
+		<br />Enter Username:<br />
+		<input type="text" name="username" />
+		<br />Enter Password:<br />
+		<input type="password" name="password" />
+		<br />
+		<input type="submit" value="Submit" />
+        <br />
+        <a href="/register">register</a>
+	</form>
+</html>
+```
 
-## POST /signup
-- create an account
-- request: 
+-   `POST /register`
+    -   Description: logs the user into the application.
+    -   Request:
 ```json
 {
-	username: "abcde",
-	password: "*****"
+	"username": kays,
+	"email": kays@email.com,
+	"password": ****
 }
+```
+	-   Response: 
+```html
+<html>
+	<h1>Log In</h1>
+	<form method="POST" action="/login">
+		<br />Enter Username:<br />
+		<input type="text" name="username" />
+		<br />Enter Password:<br />
+		<input type="password" name="password" />
+		<br />
+		<input type="submit" value="Submit" />
+        <br />
+        <a href="/register">register</a>
+	</form>
+</html>
+```
+
+-   `GET /register`
+    -   Description: logs the user into the application.
+    -   Request: None
+	-   Response: 
+```html
+<html>
+	<h1>Register</h1>
+	<form method="POST" action="/register">
+		<br />Enter Username:<br />
+		<input type="text" name="username" />
+		<br />Enter Email:<br />
+		<input type="text" name="email" />
+		<br />Enter Password:<br />
+		<input type="password" name="password" />
+		<br />
+		<input type="submit" value="Submit" />
+        <br />
+        <a href="/login">login</a>
+	</form>
+</html>
+```
+
+-   `POST /unregister`
+    -   Description: logs the user into the application.
+    -   Request:
+```json
+{
+	"username": kays
+}
+```
+	-   Response: 
+```html
+<html>
+	<h1>Log In</h1>
+	<form method="POST" action="/login">
+		<br />Enter Username:<br />
+		<input type="text" name="username" />
+		<br />Enter Password:<br />
+		<input type="password" name="password" />
+		<br />
+		<input type="submit" value="Submit" />
+        <br />
+        <a href="/register">register</a>
+	</form>
+</html>
 ```
 
 # How to run service:
 
 ### **Step 1: Prerequisites**
 
-- [Node](https://nodejs.org/en/)
-- [NPM](https://www.npmjs.com/)
-- [VSCode](https://code.visualstudio.com/)
-    - Install the appropriate language support for each language used in the project.
-- [React.js](https://reactjs.org/)
-- [Git](https://git-scm.com/)
-- [Express.js](https://expressjs.com/)
-- [MongoDB](https://www.mongodb.com/)
-- [Docker](https://www.docker.com/)
-- [Kubernetes](https://kubernetes.io/)
+-   [Node](https://nodejs.org/en/)
+-   [NPM](https://www.npmjs.com/)
+-   [VSCode](https://code.visualstudio.com/)
+    -   Install the appropriate language support for each language used in the project.
+-   [React.js](https://reactjs.org/)
+-   [Git](https://git-scm.com/)
+-   [Express.js](https://expressjs.com/)
+-   [MongoDB](https://www.mongodb.com/)
+-   [Docker](https://www.docker.com/)
+-   [Kubernetes](https://kubernetes.io/)
 
 ### **Step 2: Clone the Repository**
 
-- Navigate to the desired project directory on your computer.
-- Clone the repository from [GitHub](https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git) using the `git clone` command.
+-   Navigate to the desired project directory on your computer.
+
+-   Clone the repository from [GitHub](https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git) using the `git clone` command.
+
 ```bash
 $ git clone https://github.com/umass-cs-497s-F22/milestone-2-implementation-team0.git
 ```
-- Navigate to the cloned repository directory.
+
+-   Navigate to the cloned repository directory.
+
 ```bash
 $ cd name-of-cloned-repository
 ```
 
-### **Step 3: Install Dependencies**
+### **Step 3: Comment out other service running code in docker-compose.yml**
 
-- Check that the terminal is in the correct directory.
-```bash
-$ pwd
+-   Uncommented code in docker-compose.yml should just have admin service, event-bus service and mongodbcontainer.
+
 ```
-- Install the dependencies using the `npm install` command.
-```bash
-$ npm install
+version: '3.9'
+services:
+  analytics:
+    build: analytics
+    ports:
+      - "4004:4004"
+    depends_on:
+      - mongodb_container
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  event-bus:
+    build: event-bus
+    ports:
+      - "4012:4012"
+  mongodb_container:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongodb_data_container:/data/db
+volumes:
+  mongodb_data_container:
 ```
 
-### **Step 4: Run the Application**
+### **Step 4: Run docker-compose up --build**
 
-- Run the application using the `npm start` command.
+-   Run the application using the `docker compose up --build` command.
+
 ```bash
-$ npm start
+$ docker compose up --build
 ```
-### **Step 5: View the Application**
-- The command from Step 4 will locally host the website on `http://localhost:3000`.
 
-# References:
-- https://www.youtube.com/watch?v=F-sFp_AvHc8
+### **Step 5: Test endpoints with Thunder Client**
+
+-   The command from Step 4 will locally host the website on `http://localhost:4004`.
+-   There is a ThunderClient test collection called thunder-collection-admin.json in admin directory. Open this with ThunderClient extension and test endpoints with them.
