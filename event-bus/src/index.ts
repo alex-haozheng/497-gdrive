@@ -141,7 +141,7 @@ app.post('/events', (req, res) => {
     console.log(err.message);
   });
 
-  axios.post('http://profile:4005/events', event).catch((err: Error) => {
+  axios.post('http://moderator:4005/events', event).catch((err: Error) => {
     console.log(err.message);
   });
   

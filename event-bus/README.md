@@ -3,9 +3,13 @@ This service is the Event bus.
 
 # Authors + Githubs: 
 The names and Githubs of team members are:
+
 Yuri Kim (flffamlln) 
+
 Alex Zheng (sazzle2)
+
 Kays Laouar (kayslaouar)
+
 Justin Baltazar (justinmbaltazar)
 
 # Service Description: 
