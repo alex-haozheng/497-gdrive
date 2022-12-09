@@ -113,9 +113,6 @@ interface AdminRemoved {
 
 // JUSTIN:
 // TODO
-/* interface ShootFileAnalytics {
-  type: 'ShootFileAnalytics'
-} */ // need you to just 
 
 type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileUpdated | FileDeleted | FileOpened | ChangedPassword | ShootWordAnalytics | GetWordAnalytics | ShootFileAnalytics | GetFileAnalytics | AdminAdded | AdminRemoved;
 

@@ -6,7 +6,9 @@ const isAuth = require('./authMiddleware').isAuth;
 const isAdmin = require('./authMiddleware').isAdmin;
 const axios = require('axios');
 
-router.post('/login', passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: '/login-success' }));
+router.get('/', (req, res) => {
+	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/pre.html');
+});
 
 router.post('/register', async (req, res) => {
 	if (!req.body.username || !req.body.email || !req.body.password) {
@@ -23,18 +25,22 @@ router.post('/register', async (req, res) => {
 			salt: salt,
 			admin: true
 		});
-		/* axios.post('http://event-bus:4005/events', {
+		axios.post('http://event-bus:4005/events', {
 			type: 'AccountCreated',
 			data: {
 				uid: req.body.username,
 				email: req.body.email
 			}
-		}); */
+		});
 		newUser.save().then(user => {
 			console.log(user);
 		});
 		res.redirect('/login');
 	}
+});
+
+router.get('/register', (req, res) => {
+	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/register.html');
 });
 
 router.post('/unregister', isAuth, async (req, res) => {
@@ -43,25 +49,19 @@ router.post('/unregister', isAuth, async (req, res) => {
 		if (err) console.log(err);
 		console.log('Successful Account Deletion');
 	});
-	/* axios.post('http://event-bus:4005/events', {
+	axios.post('http://event-bus:4005/events', {
 		type: 'AccountDeleted',
 		data: {
 			uid: username
 		}
-	}); */
+	});
 	res.redirect('/login');
 });
 
-router.get('/register', (req, res) => {
-	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/register.html');
-});
+router.post('/login', passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: '/login-success' }));
 
 router.get('/login', (req, res) => {
 	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/login.html');
-});
-
-router.get('/', (req, res) => {
-	res.sendFile(__dirname.substring(0, __dirname.lastIndexOf('/')) + '/static/pre.html');
 });
 
 router.get('/dashboard', isAuth, (req, res) => {

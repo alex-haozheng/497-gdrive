@@ -37,30 +37,38 @@ const uploadFile = async (file : FileUpload) => {
 }
 
 app.get('/files/:fileId/download', async (req : express.Request, res : express.Response) => {
-    const { fileId } = req.params as { fileId : string };
-    await downloadFile(fileId);
-    res.download(`./tempFiles/${fileId}.txt`, `${fileId}.txt`, (err) => {
-        if (err) {
-            console.log(err);
-        } else {
-            fs.unlink(`./tempFiles/${fileId}.txt`, (err) => {
-                if (err) {
-                    console.log(err);
-                }
-            });
-        }
-    });
+    try{
+        const { fileId } = req.params as { fileId : string };
+        await downloadFile(fileId);
+        res.download(`./tempFiles/${fileId}.txt`, `${fileId}.txt`, (err) => {
+            if (err) {
+                console.log(err);
+            } else {
+                fs.unlink(`./tempFiles/${fileId}.txt`, (err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
+            }
+        });
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 //this functionality works but will be elaborated on web application front end and as the project progresses
 app.post('/files/upload', async (req : express.Request, res : express.Response) => {
-    const { name, content } : FileUpload = req.body;
-    const file : FileUpload = {
-        name,
-        content
-    };
-    const response = await uploadFile(file) as { data : File };
-    res.status(200).send(response.data as File);
+    try{
+        const { name, content } : FileUpload = req.body;
+        const file : FileUpload = {
+            name,
+            content
+        };
+        const response = await uploadFile(file) as { data : File };
+        res.status(200).send(response.data as File);
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 app.listen(4011, () => {
