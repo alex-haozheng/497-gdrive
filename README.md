@@ -35,3 +35,20 @@ Justin
 Team
 - Event bus
 - Client (front-end)
+
+# Front-end Components Implemented #
+Yuri
+- Admin
+- Profile
+
+Alex
+- Component 1
+- Component 2
+
+Kays
+- Component 1
+- Component 2
+
+Justin
+- Component 1
+- Component 2
