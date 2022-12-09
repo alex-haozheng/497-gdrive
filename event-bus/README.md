@@ -5,6 +5,7 @@ Event bus
 Yuri Kim (flffamlln) 
 Alex Zheng (sazzle2)
 Kays Laouar (kayslaouar)
+Justin Baltazar (justinmbaltazar)
 
 # Service Description: 
 Contains message receiving and sending to all services with event message types declared and documented. 
