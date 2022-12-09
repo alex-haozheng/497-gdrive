@@ -1,14 +1,14 @@
-# Service:
-This service is the admin service.
-
 # Author: 
 This service's author is Yuri Kim.
 
 # Github: 
 This service's author's Github is flffamlln.
 
+# Service:
+This service is the admin service.
+
 # Service Description: 
-This admin service contains which users are admins. It has endpoints to give a user admin access, remove admin access from a user, check if a user has admin access, removing a user from admin db if a user has been deleted and more. Admins have the abilities including changing admin access for other users,
+This admin service contains which users are admins. It has endpoints to give a user admin access, remove admin access from a user, check if a user has admin access, removing a user from admin db if a user has been deleted and more. Admins have the abilities including changing admin access for other users, removing posts, etc.
 
 # Interaction with other services: 
 This admin service listens for an AccountDeleted event. If it hears one, it removes that user from admin database if the user is in admin database because the user's account has been deleted.
@@ -25,7 +25,7 @@ This service runs on port 4000.
 {
 	"type": "AccountDeleted",
     "data": {
-        "uId": "[unique identifier]"
+        "uId": "[unique identifier string]"
     }
 }
 ```
@@ -36,32 +36,30 @@ This service runs on port 4000.
 }
 ```
 - HTTP Status Codes: 
-    - 201: OK
-    - 400: BAD REQUEST
-    - 404: USER NOT FOUND IN ADMINS DB
-    - 500: Internal Server Error
+    - 201: { message: "Removed user's admin access" }
+    - 304: { message: 'User is not an admin' }
+    - 400: { message: 'BAD REQUEST' }
+    - 500: { message: 'INTERNAL SERVER ERROR' }
 ---
-## GET admin:uId
+## GET checkAdmin:uId
 
 - Returns whether a specific user is an admin or not.
 - Request: 
 ```
 {
-    "uId": "[unique identifier]"
+        "uId": "[unique identifier string]"
 }
 ```
 - Response:
 ```
-{
-	"data": [boolean value]
-}
+boolean value
 ```
 - HTTP Status Codes: 
-    - 201: OK
-    - 400: BAD REQUEST
-    - 500: Internal Server Error
+    - 201: boolean value
+    - 400: { message: 'BAD REQUEST' }
+    - 500: { message: 'INTERNAL SERVER ERROR' }
 ---
-## GET admin/all
+## GET getAdmins
 
 - Returns all users that are admins.
 - Request: 
@@ -73,21 +71,21 @@ This service runs on port 4000.
 - Response:
 ```
 {
-	"data": [array of unique identifiers]
+	"data": array of unique identifier Strings
 }
 ```
 - HTTP Status Codes: 
-    - 201: OK
-    - 400: BAD REQUEST
+    - 201: array of unique identifier Strings
+    - 400: { message: 'BAD REQUEST' }
     - 500: Internal Server Error
 ---
-## POST admin/:uId
+## POST addAdmin/:uId
 
 - Adds a user as an admin using uId.
 - Request:
 ```
 {
-	"uId": "[unique identifier]"
+  "uId": "[unique identifier string]"
 }
 ```
 - Response:
@@ -97,18 +95,18 @@ This service runs on port 4000.
 }
 ```
 - HTTP Status Codes: 
-    - 201: OK
-    - 400: BAD REQUEST
-    - 404: User is already an admin
-    - 500: Internal Server Error
+    - 201: { message: 'User added as an admin'}
+    - 304: { message: 'User is already an admin' }
+    - 400: { message: 'BAD REQUEST' }
+    - 500: { message: 'INTERNAL SERVER ERROR' }
 --- 
-## DELETE admin/:userId
+## DELETE removeAdmin/:userId
 
 - Removes a user as an admin using userId.
 - Request: 
 ```
 {
-	"uId": "[unique identifier]"
+  "uId": "[unique identifier string]"
 }
 ```
 - Response:
@@ -118,10 +116,10 @@ This service runs on port 4000.
 }
 ```
 - HTTP Status Codes:
-    - 201: OK
-    - 400: BAD REQUEST
-    - 404: USER NOT FOUND IN ADMIN DB
-    - 500: INTERNAL SERVER ERROR
+    - 201: { message: "Removed user's admin access" }
+    - 400: { message: 'BAD REQUEST' }
+    - 304: { message: 'User is not an admin' }
+    - 500: { message: 'INTERNAL SERVER ERROR' }
 
 # How to run service:
 
@@ -153,25 +151,43 @@ This service runs on port 4000.
     ```bash
     $ cd name-of-cloned-repository
     ```
-### **Step 3: Install Dependencies**
+### **Step 3: Comment out other service running code in docker-compose.yml**
 
-- Check that the terminal is in the correct directory.
+- Uncommented code in docker-compose.yml should just have admin service, event-bus service and mongodbcontainer.
+
+```
+version: '3.9'
+services:
+  admin:
+    build: admin
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongodb_container
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  event-bus:
+    build: event-bus
+    ports:
+      - "4012:4012"
+  mongodb_container:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongodb_data_container:/data/db     
+volumes:
+  mongodb_data_container:
+```
+
+### **Step 4: Run docker-compose up --build**
+
+- Run the application using the `docker-compose up --build` command.
 
     ```bash
-    $ pwd
+    $ docker-compose up --build
     ```
-
-- Install the dependencies using the `npm install` command.
-
-    ```bash
-    $ npm install
-    ```
-### **Step 4: Run the Application**
-
-- Run the application using the `npm start` command.
-
-    ```bash
-    $ npm start
-    ```
-### **Step 5: View the Application**
-- The command from Step 4 will locally host the website on `http://localhost:3000`.
+### **Step 5: Test endpoints with Thunder Client**
+- The command from Step 4 will locally host the website on `http://localhost:4000`.
+- There is a ThunderClient test collection called thunder-collection-admin.json in admin directory. Open this with ThunderClient extension and test endpoints with them.
