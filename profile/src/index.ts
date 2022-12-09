@@ -1,8 +1,7 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { MongoClient } from 'mongodb';
 import logger from 'morgan';
 import cors from 'cors';
-import axios from 'axios';
 
 const app = express();
 app.use(logger('dev'));

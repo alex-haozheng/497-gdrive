@@ -1,14 +1,14 @@
-# Service:
-This service is the tag service.
-
 # Author: 
 This service's author is Yuri Kim.
 
 # Github: 
 This service's author's Github is flffamlln.
 
+# Service:
+This service is the tag service.
+
 # Service Description: 
-This tag service contains which tags and docIds of documents that were tagged with those tags. It contains information on fileIds (unique key) and their respective tags. This service allows users to add and remove tags to a file given a fileId, get all files tagged with a specific tag and get all tags.
+This tag service contains which tags and fileId of documents that were tagged with those tags. It contains information on fileIds (unique key) and their respective tags. This service allows users to add and remove tags to a file given a fileId, get all files tagged with a specific tag and get all tags.
 
 # Interaction with other services: 
 This tag service listens for a FileDeleted event. If it hears one, it removes that file from tag database if the file is in tag database because the file has been deleted.
@@ -18,7 +18,7 @@ This service runs on port 4001.
 
 # Endpoint Information:
 
-## POST events
+## POST /events
 - If a file is removed event message is heard, remove document from tags DB.
 - Request: 
 ```
@@ -32,55 +32,68 @@ This service runs on port 4001.
 ```
 - Response:
 ```
-{
-	"message": "Removed file from tags DB"
-}
+{ message: "File deleted" }
 ```
 - HTTP Status Codes: 
-    - 201: OK
-    - 400: BAD REQUEST
-    - 500: Internal Server Error
+    - 201: { message: "File deleted" }
+    - 400: { message: 'BAD REQUEST' }
+    - 404: { message: 'File does not exist in tags db' }
+    - 500: {message: 'INTERNAL SERVER ERROR'}
 ---
-## GET tag/:tag
+## GET /getFiles/:tag
 
-- Returns all fileIds tagged with a specific tag.
+- Returns all files tagged with a specific tag.
+- Request: 
+```
+[
+  {
+            "tag": "[String]",
+            "fileId": "[String]"
+        }
+]
+```
+- Response:
+```
+[
+  {
+            "tag": "[String]",
+            "fileId": "[String]"
+        }
+]
+```
+- HTTP Status Codes: 
+    - 201: [
+  {
+            "tag": "[String]",
+            "fileId": "[String]"
+        }
+]
+    - 400: { message: 'BAD REQUEST' }
+    - 404: { message: 'Tag not in tag database' }
+    - 500: { message: 'INTERNAL SERVER ERROR' }
+---
+## GET /getTags
+
+- Returns all tags in tags db.
 - Request: 
 ```
 {
-    "tag": "[unique identifier]"
 }
 ```
 - Response:
 ```
-{
-	"data": [array of unique identifiers]
-}
+[
+String
+]
 ```
 - HTTP Status Codes: 
-    - 201: OK
-    - 400: BAD REQUEST
-    - 500: Internal Server Error
+    - 201: [
+String
+]
+    - 400: { message: 'BAD REQUEST' }
+    - 500: { message: 'INTERNAL SERVER ERROR' }
 ---
-## GET tag/all
-
-- Returns all tags.
-- Request: 
-```
-{
-}
-```
-- Response:
-```
-{
-	"data": [array of unique identifiers]
-}
-```
-- HTTP Status Codes: 
-    - 201: OK
-    - 400: BAD REQUEST
-    - 500: Internal Server Error
----
-## POST tag/:fileId/:tag
+## POST /addTag/:fileId/:tag
 
 - Adds a tag to a file based on fileId.
 - Request:
@@ -92,16 +105,15 @@ This service runs on port 4001.
 ```
 - Response:
 ```
-{
-	"message": "Added a tag to a document"
-}
+{ message: 'Tag added to doc'}
 ```
 - HTTP Status Codes:
-    - 200: OK
-    - 404: DOCUMENT ALREADY HAS THAT TAG
-    - 500: INTERNAL SERVER ERROR
+    - 200: { message: 'Tag added to doc'}
+    - 304: { message: 'Doc already tagged with that tag' }
+    - 400: { message: 'BAD REQUEST' }
+    - 500: { message: 'INTERNAL SERVER ERROR' }
 ---
-## DELETE tag/:fileId
+## DELETE /removeTag/:tag/:fileId
 
 - Removes a tag from a file.
 - Request:
@@ -118,10 +130,11 @@ This service runs on port 4001.
 }
 ```
 - HTTP Status Codes:
-    - 200: OK
-    - 400: DOCUMENT DOES NOT HAVE THAT TAG
-    - 404: TAG NOT FOUND
-    - 500: INTERNAL SERVER ERROR
+    - 200: { message: "Deleted tag from doc" }
+    - 400: { message: 'BAD REQUEST' }
+    - 404: { message: 'Tag does not exist in tags db' }
+    - 500: { message: 'INTERNAL SERVER ERROR' }
+
 # How to run service:
 
 ### **Step 1: Prerequisites**
@@ -152,25 +165,43 @@ This service runs on port 4001.
     ```bash
     $ cd name-of-cloned-repository
     ```
-### **Step 3: Install Dependencies**
+### **Step 3: Comment out other service running code in docker-compose.yml**
 
-- Check that the terminal is in the correct directory.
+- Uncommented code in docker-compose.yml should just have admin service, event-bus service and mongodbcontainer.
+
+```
+version: '3.9'
+services:
+  tag:
+    build: tag
+    ports:
+      - "4001:4001"
+    depends_on:
+      - mongodb_container
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  event-bus:
+    build: event-bus
+    ports:
+      - "4012:4012"
+  mongodb_container:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongodb_data_container:/data/db     
+volumes:
+  mongodb_data_container:
+```
+
+### **Step 4: Run docker-compose up --build**
+
+- Run the application using the `docker-compose up --build` command.
 
     ```bash
-    $ pwd
+    $ docker-compose up --build
     ```
-
-- Install the dependencies using the `npm install` command.
-
-    ```bash
-    $ npm install
-    ```
-### **Step 4: Run the Application**
-
-- Run the application using the `npm start` command.
-
-    ```bash
-    $ npm start
-    ```
-### **Step 5: View the Application**
-- The command from Step 4 will locally host the website on `http://localhost:3000`.
+### **Step 5: Test endpoints with Thunder Client**
+- The command from Step 4 will locally host the website on `http://localhost:4001`.
+- There is a ThunderClient test collection called thunder-collection_tag.json in tag directory. Open this with ThunderClient extension and test endpoints with them.
