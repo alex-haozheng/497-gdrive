@@ -1,18 +1,14 @@
 # TODO: ADD DATABASE INFO ONCE DONE IN THIS FILE
 version: '3.9'
 services:
-  client:
-    build: client
-    ports:
-      - "3000:3000"
   admin:
     build: admin
     ports:
       - "4000:4000"
     depends_on:
-          - mongodb_container
-        environment:
-          DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin   
+      - mongodb_container
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin   
   tag:
     build: tag
     ports:
