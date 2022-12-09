@@ -9,21 +9,29 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
 
-app.get('/files/:fileId/time', async (req, res) => {
-    const { fileId } = req.params;
-    const file = await axios.get(`http://localhost:4009/files/${fileId}`);
-    res.status(200).send(file.data);
+interface File {
+    fileId: string;
+    name: string;
+    size: number;
+    tags: string[];
+    type: string;
+    date: Date;
+    content: string;
+}
+  
+app.get('/files/:fileId/time', async (req : express.Request, res : express.Response) => {
+    const { fileId } = req.params as { fileId : string };
+    const file = await axios.get(`http://localhost:4009/files/${fileId}`) as { data : File };
+    res.status(200).send(file.data as File);
 });
 
-app.put('/files/:fileId/time', async (req, res) => {
-    const { fileId } = req.params;
-    const file = await axios.get(`http://localhost:4009/files/${fileId}`);
-    let response = {
-        ...file.data,
-    };
+app.put('/files/:fileId/time', async (req : express.Request, res : express.Response) => {
+    const { fileId } = req.params as { fileId : string };
+    const file = await axios.get(`http://localhost:4009/files/${fileId}`) as { data : File };
+    let response : File = { ...file.data, };
     response.date = new Date();
-    const updatedFile = await axios.put(`http://localhost:4009/files/${fileId}`, response);
-    res.status(200).send(updatedFile.data);
+    const updatedFile = await axios.put(`http://localhost:4009/files/${fileId}`, response) as { data : File };
+    res.status(200).send(updatedFile.data as File);
 });
 
 app.listen(4010, () => {

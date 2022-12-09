@@ -117,7 +117,7 @@ interface AdminRemoved {
   type: 'ShootFileAnalytics'
 } */ // need you to just 
 
-type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileUpdated | FileDeleted | FileOpened | ChangedPassword | ShootWordAnalytics | GetWordAnalytics | ShootFileAnalytics | GetFileAnalytics;
+type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileUpdated | FileDeleted | FileOpened | ChangedPassword | ShootWordAnalytics | GetWordAnalytics | ShootFileAnalytics | GetFileAnalytics | AdminAdded | AdminRemoved;
 
 app.post('/events', (req, res) => {
   const event : MESSAGETYPE = req.body;
