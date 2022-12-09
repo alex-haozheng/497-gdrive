@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 var express = require("express");
 var axios_1 = require("axios");
 var cors = require("cors");
@@ -147,7 +147,7 @@ function start() {
                                 case 0:
                                     _a = req.body, type = _a.type, data = _a.data;
                                     file = data.file;
-                                    if (!(type === 'FileModified')) return [3 /*break*/, 11];
+                                    if (!(type === 'FileUpdated')) return [3 /*break*/, 11];
                                     return [4 /*yield*/, badfilesDB.findOne({ fileId: file.fileId })];
                                 case 1:
                                     badfile = _d.sent();
@@ -184,7 +184,7 @@ function start() {
                                     return [4 /*yield*/, getBadfiles(badfilesDB)];
                                 case 12:
                                     badfiles = _d.sent();
-                                    axios_1.default.post('http://event-bus:4005/events', {
+                                    axios_1["default"].post('http://event-bus:4005/events', {
                                         type: 'GetWordAnalytics',
                                         data: {
                                             files: badfiles
