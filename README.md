@@ -42,13 +42,13 @@ Yuri
 - Profile
 
 Alex
-- Component 1
-- Component 2
+- Questions
+- fileSearch
 
 Kays
 - Component 1
 - Component 2
 
 Justin
-- Home Page
-- Edit Document Page
+- Component 1
+- Component 2

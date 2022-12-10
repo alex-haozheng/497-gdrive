@@ -48,6 +48,8 @@ services:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
   query:
     build: query
+    ports:
+      - "4007:4007"
     depends_on:
       - mongodb_container
     environment:

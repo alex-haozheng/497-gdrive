@@ -17,7 +17,7 @@ interface database {
 };
 
 //holds a collection of all emails that are registered
-// store uid along with email
+// store uid along with security question
 const db: database = {};
 
 // uid: team0.clouddrive@gmail.com
