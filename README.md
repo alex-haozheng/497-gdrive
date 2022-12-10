@@ -50,5 +50,5 @@ Kays
 - Component 2
 
 Justin
-- Component 1
-- Component 2
+- Home Page
+- Edit Document Page
