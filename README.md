@@ -46,8 +46,8 @@ Alex
 - fileSearch
 
 Kays
-- Component 1
-- Component 2
+- Login
+- Logout
 
 Justin
 - Component 1
