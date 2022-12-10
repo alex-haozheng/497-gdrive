@@ -38,8 +38,8 @@ services:
       - "4004:4004"
   moderator:
     build: moderator
-  forgotpw:
-    build: forgotpw
+  questions:
+    build: questions
     ports:
       - "4006:4006"
     depends_on:

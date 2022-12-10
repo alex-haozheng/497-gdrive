@@ -3,7 +3,6 @@ import { Request, Response } from 'express';
 import { MongoClient } from 'mongodb';
 import * as logger from 'morgan';
 import * as cors from 'cors';
-import { rmSync } from 'fs';
 
 const app = express();
 
@@ -11,8 +10,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
 
-// users : file
-const userFiles = {};
+// user: files
 
 async function connectDB(): Promise<MongoClient>{
 	const uri = process.env.DATABASE_URL;

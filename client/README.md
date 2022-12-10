@@ -32,7 +32,7 @@ Profile UI interacts with profile service to show user's profile details.
 
 FileCompression UI interacts with the file service to update the status (opened / closed) of current selected files.
 
-Forgot Password UI interacts with the authentication service as it changes the password on the database followed by an email. 
+Questions UI interacts with the authentication service as it changes the password on the database followed by an email. 
 
 Auth UI interacts with auth service (sends it username, email, password for registration, username password for login).
 
