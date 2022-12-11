@@ -19,11 +19,9 @@ const AdminRequestCard = (data) => {
     const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
     
-        await axios.post(`http://localhost:4000/addAdmin`, {
+        await Promise.all([axios.delete(`http://localhost:4013/removeRequest/${uId}`), axios.post(`http://localhost:4000/addAdmin`, {
             uId: uId
-        });
-
-        // await axios.delete(`http://localhost:4013/removeRequest/${uId}`);
+        })]);
     
         fetchProfile();
     };

@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const Profile = (data) => {
     const [profile, setProfile] = useState({uId: 'new', name: 'new', email: 'new', bio: 'new', funFact: 'new'});
+    const [onEdit, setOnEdit] = useState(false);
 
     const uId = data.uId;
 
