@@ -1,6 +1,6 @@
 import React from 'react';
-import Login from './Login.js';
-import AdminList from './AdminList.js';
+import Login from './Login';
+import AdminList from './AdminList';
 
 function App() {
   return (
