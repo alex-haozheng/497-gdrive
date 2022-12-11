@@ -1,12 +1,10 @@
 import * as express from 'express';
 import { Request, Response } from 'express';
 import { MongoClient } from 'mongodb';
-import * as logger from 'morgan';
 import * as cors from 'cors';
 
 const app = express();
 
-app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
 
@@ -25,34 +23,34 @@ async function connectDB(): Promise<MongoClient>{
 }
 
 async function initDB(mongo: MongoClient) {
-const db = mongo.db();
+	const db = mongo.db();
 
-if (await db.listCollections({ name: 'query' }).hasNext()) {
-	db.collection('query').drop(function(err, delOK) {
-		if (err) throw err;
-		if (delOK) console.log("Collection deleted");
-	});
-	console.log('Collection deleted.');
-}
+	if (await db.listCollections({ name: 'query' }).hasNext()) {
+		db.collection('query').drop(function(err, delOK) {
+			if (err) throw err;
+			if (delOK) console.log("Collection deleted");
+		});
+		console.log('Collection deleted.');
+	}
 
-if (await db.listCollections({ name: 'query' }).hasNext()) {
-	console.log('Collection already exists. Skipping initialization.');
-	return;
-}
+	if (await db.listCollections({ name: 'query' }).hasNext()) {
+		console.log('Collection already exists. Skipping initialization.');
+		return;
+	}
 
-const query = db.collection('query');
-const result = await query.insertMany([
-	{ 'a': []},
-	{ 'b': []},
-	{ 'c': []},
-]);
+	const query = db.collection('query');
+	const result = await query.insertMany([
+		{ 'a': []},
+		{ 'b': []},
+		{ 'c': []},
+	]);
 
-console.log(`Initialized ${result.insertedCount} query`);
-console.log(`Initialized:`);
+	console.log(`Initialized ${result.insertedCount} query`);
+	console.log(`Initialized:`);
 
-for (let key in result.insertedIds) {
-	console.log(`  Inserted user with ID ${result.insertedIds[key]}`);
-}
+	for (let key in result.insertedIds) {
+		console.log(`  Inserted user with ID ${result.insertedIds[key]}`);
+	}
 }
 
 async function getUsers(mongo: MongoClient) {
