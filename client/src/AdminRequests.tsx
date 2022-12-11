@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import AdminCard from './AdminCard';
+import AdminRequestCard from './AdminRequestCard';
 
-const AdminList = () => {
-    const [admins, setAdmins] = useState([]);
+const AdminRequests = () => {
+    const [users, setUsers] = useState([]);
 
-    const fetchAdmins = async () => {
-      const res = await axios.get('http://localhost:4000/getAdmins');
-      setAdmins(res.data);
+    const fetchRequests = async () => {
+      const res = await axios.get('http://localhost:4013/getRequests');
+      setUsers(res.data);
       console.log(res.data);
     };
 
     useEffect(() => {
-      fetchAdmins();
+      fetchRequests();
     }, []);
 
-    const renderedAdmins = Object.values(admins).map((p) => {
+    const renderedAdminRequests = Object.values(users).map((p) => {
         return (
           <div
             className="card"
@@ -26,7 +26,7 @@ const AdminList = () => {
                 className="card-body"  
                 style={{ backgroundColor: 'pink', margin: '5%', border: '1px solid black'}}
             >
-              <AdminCard uId={p}/>
+              <AdminRequestCard uId={p}/>
             </div>
           </div>
         );
@@ -34,12 +34,12 @@ const AdminList = () => {
 
     return (
       <div>
-        <h1>Admin List</h1>
+        <h1>Admin Requests</h1>
         <div className="d-flex flex-row flex-wrap justify-content-between">
-          {renderedAdmins}
+          {renderedAdminRequests}
         </div>
       </div>
     );
 };
 
-export default AdminList;
+export default AdminRequests;

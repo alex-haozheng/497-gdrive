@@ -132,10 +132,10 @@ async function start(){
         }
     });
 
-    app.get('/getProfile', async (req: Request, res: Response) => {
-        const { uId } = req.body;
+    app.get('/getProfile/:uId', async (req: Request, res: Response) => {
+        const uId = req.params.uId;
+        console.log(req.params.uId);
         if(
-            Object.keys(req.body).length !== 1 ||
             uId === "" ||
             uId === undefined ||
             typeof uId !== "string"

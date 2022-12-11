@@ -135,6 +135,10 @@ app.post('/events', (req, res) => {
     console.log(err.message);
   });
 
+  axios.post('http://requests:4013/events', event).catch((err: Error) => {
+    console.log(err.message);
+  });
+
   // kays service
   axios.post('http://auth:4003/events', event).catch((err: Error) => {
     console.log(err.message);

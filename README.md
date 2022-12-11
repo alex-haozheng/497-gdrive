@@ -16,6 +16,7 @@ Yuri
 - Admin
 - Profile
 - (Doc) Tag
+- Requests
 
 Alex
 - Forgot Password

@@ -86,6 +86,14 @@ services:
     build: event-bus
     ports:
       - "4012:4012"
+  requests:
+    build: requests
+    ports:
+      - "4013:4013"
+    depends_on:
+      - mongodb_container
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
   mongodb_container:
     image: mongo:latest
     environment:

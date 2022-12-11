@@ -24,38 +24,37 @@ async function connectDB(): Promise<MongoClient>{
 async function initDB(mongo: MongoClient) {
   const db = mongo.db();
 
-  if (await db.listCollections({ name: 'admins' }).hasNext()) {
-    db.collection('admins').drop(function(err, delOK) {
+  if (await db.listCollections({ name: 'requests' }).hasNext()) {
+    db.collection('requests').drop(function(err, delOK) {
       if (err) throw err;
       if (delOK) console.log("Collection deleted");
     });
     console.log('Collection deleted.');
   }
 
-  if (await db.listCollections({ name: 'admins' }).hasNext()) {
+  if (await db.listCollections({ name: 'requests' }).hasNext()) {
     console.log('Collection already exists. Skipping initialization.');
     return;
   }
 
-  const admins = db.collection('admins');
+  const admins = db.collection('requests');
   const result = await admins.insertMany([
-    { uId: 'user0'},
     { uId: 'user1'},
     { uId: 'user2'},
   ]);
 
-  console.log(`Initialized ${result.insertedCount} admins`);
+  console.log(`Initialized ${result.insertedCount} admin requests`);
   console.log(`Initialized:`);
 
   for (let key in result.insertedIds) {
-    console.log(`  Inserted user with ID ${result.insertedIds[key]} as an admin`);
+    console.log(`  Inserted user with ID ${result.insertedIds[key]} as a requestor for admin access`);
   }
 }
 
-// import { getAdmins, checkAdmin, addAdmin, removeAdmin } from './database.js';
-async function getAdmins(mongo: MongoClient) {
-    const admins = mongo.db().collection('admins');
-    const result = admins.find();
+// import { getRequests, checkRequest, addRequest, removeRequest } from './database.js';
+async function getRequests(mongo: MongoClient) {
+    const requests = mongo.db().collection('requests');
+    const result = requests.find();
 
     const ret: String[] = [];
     await result.forEach((doc) => {
@@ -64,24 +63,24 @@ async function getAdmins(mongo: MongoClient) {
     return ret;
 }
 
-async function checkAdmin(mongo: MongoClient, uId: String) {
+async function checkRequest(mongo: MongoClient, uId: String) {
     const query: { uId: String } = { uId: uId };
-    const admins = mongo.db().collection('admins');
-    const result = await admins.count(query);
+    const requests = mongo.db().collection('requests');
+    const result = await requests.count(query);
     return result > 0;
 }
 
-async function addAdmin(mongo: MongoClient, uId: String) {
+async function addRequest(mongo: MongoClient, uId: String) {
     const query: { uId: String } = { uId: uId };
-    const admins = mongo.db().collection('admins');
-    admins.insertOne(query);
+    const requests = mongo.db().collection('requests');
+    requests.insertOne(query);
     return;
 }
 
-async function removeAdmin(mongo: MongoClient, uId: String) {
+async function removeRequest(mongo: MongoClient, uId: String) {
     const query: { uId: String } = { uId: uId };
-    const admins = mongo.db().collection('admins');
-    admins.deleteOne(query);
+    const requests = mongo.db().collection('requests');
+    requests.deleteOne(query);
     return;
 }
 
@@ -89,15 +88,15 @@ async function start() {
     const mongo = await connectDB();
     await initDB(mongo);
     
-    app.get('/getAdmins', async (req: Request, res: Response) => {
+    app.get('/getRequests', async (req: Request, res: Response) => {
         if(
             Object.keys(req.body).length !== 0
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else{
             try {
-                const admins = await getAdmins(mongo);
-                res.status(201).send(admins);
+                const requests = await getRequests(mongo);
+                res.status(201).send(requests);
             } catch (e) {
                 console.log(e);
                 res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
@@ -105,7 +104,7 @@ async function start() {
         }
     });
 
-    app.get('/checkAdmin', async (req: Request, res: Response) => {
+    app.get('/checkRequest', async (req: Request, res: Response) => {
         const { uId } = req.body;
         if(
             Object.keys(req.body).length !== 1 ||
@@ -116,7 +115,7 @@ async function start() {
             res.status(400).send({ message: 'BAD REQUEST' });
         } else{
             try {
-                const check = await checkAdmin(mongo, uId);
+                const check = await checkRequest(mongo, uId);
                 res.status(201).send(check);
             } catch (e) {
                 console.log(e);
@@ -125,7 +124,7 @@ async function start() {
         }
     });
 
-    app.post('/addAdmin', async (req, res) => {
+    app.post('/addRequest', async (req, res) => {
         const { uId } = req.body;
         
         if(
@@ -136,28 +135,20 @@ async function start() {
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else if(
-            await checkAdmin(mongo, uId)
+            await checkRequest(mongo, uId)
         ){
-            res.status(304).send({ message: 'User is already an admin' });
+            res.status(304).send({ message: 'User has already submitted a pending request for admin access' });
         } else{
             try{
-                await addAdmin(mongo, uId);
-
-                axios.post('http://event-bus:4012/events', {
-                    type: 'AdminAdded',
-                    data: {
-                        uId: uId
-                    }
-                });
-                
-                res.status(201).send({ message: 'User added as an admin'});
+                await addRequest(mongo, uId);
+                res.status(201).send({ message: 'Request submitted'});
             } catch (error){
                 res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
             }
         }
     });
 
-    app.delete('/removeAdmin/:uId', async (req, res) => {
+    app.delete('/removeRequest/:uId', async (req, res) => {
         const uId = req.params.uId;
 
         if(
@@ -168,27 +159,20 @@ async function start() {
         ){
             res.status(400).send({ message: 'BAD REQUEST'});
         } else if( 
-            !await checkAdmin(mongo, uId) 
+            !await checkRequest(mongo, uId) 
         ){
             res.status(304).send({ message: 'User is not an admin' });
         } else{
             try{
-                await removeAdmin(mongo, uId);
-                
-                axios.post('http://event-bus:4012/events', {
-                    type: 'AdminRemoved',
-                    data: {
-                        uId: uId
-                    }
-                });
-                
-                res.status(201).send({ message: "Removed user's admin access" });
+                await removeRequest(mongo, uId);
+                res.status(201).send({ message: "Removed request for admin access" });
             } catch (error){
                 res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
             }
         }
     });
 
+    /*
     app.post('/events', async (req, res) => {
         const { type, data } = req.body;
     
@@ -201,7 +185,7 @@ async function start() {
             res.status(400).send({message: 'BAD REQUEST'});
         } else{
             try{
-                if (type === "AccountDeleted") {
+                if (type === "AdminAdded") {
                     const { uId } = data;
                     if (
                         uId === "" ||
@@ -210,12 +194,12 @@ async function start() {
                     ){
                         res.status(400).send({ message: 'BAD REQUEST' });
                     } else if (
-                        !await checkAdmin(mongo, uId)
+                        !await checkRequest(mongo, uId)
                     ){ 
-                        res.status(304).send({ message: 'User is not an admin' });
+                        res.status(304).send({ message: 'There is no pending admin access request from this user' });
                     } else{
-                        await removeAdmin(mongo, uId);
-                        res.status(201).send({ message: "Removed user's admin access" });
+                        await removeRequest(mongo, uId);
+                        res.status(201).send({ message: "Removed user's admin access request" });
                     }
                 }
                 res.send({ status: 'OK' });
@@ -225,9 +209,10 @@ async function start() {
             }
         }
     });
+    */
 
-    app.listen(4000, () => {
-        console.log(`Running on 4000.`);
+    app.listen(4013, () => {
+        console.log(`Running on 4013.`);
     });
 }
     
