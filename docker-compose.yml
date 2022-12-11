@@ -54,6 +54,14 @@ services:
       - analytics-mongo
     environment:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  analytics-mongo:
+    image: mongo:latest
+    container_name: analytics-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - analytics-mongo-data:/data/db
   query:
     build: query
     ports:
