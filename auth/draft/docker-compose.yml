@@ -2,15 +2,17 @@ version: '3.7'
 services:
   auth:
     build: .
+    container_name: auth
     ports:
       - "4003:4003"
     depends_on:
-      - mongodb_container
+      - auth-mongo
     environment:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
 
-  mongodb_container:
+  auth-mongo:
     image: mongo:latest
+    container_name: auth-mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword

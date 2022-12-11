@@ -69,10 +69,12 @@ router.get('/dashboard', isAuth, (req, res) => {
 });
 
 router.get('/auth-route', isAuth, (req, res) => {
+	console.log('auth-route reached');
 	res.send('<div>Auth only route <a href="/logout">Logout</a></div>');
 });
 
 router.get('/admin-route', isAdmin, (req, res) => {
+	console.log('admin-route reached');
 	res.send('<div>Admin only route</div>');
 });
 
@@ -82,10 +84,13 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/login-success', (req, res) => {
+	console.log('success login');
+	console.log(req.user);
 	res.redirect('/dashboard');
 });
 
 router.get('/login-failure', (req, res) => {
+	console.log('failure login');
 	res.redirect('login');
 });
 

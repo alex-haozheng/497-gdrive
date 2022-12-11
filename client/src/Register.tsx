@@ -8,17 +8,17 @@ export default function Register() {
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		await axios.post('http://auth:4003/login', {
+		await axios.post('http://localhost:4003/register', {
 			username,
             email,
 			password
 		});
-        setUsername(''), setPassword('');
+        /* setUsername(''), setPassword(''); */
 	};
 
 	return (
 		<div>
-			<h1>Log In</h1>
+			<h1>Register</h1>
 			<form onSubmit={handleSubmit}>
 				<label>Username</label>
 				<input type="text" onChange={e => setUsername(e.target.value)} />

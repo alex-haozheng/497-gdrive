@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+  event-bus:
+    build: .
+    container_name: event-bus
+    ports:
+      - "4012:4012"

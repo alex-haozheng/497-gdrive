@@ -1,12 +1,14 @@
 export interface File {
-    fileId: string,
-    content: string
-  }
+	fileId: string;
+	content: string;
+}
+
+interface ReadabilityMap {
+  [key: string | number]: number
+}
 
 export interface Analytics {
 	numFiles: number;
-	readability: {
-		[key: string | number]: number;
-	},
-  badfiles: File[];
+	readability: ReadabilityMap;
+	badfiles: File[];
 }

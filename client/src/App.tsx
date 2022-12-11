@@ -2,12 +2,13 @@ import React from 'react';
 import Login from './Login';
 import AdminList from './AdminList';
 import LandingPage from './LandingPage';
+import Register from './Register';
 
 function App() {
   return (
     <div className="App">
-      <h1>Login</h1>
       <Login />
+      <Register />
       <h1>Admin</h1>
       <AdminList />
       <h1>Files</h1>

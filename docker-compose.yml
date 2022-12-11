@@ -11,7 +11,7 @@ services:
     depends_on:
       - mongodb_container
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin   
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
   tag:
     build: tag
     ports:
@@ -30,20 +30,28 @@ services:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
   auth:
     build: auth
+    container_name: auth
     ports:
       - "4003:4003"
+    depends_on:
+      - auth-mongo
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  auth-mongo:
+    image: mongo:latest
+    container_name: auth-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongodb_data_container:/data/db
   analytics:
     build: analytics
+    container_name: analytics
     ports:
       - "4004:4004"
-  moderator:
-    build: moderator
-  questions:
-    build: questions
-    ports:
-      - "4006:4006"
     depends_on:
-      - mongodb_container
+      - analytics-mongo
     environment:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
   query:
