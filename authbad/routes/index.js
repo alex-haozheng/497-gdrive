@@ -90,18 +90,21 @@ router.get('/logout', (req, res) => {
 router.get('/login-success', (req, res) => {
 	console.log('login-success req.user:');
 	console.log(req.user);
-	axios.post('http://auth:4003/test-req', { hello: 'hola' });
+	axios.post('http://auth:4003/test-req', { hello: 'hola', user: req.user }, { withCredentials: true });
 	res.redirect('/dashboard');
 });
 
 router.post('/test-req', (req, res) => {
 	console.log('test-req req.user: ');
 	console.log(req.user);
+	console.log(req.body.hello);
+	console.log(req.body.user);
 	res.send({});
 });
 
 router.get('/login-failure', (req, res) => {
 	console.log('failure login');
+	console.log(req.user);
 	res.redirect('login');
 });
 

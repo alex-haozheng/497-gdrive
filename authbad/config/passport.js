@@ -9,13 +9,13 @@ const customFields = {
 	passwordField: 'password'
 };
 
-// Validate that user exists and that there is a password match. 
+// Validate that user exists and that there is a password match.
 const validateCredentials = (username, password, done) => {
 	User.findOne({ username: username })
 		.then(async user => {
 			if (!user) return done(null, false);
 			const isValid = validatePassword(password, user.hash, user.salt);
-			if (!isValid) return await new Promise(r => setTimeout(r, 1000)).then((x) => done(null, false)); // rate limiter
+			if (!isValid) return await new Promise(r => setTimeout(r, 1000)).then(x => done(null, false)); // rate limiter
 			else return done(null, user);
 		})
 		.catch(err => {
@@ -37,5 +37,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((userId, done) => {
 	console.log('deserializeUser should print userId:');
 	console.log(userId);
-	User.findById(userId).then(user => done(null, user)).catch(err => done(err));
+	User.findById(userId)
+		.then(user => done(null, user))
+		.catch(err => done(err));
 });

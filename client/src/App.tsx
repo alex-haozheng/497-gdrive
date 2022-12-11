@@ -17,11 +17,12 @@ function App() {
       <Questions uId = {'test'}/>
       <ForgotQuestions uId = {'test'}/>
 
+=======
+>>>>>>> Stashed changes
       <h1>Files</h1>
-      
-      {/* uncomment the line below to see a working concept of the landing page where all the files are shown on. Only works when fileService and uploadDownload service are running.
+      {/* uncomment the line below to see a working concept of the landing page where all the files are shown on. Only works when fileService and uploadDownload service are running.} */}
       <LandingPage />
-      */}
+
     </div>
   );
 }
