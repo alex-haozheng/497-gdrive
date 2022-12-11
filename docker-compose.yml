@@ -36,7 +36,7 @@ services:
     depends_on:
       - auth-mongo
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+      DATABASE_URL: mongodb://root:rootpassword@auth-mongo:27017/mydb?directConnection=true&authSource=admin
   auth-mongo:
     image: mongo:latest
     container_name: auth-mongo
@@ -44,7 +44,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
-      - mongodb_data_container:/data/db
+      - auth-mongo-data:/data/db
   analytics:
     build: analytics
     container_name: analytics
@@ -102,4 +102,7 @@ services:
     volumes:
       - mongodb_data_container:/data/db     
 volumes:
+  analytics-mongo-data:
+  auth-mongo-data:
+  moderator-mongo-data:
   mongodb_data_container:

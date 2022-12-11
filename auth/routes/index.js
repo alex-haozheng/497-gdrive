@@ -25,13 +25,15 @@ router.post('/register', async (req, res) => {
 			salt: salt,
 			admin: true
 		});
-		axios.post('http://event-bus:4005/events', {
+		console.log('Sending Account Created Event...');
+		/* axios.post('http://event-bus:4005/events', {
 			type: 'AccountCreated',
 			data: {
 				uid: req.body.username,
 				email: req.body.email
 			}
-		});
+		}); */
+		console.log('Account Created Event Sent');
 		newUser.save().then(user => {
 			console.log(user);
 		});
@@ -49,12 +51,14 @@ router.post('/unregister', isAuth, async (req, res) => {
 		if (err) console.log(err);
 		console.log('Successful Account Deletion');
 	});
-	axios.post('http://event-bus:4005/events', {
+	console.log('Sending Account Deleted Event...');
+	/* axios.post('http://event-bus:4005/events', {
 		type: 'AccountDeleted',
 		data: {
 			uid: username
 		}
-	});
+	}); */
+	console.log('Account Deleted Event Sent');
 	res.redirect('/login');
 });
 
@@ -69,12 +73,12 @@ router.get('/dashboard', isAuth, (req, res) => {
 });
 
 router.get('/auth-route', isAuth, (req, res) => {
-	console.log('auth-route reached');
+	console.log('auth-route req.user');
 	res.send('<div>Auth only route <a href="/logout">Logout</a></div>');
 });
 
 router.get('/admin-route', isAdmin, (req, res) => {
-	console.log('admin-route reached');
+	console.log('admin-route req.user');
 	res.send('<div>Admin only route</div>');
 });
 
@@ -84,9 +88,16 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/login-success', (req, res) => {
-	console.log('success login');
+	console.log('login-success req.user:');
 	console.log(req.user);
+	axios.post('http://auth:4003/test-req', { hello: 'hola' });
 	res.redirect('/dashboard');
+});
+
+router.post('/test-req', (req, res) => {
+	console.log('test-req req.user: ');
+	console.log(req.user);
+	res.send({});
 });
 
 router.get('/login-failure', (req, res) => {
