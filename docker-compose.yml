@@ -12,6 +12,14 @@ services:
       - mongodb_container
     environment:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  admin-mongo:
+    image: mongo:latest
+    container_name: admin-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - admin-mongo-data:/data/db
   tag:
     build: tag
     ports:
@@ -20,6 +28,14 @@ services:
       - mongodb_container
     environment:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  tag-mongo:
+    image: mongo:latest
+    container_name: tag-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - tag-mongo-data:/data/db
   profile:
     build: profile
     ports:
@@ -28,6 +44,14 @@ services:
       - mongodb_container
     environment:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  profile-mongo:
+    image: mongo:latest
+    container_name: profile-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - profile-mongo-data:/data/db
   auth:
     build: auth
     container_name: auth
@@ -77,7 +101,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
-      - quesstions-mongo-data:/data/db
+      - questions-mongo-data:/data/db
   query:
     build: query
     ports:
@@ -134,6 +158,14 @@ services:
       - mongodb_container
     environment:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  requests-mongo:
+    image: mongo:latest
+    container_name: requests-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - requests-mongo-data:/data/db
   mongodb_container:
     image: mongo:latest
     environment:
@@ -142,6 +174,13 @@ services:
     volumes:
       - mongodb_data_container:/data/db     
 volumes:
+  admin-mongo-data:
+  profile-mongo-data:
+  tag-mongo-data:
+  requests-mongo-data:
+  questions-mongo-data:
+  fc-mongo-data:
+  query-mongo-data:
   analytics-mongo-data:
   auth-mongo-data:
   moderator-mongo-data:
