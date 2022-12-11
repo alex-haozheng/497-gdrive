@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export default function Login() {
 	const [username, setUsername]: [username: string | undefined, setUsername: (arg: any) => void] = useState<string | undefined>('');
-	const [password, setPassword]: [username: string | undefined, setPassword: (arg: any) => void] = useState<string | undefined>('');
+	const [password, setPassword]: [password: string | undefined, setPassword: (arg: any) => void] = useState<string | undefined>('');
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		console.log(username);
