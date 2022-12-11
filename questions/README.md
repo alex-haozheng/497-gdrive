@@ -12,11 +12,18 @@ will send events to the users endpoint to change the change password flag, will 
 
 # Endpoint Information: 
 
-`GET /login/:email/forgotpw`
+`POST /new/user`
 
-Description: This endpoint will send an email out to the recipients with the following account information
+Description: This will update the database indicating a new security question has been submitted (we say security question but in reality it is just a string a 2nd token verification in case you forgot your first)
 
-- will add endpoints as I go
+`GET /verify`
+
+Description: This will check if the security question passed is valid to what is stored
+
+`POST /change/pw`
+
+Description: This endpoint will generate a change password event to the authentication service (uid, otp) format
+
 
 # How to run service:
 

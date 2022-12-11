@@ -2,9 +2,9 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import * as logger from 'morgan';
 import * as cors from 'cors';
-//import { nodemailer } from 'nodemailer';
-const nodemailer = require('nodemailer');
-import { faker } from '@faker-js/faker';
+import axios from 'axios';
+import { MongoClient } from 'mongodb';
+import { verify } from 'crypto';
 
 const app = express();
 
@@ -12,92 +12,148 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
 
+// uid : security question
 interface database {
 	[key: string]: string
 };
 
-//holds a collection of all emails that are registered
-// store uid along with security question
-const db: database = {};
+async function connectDB(): Promise<MongoClient>{
+	const uri = process.env.DATABASE_URL;
 
-// uid: team0.clouddrive@gmail.com
-// password: ourpassword
+	if (uri === undefined) {
+			throw Error('DATABASE_URL environment variable is not specified');
+	}
+	
+	const mongo = new MongoClient(uri);
+	await mongo.connect();
+	return await Promise.resolve(mongo);
+}
 
-// return the verified emails (used for account creation with existing email)
-app.get('/emails', (req: Request, res: Response) => {
-	res.send(Object.keys(db));
-});
+async function initDB(mongo: MongoClient) {
+	const db = mongo.db();
 
-app.get('/login/forgotpw', async (req: Request, res: Response) => {
-	try {
-		const { uid, email }: { uid: string, email: string } = req.body;
-		const otp: string = faker.internet.password();
-		
-		if (!(uid in db)) {
-			res.status(400).json({
-				message: 'NOT FOUND'
-			}); return;
-		}
-
-		// right around here add a await call to another endpoint to change the password and mark a flag
-		// await axios.post('http://event-bus:4012/events', {
-		// 	type: "ChangePassword",
-		// 	data: {
-		// 		uid, // username
-		// 		otp
-		// 	}
-		// });
-		// let's create the transport (it's the postman/delivery-man who will send your emails)
-		const myTransport = nodemailer.createTransport({
-			service: 'Gmail',
-			auth: {
-				user: 'team0cloud@hotmail.com', // your gmail account which you'll use to send the emails
-				pass: 'ourpassword!', // the password for your gmail account
-			}
+	if (await db.listCollections({ name: 'questions' }).hasNext()) {
+		db.collection('questions').drop(function(err, delOK) {
+			if (err) throw err;
+			if (delOK) console.log("Collection deleted");
 		});
-		// defining the content of the email (I mean, what will be on the email)
-		const mailOptions = {
-			from: 'team0cloud@hotmail.com', // from where the email is going, you can type anything or any name here, it'll be displayed as the sender to the person who receives it
-			to: email, // the email address(es) where you want to send the emails to. If it's more than one person/email, seperate them with a comma, like here how I seperated the 3 users with a comma
-			
-			subject: 'Sending Some Freaking Email', // your email subject (optional but better to have it)
-			text: `Hello there my sweetling! Let's send some freaking emails!\n Here is your one time password: ${otp}` // your email body in plain text format (optional) 
-			
-			// your email body in html format (optional)
-			// if you want to send a customly and amazingly designed html body
-			// instead of a boring plain text, then use this "html" property
-			// instead of "text" property
-			// html: `<h1 style="color: red;text-align:center">Hello there my sweetling!</h1>
-			// 			<p style="text-align:center">Let's send some <span style="color: red">freaking</span> emails!</p>`,
-		}
-		
-		// sending the email
-		myTransport.sendMail(mailOptions, (err) => {
-			if (err) {
-				console.log(`Email failed to send!`);
-				console.error(err);
-			} else {
-				console.log(`Email successfully sent!`);
-			}
-		})
-		// should probably change this output later (not necessary)
-		res.status(200).json(email);
-	} catch (e) {
-		res.status(500).send(e);
+		console.log('Collection deleted.');
 	}
-});
 
-app.post('/events', (req: Request, res: Response) => {
-	const {type, data }: {type: string, data: { uid: string, email?: string }} = req.body;
-	if (type === 'AccountCreated') {
-		const { uid , email }: { uid: string, email?: string } = data;
-		db[uid] = email!;
-	} else if (type === 'AccountDeleted') {
-		const { uid }: { uid: string, email?: string } = data;
-		delete db[uid];
+	if (await db.listCollections({ name: 'questions' }).hasNext()) {
+		console.log('Collection already exists. Skipping initialization.');
+		return;
 	}
-	res.send({status: 'ok'});
-});
+
+	const questions = db.collection('questions');
+	const result = await questions.insertMany([
+		{ 'a': 'test'},
+		{ 'b': 'test'},
+		{ 'c': 'test'},
+	]);
+
+	console.log(`Initialized ${result.insertedCount} questions`);
+	console.log(`Initialized:`);
+
+	for (let key in result.insertedIds) {
+		console.log(`  Inserted user with ID ${result.insertedIds[key]}`);
+	}
+}
+
+async function verify(mongo: MongoClient, uid: string, question: string) {
+	const questions = mongo.db().collection('questions');
+	const ret = questions.find({$and: 
+		[{uid: uid},
+		{question: question}]
+	});
+	return ret.toArray();
+}
+
+async function reset(mongo: MongoClient) {
+	const questions = mongo.db().collection('questions');
+	return questions.deleteMany({});
+}
+
+async function insertQuestion(mongo: MongoClient, uid: string, question: string) {
+	const questions = mongo.db().collection('questions');
+	return questions.insertOne({uid, question});
+}
+
+
+async function start() {
+	const mongo = await connectDB();
+	await initDB(mongo);
+	
+	// will be used for checking and returning
+	app.get('/verify', async (req: Request, res: Response) => {
+		try {
+			if ( Object.keys(req.body).length !== 3 ){
+				res.status(400).send({ message: 'BAD REQUEST' });
+			} else {
+				const { uid, question, otp} = req.body;
+
+				const ret = await verify(mongo, uid, question);
+				if (ret.length > 0) {
+					axios.post('http://event-bus:4005/events', {
+						type: 'ChangePassword',
+						data: {
+							uid,
+							otp
+						}
+					});
+					res.status(201).send(ret);
+				} else {
+					res.status(404).send({ message: 'NOT FOUND'});
+				}
+			}
+		} catch (e) {
+			res.status(500).send(e);
+		}
+	});	
+
+	app.post('/new/user', async (req: Request, res: Response) => {
+		try {
+			if ( Object.keys(req.body).length !== 2 ){
+				res.status(400).send({ message: 'BAD REQUEST' });
+			} else {
+				const { uid, question } = req.body;
+				const ret = await insertQuestion(mongo, uid, question);
+				if (ret.acknowledged) {
+					res.status(201).send(ret);
+				} else {
+					res.status(400).send(ret);
+				}
+			}
+		} catch (e) {
+			res.status(500).send(e);
+		}
+	});
+
+	app.delete('/reset', async (req: Request, res: Response) => {
+		try {
+			const ret = await reset(mongo);
+			res.status(201).send(ret);
+		} catch (e) {
+			res.status(500).send(e);
+		}
+	});
+
+
+	app.post('/events', (req: Request, res: Response) => {
+		const {type, data }: {type: string, data: { uid: string, email?: string }} = req.body;
+		if (type === 'AccountCreated') {
+			const { uid , email }: { uid: string, email?: string } = data;
+			db[uid] = email!;
+		} else if (type === 'AccountDeleted') {
+			const { uid }: { uid: string, email?: string } = data;
+			delete db[uid];
+		}
+		res.send({status: 'ok'});
+	});
+}
+
+start();
+
 
 app.listen(4006, () => {
 	console.log('Listening on 4006');
