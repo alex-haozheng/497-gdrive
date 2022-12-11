@@ -53,30 +53,14 @@ services:
     depends_on:
       - analytics-mongo
     environment:
-<<<<<<< Updated upstream
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
   query:
     build: query
-=======
-      DATABASE_URL: mongodb://root:rootpassword@analytics-mongo:27017/mydb?directConnection=true&authSource=admin
-  analytics-mongo:
-    image: mongo:latest
-    container_name: analytics-mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
-    volumes:
-      - analytics-mongo-data:/data/db
-  moderator:
-    build: moderator
-    container_name: moderator
->>>>>>> Stashed changes
     ports:
       - "4007:4007"
     depends_on:
       - mongodb_container
     environment:
-<<<<<<< Updated upstream
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
   filecompression:
     build: filecompression
@@ -96,51 +80,6 @@ services:
       - "4010:4010"
   uploaddownload:
     build: uploaddownload
-=======
-      DATABASE_URL: mongodb://root:rootpassword@moderator-mongo:27017/mydb?directConnection=true&authSource=admin
-  moderator-mongo:
-    image: mongo:latest
-    container_name: moderator-mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
-    volumes:
-      - moderator-mongo-data:/data/db
-  questions:
-    build: questions
-    ports:
-      - "4006:4006"
-    depends_on:
-      - mongodb_container
-    environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
-  query:
-    build: query
-    ports:
-      - "4007:4007"
-    depends_on:
-      - mongodb_container
-    environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
-  filecompression:
-    build: filecompression
-    ports:
-      - "4008:4008"
-    depends_on:
-      - mongodb_container
-    environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
-  fileService:
-    build: fileService
-    ports:
-      - "4009:4009"
-  timeLogger:
-    build: timeLogger
-    ports:
-      - "4010:4010"
-  uploadDownload:
-    build: uploadDownload
->>>>>>> Stashed changes
     ports:
       - "4011:4011"
   event-bus:
