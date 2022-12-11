@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function Login() {
+export default function Register() {
 	const [username, setUsername]: [username: string | undefined, setUsername: (arg: any) => void] = useState<string | undefined>('');
     const [email, setEmail]: [email: string | undefined, setEmail: (arg: any) => void] = useState<string | undefined>('');
 	const [password, setPassword]: [username: string | undefined, setPassword: (arg: any) => void] = useState<string | undefined>('');
