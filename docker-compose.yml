@@ -62,22 +62,54 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
       - analytics-mongo-data:/data/db
+  questions:
+    build: questions
+    ports:
+      - "4006:4006"
+    depends_on:
+      - questions-mongo
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@questions-mongo:27017/mydb?directConnection=true&authSource=admin
+  questions-mongo:
+    image: mongo:latest
+    container_name: questions-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - quesstions-mongo-data:/data/db
   query:
     build: query
     ports:
       - "4007:4007"
     depends_on:
-      - mongodb_container
+      - query-mongo
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+      DATABASE_URL: mongodb://root:rootpassword@query-mongo:27017/mydb?directConnection=true&authSource=admin
+  query-mongo:
+    image: mongo:latest
+    container_name: query-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - query-mongo-data:/data/db
   filecompression:
     build: filecompression
     ports:
       - "4008:4008"
     depends_on:
-      - mongodb_container
+      - fc-mongo
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+      DATABASE_URL: mongodb://root:rootpassword@fc-mongo:27017/mydb?directConnection=true&authSource=admin
+  fc-mongo:
+    image: mongo:latest
+    container_name: fc-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - fc-mongo-data:/data/db
   fileservice:
     build: fileservice
     ports:

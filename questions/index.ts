@@ -117,7 +117,7 @@ async function start() {
 
 	app.post('/new/user', async (req: Request, res: Response) => {
 		try {
-			if ( Object.keys(req.body).length !== 2 ){
+			if ( Object.keys(req.body).length !== 1 ){
 				res.status(400).send({ message: 'BAD REQUEST' });
 			} else {
 				const { uid, question } = req.body;
