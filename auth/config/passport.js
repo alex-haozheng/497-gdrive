@@ -28,10 +28,14 @@ passport.use(strategy);
 
 // add passport.user field to session
 passport.serializeUser((user, done) => {
+	console.log('serializeUser should print user:');
+	console.log(user);
 	done(null, user.id);
 });
 
 // add user field to req
 passport.deserializeUser((userId, done) => {
+	console.log('deserializeUser should print userId:');
+	console.log(userId);
 	User.findById(userId).then(user => done(null, user)).catch(err => done(err));
 });
