@@ -104,10 +104,10 @@ async function start() {
         }
     });
 
-    app.get('/checkRequest', async (req: Request, res: Response) => {
-        const { uId } = req.body;
+    app.get('/checkRequest/:uId', async (req: Request, res: Response) => {
+        const uId = req.params.uId;
         if(
-            Object.keys(req.body).length !== 1 ||
+            Object.keys(req.params).length !== 1 ||
             uId === "" ||
             uId === undefined ||
             typeof uId !== "string"
