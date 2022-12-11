@@ -2,6 +2,8 @@ import React from 'react';
 import Login from './Login';
 import AdminList from './AdminList';
 import AdminRequests from './AdminRequests';
+import Questions from './Questions';
+import ForgotQuestions from './ForgotQuestions';
 import LandingPage from './LandingPage';
 import Register from './Register';
 import Profile from './Profile';
@@ -14,6 +16,8 @@ function App() {
       <Profile uId={"user0"}/>
       <AdminList />
       <AdminRequests />
+      <Questions uId = {'test'}/>
+      <ForgotQuestions uId = {'test'}/>
 
       <h1>Files</h1>
       
