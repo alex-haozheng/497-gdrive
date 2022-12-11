@@ -4,12 +4,14 @@ import AdminList from './AdminList';
 import AdminRequests from './AdminRequests';
 import LandingPage from './LandingPage';
 import Register from './Register';
+import Profile from './Profile';
 
 function App() {
   return (
     <div className="App">
       <Login />
       <Register />
+      <Profile uId={"user0"}/>
       <AdminList />
       <AdminRequests />
 
