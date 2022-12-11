@@ -4,7 +4,6 @@ import * as logger from 'morgan';
 import * as cors from 'cors';
 import axios from 'axios';
 import { MongoClient } from 'mongodb';
-import { verify } from 'crypto';
 
 const app = express();
 
@@ -67,6 +66,11 @@ async function verify(mongo: MongoClient, uid: string, question: string) {
 		{question: question}]
 	});
 	return ret.toArray();
+}
+
+async function deleteUser(mongo: MongoClient, uid: string) {
+	const questions = mongo.db().collection('questions');
+	return questions.deleteOne({uid});
 }
 
 async function reset(mongo: MongoClient) {
@@ -139,22 +143,24 @@ async function start() {
 	});
 
 
-	app.post('/events', (req: Request, res: Response) => {
+	app.post('/events', async (req: Request, res: Response) => {
 		const {type, data }: {type: string, data: { uid: string, email?: string }} = req.body;
-		if (type === 'AccountCreated') {
-			const { uid , email }: { uid: string, email?: string } = data;
-			db[uid] = email!;
-		} else if (type === 'AccountDeleted') {
+		if (type === 'AccountDeleted') {
 			const { uid }: { uid: string, email?: string } = data;
-			delete db[uid];
+			const ret = await deleteUser(mongo, uid);
+			if (ret.acknowledged) {
+				res.status(201).send(ret);
+			} else {
+				res.status(400).send(ret);
+			}
 		}
 		res.send({status: 'ok'});
+	});
+
+	app.listen(4006, () => {
+		console.log('Listening on 4006');
 	});
 }
 
 start();
 
-
-app.listen(4006, () => {
-	console.log('Listening on 4006');
-});

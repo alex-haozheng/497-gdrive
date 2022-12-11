@@ -39,85 +39,243 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var logger = require("morgan");
 var cors = require("cors");
-//import { nodemailer } from 'nodemailer';
-var nodemailer = require('nodemailer');
-var faker_1 = require("@faker-js/faker");
+var axios_1 = require("axios");
+var mongodb_1 = require("mongodb");
 var app = express();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
 ;
-//holds a collection of all emails that are registered
-// store uid along with email
-var db = { "x": "azheng@umass.edu" };
-// uid: team0.clouddrive@gmail.com
-// password: ourpassword
-// return the verified emails (used for account creation with existing email)
-app.get('/emails', function (req, res) {
-    res.send(Object.keys(db));
-});
-app.get('/login/forgotpw', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, uid, email, otp, myTransport, mailOptions;
-    return __generator(this, function (_b) {
-        try {
-            _a = req.body, uid = _a.uid, email = _a.email;
-            otp = faker_1.faker.internet.password();
-            if (!(uid in db)) {
-                res.status(400).json({
-                    message: 'NOT FOUND'
-                });
-                return [2 /*return*/];
+function connectDB() {
+    return __awaiter(this, void 0, void 0, function () {
+        var uri, mongo;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    uri = process.env.DATABASE_URL;
+                    if (uri === undefined) {
+                        throw Error('DATABASE_URL environment variable is not specified');
+                    }
+                    mongo = new mongodb_1.MongoClient(uri);
+                    return [4 /*yield*/, mongo.connect()];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, Promise.resolve(mongo)];
+                case 2: return [2 /*return*/, _a.sent()];
             }
-            myTransport = nodemailer.createTransport({
-                service: 'Gmail',
-                auth: {
-                    user: 'team0cloud@hotmail.com',
-                    pass: 'ourpassword!', // the password for your gmail account
-                }
-            });
-            mailOptions = {
-                from: 'team0cloud@hotmail.com',
-                to: email,
-                subject: 'Sending Some Freaking Email',
-                text: "Hello there my sweetling! Let's send some freaking emails!\n Here is your one time password: ".concat(otp) // your email body in plain text format (optional) 
-                // your email body in html format (optional)
-                // if you want to send a customly and amazingly designed html body
-                // instead of a boring plain text, then use this "html" property
-                // instead of "text" property
-                // html: `<h1 style="color: red;text-align:center">Hello there my sweetling!</h1>
-                // 			<p style="text-align:center">Let's send some <span style="color: red">freaking</span> emails!</p>`,
-            };
-            // sending the email
-            myTransport.sendMail(mailOptions, function (err) {
-                if (err) {
-                    console.log("Email failed to send!");
-                    console.error(err);
-                }
-                else {
-                    console.log("Email successfully sent!");
-                }
-            });
-            // should probably change this output later (not necessary)
-            res.status(200).json(email);
-        }
-        catch (e) {
-            res.status(500).send(e);
-        }
-        return [2 /*return*/];
+        });
     });
-}); });
-app.post('/events', function (req, res) {
-    var _a = req.body, type = _a.type, data = _a.data;
-    if (type === 'AccountCreated') {
-        var uid = data.uid, email = data.email;
-        db[uid] = email;
-    }
-    else if (type === 'AccountDeleted') {
-        var uid = data.uid;
-        delete db[uid];
-    }
-    res.send({ status: 'ok' });
-});
-app.listen(4006, function () {
-    console.log('Listening on 4006');
-});
+}
+function initDB(mongo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var db, questions, result, key;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    db = mongo.db();
+                    return [4 /*yield*/, db.listCollections({ name: 'questions' }).hasNext()];
+                case 1:
+                    if (_a.sent()) {
+                        db.collection('questions').drop(function (err, delOK) {
+                            if (err)
+                                throw err;
+                            if (delOK)
+                                console.log("Collection deleted");
+                        });
+                        console.log('Collection deleted.');
+                    }
+                    return [4 /*yield*/, db.listCollections({ name: 'questions' }).hasNext()];
+                case 2:
+                    if (_a.sent()) {
+                        console.log('Collection already exists. Skipping initialization.');
+                        return [2 /*return*/];
+                    }
+                    questions = db.collection('questions');
+                    return [4 /*yield*/, questions.insertMany([
+                            { 'a': 'test' },
+                            { 'b': 'test' },
+                            { 'c': 'test' },
+                        ])];
+                case 3:
+                    result = _a.sent();
+                    console.log("Initialized ".concat(result.insertedCount, " questions"));
+                    console.log("Initialized:");
+                    for (key in result.insertedIds) {
+                        console.log("  Inserted user with ID ".concat(result.insertedIds[key]));
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function verify(mongo, uid, question) {
+    return __awaiter(this, void 0, void 0, function () {
+        var questions, ret;
+        return __generator(this, function (_a) {
+            questions = mongo.db().collection('questions');
+            ret = questions.find({ $and: [{ uid: uid },
+                    { question: question }]
+            });
+            return [2 /*return*/, ret.toArray()];
+        });
+    });
+}
+function deleteUser(mongo, uid) {
+    return __awaiter(this, void 0, void 0, function () {
+        var questions;
+        return __generator(this, function (_a) {
+            questions = mongo.db().collection('questions');
+            return [2 /*return*/, questions.deleteOne({ uid: uid })];
+        });
+    });
+}
+function reset(mongo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var questions;
+        return __generator(this, function (_a) {
+            questions = mongo.db().collection('questions');
+            return [2 /*return*/, questions.deleteMany({})];
+        });
+    });
+}
+function insertQuestion(mongo, uid, question) {
+    return __awaiter(this, void 0, void 0, function () {
+        var questions;
+        return __generator(this, function (_a) {
+            questions = mongo.db().collection('questions');
+            return [2 /*return*/, questions.insertOne({ uid: uid, question: question })];
+        });
+    });
+}
+function start() {
+    return __awaiter(this, void 0, void 0, function () {
+        var mongo;
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, connectDB()];
+                case 1:
+                    mongo = _a.sent();
+                    return [4 /*yield*/, initDB(mongo)];
+                case 2:
+                    _a.sent();
+                    // will be used for checking and returning
+                    app.get('/verify', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, uid, question, otp, ret, e_1;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 4, , 5]);
+                                    if (!(Object.keys(req.body).length !== 3)) return [3 /*break*/, 1];
+                                    res.status(400).send({ message: 'BAD REQUEST' });
+                                    return [3 /*break*/, 3];
+                                case 1:
+                                    _a = req.body, uid = _a.uid, question = _a.question, otp = _a.otp;
+                                    return [4 /*yield*/, verify(mongo, uid, question)];
+                                case 2:
+                                    ret = _b.sent();
+                                    if (ret.length > 0) {
+                                        axios_1.default.post('http://event-bus:4005/events', {
+                                            type: 'ChangePassword',
+                                            data: {
+                                                uid: uid,
+                                                otp: otp
+                                            }
+                                        });
+                                        res.status(201).send(ret);
+                                    }
+                                    else {
+                                        res.status(404).send({ message: 'NOT FOUND' });
+                                    }
+                                    _b.label = 3;
+                                case 3: return [3 /*break*/, 5];
+                                case 4:
+                                    e_1 = _b.sent();
+                                    res.status(500).send(e_1);
+                                    return [3 /*break*/, 5];
+                                case 5: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    app.post('/new/user', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, uid, question, ret, e_2;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 4, , 5]);
+                                    if (!(Object.keys(req.body).length !== 2)) return [3 /*break*/, 1];
+                                    res.status(400).send({ message: 'BAD REQUEST' });
+                                    return [3 /*break*/, 3];
+                                case 1:
+                                    _a = req.body, uid = _a.uid, question = _a.question;
+                                    return [4 /*yield*/, insertQuestion(mongo, uid, question)];
+                                case 2:
+                                    ret = _b.sent();
+                                    if (ret.acknowledged) {
+                                        res.status(201).send(ret);
+                                    }
+                                    else {
+                                        res.status(400).send(ret);
+                                    }
+                                    _b.label = 3;
+                                case 3: return [3 /*break*/, 5];
+                                case 4:
+                                    e_2 = _b.sent();
+                                    res.status(500).send(e_2);
+                                    return [3 /*break*/, 5];
+                                case 5: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    app.delete('/reset', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var ret, e_3;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, reset(mongo)];
+                                case 1:
+                                    ret = _a.sent();
+                                    res.status(201).send(ret);
+                                    return [3 /*break*/, 3];
+                                case 2:
+                                    e_3 = _a.sent();
+                                    res.status(500).send(e_3);
+                                    return [3 /*break*/, 3];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    app.post('/events', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, type, data, uid, ret;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _a = req.body, type = _a.type, data = _a.data;
+                                    if (!(type === 'AccountDeleted')) return [3 /*break*/, 2];
+                                    uid = data.uid;
+                                    return [4 /*yield*/, deleteUser(mongo, uid)];
+                                case 1:
+                                    ret = _b.sent();
+                                    if (ret.acknowledged) {
+                                        res.status(201).send(ret);
+                                    }
+                                    else {
+                                        res.status(400).send(ret);
+                                    }
+                                    _b.label = 2;
+                                case 2:
+                                    res.send({ status: 'ok' });
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    app.listen(4006, function () {
+                        console.log('Listening on 4006');
+                    });
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+start();
