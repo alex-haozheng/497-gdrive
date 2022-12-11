@@ -8,7 +8,7 @@ const Profile = (data) => {
     const uId = data.uId;
 
     const fetchProfile = async () => {
-        const res = await axios.get(`http://localhost:4002/getProfile/${uId}`);
+        const res = await axios.get(`http://localhost:4002/getProfile/`, { withCredentials: true });
         setProfile(res.data);
         console.log(res.data);
     };
@@ -18,13 +18,13 @@ const Profile = (data) => {
     }, []);
 
     const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        /*
+        
         event.preventDefault();
     
         await axios.delete(`http://localhost:4000/removeAdmin/${uId}`);
     
         fetchProfile();
-        */
+       
        return;
     };
 
