@@ -22,7 +22,7 @@ export default function Analytics() {
 	const [badfiles, setBadfiles]: [badfiles: File[], setBadfiles: (arg: any) => void] = useState<File[]>([]);
 
 	const fetchAnalytics = async () => {
-		const analytics: Analytics = await axios.get('http://analytics:4004/analytics');
+		const analytics: Analytics = await axios.get('http://localhost:4004/analytics');
 		setNumFiles(analytics.numFiles);
 		setReadability(analytics.readability);
 		setBadfiles(analytics.badfiles);

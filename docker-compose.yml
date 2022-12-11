@@ -4,76 +4,117 @@ services:
     build: client
     ports:
       - "3000:3000"
-  admin:
-    build: admin
-    ports:
-      - "4000:4000"
-    depends_on:
-      - mongodb_container
-    environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin   
-  tag:
-    build: tag
-    ports:
-      - "4001:4001"
-    depends_on:
-      - mongodb_container
-    environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
-  profile:
-    build: profile
-    ports:
-      - "4002:4002"
-    depends_on:
-      - mongodb_container
-    environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  # admin:
+  #   build: admin
+  #   ports:
+  #     - "4000:4000"
+  #   depends_on:
+  #     - mongodb_container
+  #   environment:
+  #     DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  # tag:
+  #   build: tag
+  #   ports:
+  #     - "4001:4001"
+  #   depends_on:
+  #     - mongodb_container
+  #   environment:
+  #     DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  # profile:
+  #   build: profile
+  #   ports:
+  #     - "4002:4002"
+  #   depends_on:
+  #     - mongodb_container
+  #   environment:
+  #     DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
   auth:
     build: auth
+    container_name: auth
     ports:
       - "4003:4003"
+    depends_on:
+      - auth-mongo
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  auth-mongo:
+    image: mongo:latest
+    container_name: auth-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongodb_data_container:/data/db
   analytics:
     build: analytics
+    container_name: analytics
     ports:
       - "4004:4004"
+    depends_on:
+      - analytics-mongo
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  analytics-mongo:
+    image: mongo:latest
+    container_name: analytics-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongodb_data_container:/data/db
   moderator:
     build: moderator
-  questions:
-    build: questions
+    container_name: moderator
     ports:
-      - "4006:4006"
+      - "4005:4005"
     depends_on:
-      - mongodb_container
+      - moderator-mongo
     environment:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
-  query:
-    build: query
-    ports:
-      - "4007:4007"
-    depends_on:
-      - mongodb_container
+  moderator-mongo:
+    image: mongo:latest
+    container_name: moderator-mongo
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
-  filecompression:
-    build: filecompression
-    ports:
-      - "4008:4008"
-    depends_on:
-      - mongodb_container
-    environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
-  fileService:
-    build: fileService
-    ports:
-      - "4009:4009"
-  timeLogger:
-    build: timeLogger
-    ports:
-      - "4010:4010"
-  uploadDownload:
-    build: uploadDownload
-    ports:
-      - "4011:4011"
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mongodb_data_container:/data/db
+  # questions:
+  #   build: questions
+  #   ports:
+  #     - "4006:4006"
+  #   depends_on:
+  #     - mongodb_container
+  #   environment:
+  #     DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  # query:
+  #   build: query
+  #   ports:
+  #     - "4007:4007"
+  #   depends_on:
+  #     - mongodb_container
+  #   environment:
+  #     DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  # filecompression:
+  #   build: filecompression
+  #   ports:
+  #     - "4008:4008"
+  #   depends_on:
+  #     - mongodb_container
+  #   environment:
+  #     DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+  # fileService:
+  #   build: fileService
+  #   ports:
+  #     - "4009:4009"
+  # timeLogger:
+  #   build: timeLogger
+  #   ports:
+  #     - "4010:4010"
+  # uploadDownload:
+  #   build: uploadDownload
+  #   ports:
+  #     - "4011:4011"
   event-bus:
     build: event-bus
     ports:

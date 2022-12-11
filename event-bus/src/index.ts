@@ -119,6 +119,9 @@ type MESSAGETYPE = AccountCreated | AccountDeleted | FileCreated | FileUpdated |
 app.post('/events', (req, res) => {
   const event : MESSAGETYPE = req.body;
 
+  console.log(req.body.type);
+  console.log(req.body.data);
+
   // yuri's services
   axios.post('http://admin:4000/events', event).catch((err: Error) => {
     console.log(err.message);

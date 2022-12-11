@@ -1,16 +1,18 @@
 version: '3.8'
 services:
-  analytics:
+  moderator:
     build: .
+    container_name: moderator
     ports:
-      - "4004:4004"
+      - "4005:4005"
     depends_on:
-      - mongodb_container
+      - moderator-mongo
     environment:
       DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
 
-  mongodb_container:
+  moderator-mongo:
     image: mongo:latest
+    container_name: moderator-mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
