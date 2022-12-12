@@ -117,7 +117,7 @@ async function start() {
     });
 
     app.get('/checkAdmin/:uid/:accessToken', async (req: Request, res: Response) => {
-        const { uid, accessToken } = req.param;
+        const { uid, accessToken } = req.params;
 		try {
 			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
 			const user = await authDB.findOne({ uid });
@@ -144,7 +144,7 @@ async function start() {
     });
 
     app.post('/addAdmin/:uid/:accessToken', async (req, res) => {
-        const { uid, accessToken } = req.param;
+        const { uid, accessToken } = req.params;
 		try {
 			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
 			const user = await authDB.findOne({ uid });
@@ -184,7 +184,7 @@ async function start() {
     });
 
     app.delete('/removeAdmin/:uid/:accessToken', async (req, res) => {
-        const { uid, accessToken } = req.param;
+        const { uid, accessToken } = req.params;
 		try {
 			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
 			const user = await authDB.findOne({ uid });
