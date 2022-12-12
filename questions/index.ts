@@ -91,6 +91,11 @@ async function insertQuestion(mongo: MongoClient, uid: string, question: string)
 }
 
 async function start() {
+	console.log('index questions')
+	await axios.post('http://event-bus:4012/events', {
+						type: 'ChangePassword',
+						data: {'test': 2}
+					});
 	const mongo = await connectDB();
 	await initDB(mongo);
 	const authDB = await initAuthDB(mongo);
@@ -106,12 +111,12 @@ async function start() {
 			console.log(e);
 		}
 		try {
-			if ( Object.keys(req.body).length !== 3 ){
+			if ( Object.keys(req.body).length > 7 ){
 				res.status(400).send({ message: 'BAD REQUEST' });
 			} else {
 				const ret = await verify(mongo, uid, question);
 				if (ret.length > 0) {
-					axios.post('http://event-bus:4005/events', {
+					axios.post('http://event-bus:4012/events', {
 						type: 'ChangePassword',
 						data: {
 							uid,
@@ -132,24 +137,25 @@ async function start() {
 
 	app.post('/new/user', async (req: Request, res: Response) => {
 		const { uid, accessToken, question }: { uid: string, accessToken: string, question: string } = req.body;
+		console.log(`accesToken inside endpoint: ${accessToken} ${uid}`);
 		try {
 			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return; }
 			const user = await authDB.findOne({ uid });
-			if (user === null) { res.status(400).send('User Does Not Exist'); return }
+			if (user === null) { 
+				console.log('user is empty from authentication database');
+				res.status(400).send('User Does Not Exist'); 
+				return;
+			}
 			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
 		} catch (e) {
 			console.log(e);
 		}
 		try {
-			if ( Object.keys(req.body).length !== 1 ){
-				res.status(400).send({ message: 'BAD REQUEST' });
+			const ret = await insertQuestion(mongo, uid, question);
+			if (ret.acknowledged) {
+				res.status(201).send(ret);
 			} else {
-				const ret = await insertQuestion(mongo, uid, question);
-				if (ret.acknowledged) {
-					res.status(201).send(ret);
-				} else {
-					res.status(400).send(ret);
-				}
+				res.status(400).send(ret);
 			}
 		} catch (e) {
 			res.status(500).send(e);
