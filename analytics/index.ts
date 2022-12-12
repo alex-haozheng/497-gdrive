@@ -49,11 +49,22 @@ async function initDB(mongo) {
 	}
 }
 
+async function initAuthDB(mongo) {
+	try {
+		const auth = mongo.db().collection('auth');
+		return auth;
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+}
+
 async function start() {
 	const mongo = await connectDB();
 	if (mongo === null) throw Error('Database connection failed');
 	let analytics = await initDB(mongo);
 	if (analytics === null) throw Error('Database initialization failed');
+	const authDB = await initAuthDB(mongo);
 
 	setInterval(async () => {
 		try {
@@ -98,7 +109,16 @@ async function start() {
 	}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
 
 	// TODO: uncomment isAdmin
-	app.get('/analytics', /* isAdmin ,*/ async (req, res) => {
+	app.get('/analytics', async (req, res) => {
+		const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
 		try {
 			const results = await analytics.findOne({ key: 'analytics' });
 			res.status(200).send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
@@ -113,6 +133,9 @@ async function start() {
 			badfiles = req.body.data.files;
 		} else if (req.body.type === 'GetFileAnalytics') {
 			files = req.body.data.files;
+		} else if (req.body.type === 'AccountCreated') {
+			const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body;
+			authDB.insertOne({ uid, accessToken, admin });
 		}
 		res.send({});
 	});

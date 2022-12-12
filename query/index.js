@@ -38,14 +38,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var mongodb_1 = require("mongodb");
-var logger = require("morgan");
 var cors = require("cors");
 var app = express();
-app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
-// users : file
-var userFiles = {};
+// user: files
 function connectDB() {
     return __awaiter(this, void 0, void 0, function () {
         var uri, mongo;
@@ -108,6 +105,22 @@ function initDB(mongo) {
         });
     });
 }
+function initAuthDB(mongo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var auth;
+        return __generator(this, function (_a) {
+            try {
+                auth = mongo.db().collection('auth');
+                return [2 /*return*/, auth];
+            }
+            catch (e) {
+                console.log(e);
+                return [2 /*return*/, null];
+            }
+            return [2 /*return*/];
+        });
+    });
+}
 function getUsers(mongo) {
     return __awaiter(this, void 0, void 0, function () {
         var query, result, ret;
@@ -119,69 +132,69 @@ function getUsers(mongo) {
         });
     });
 }
-function checkUsers(mongo, uId) {
+function checkUsers(mongo, uid) {
     return __awaiter(this, void 0, void 0, function () {
         var query, result;
         return __generator(this, function (_a) {
             query = mongo.db().collection('query');
             result = query.find();
-            return [2 /*return*/, uId in result];
+            return [2 /*return*/, uid in result];
         });
     });
 }
-function addUser(mongo, uId) {
+function addUser(mongo, uid) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         var _a;
         return __generator(this, function (_b) {
             query = mongo.db().collection('query');
-            query.insertOne((_a = {}, _a[uId] = [], _a));
+            query.insertOne((_a = {}, _a[uid] = [], _a));
             return [2 /*return*/];
         });
     });
 }
-function removeUser(mongo, uId) {
+function removeUser(mongo, uid) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         var _a;
         return __generator(this, function (_b) {
             query = mongo.db().collection('query');
-            return [2 /*return*/, query.updateOne({}, { $unset: (_a = {}, _a[uId] = "", _a) })];
+            return [2 /*return*/, query.updateOne({}, { $unset: (_a = {}, _a[uid] = "", _a) })];
         });
     });
 }
-function getFiles(mongo, uId) {
+function getFiles(mongo, uid) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             query = mongo.db().collection('query');
-            return [2 /*return*/, query.findOne()[uId]];
+            return [2 /*return*/, query.findOne()[uid]];
         });
     });
 }
-function addFile(mongo, uId, fileId) {
+function addFile(mongo, uid, fileId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         var _a;
         return __generator(this, function (_b) {
             query = mongo.db().collection('query');
-            return [2 /*return*/, query.updateOne({}, { $push: (_a = {}, _a[uId] = fileId, _a) })];
+            return [2 /*return*/, query.updateOne({}, { $push: (_a = {}, _a[uid] = fileId, _a) })];
         });
     });
 }
-function removeFile(mongo, uId, fileId) {
+function removeFile(mongo, uid, fileId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         var _a;
         return __generator(this, function (_b) {
             query = mongo.db().collection('query');
-            return [2 /*return*/, query.updateOne({}, { $pull: (_a = {}, _a[uId] = fileId, _a) })];
+            return [2 /*return*/, query.updateOne({}, { $pull: (_a = {}, _a[uid] = fileId, _a) })];
         });
     });
 }
 function start() {
     return __awaiter(this, void 0, void 0, function () {
-        var mongo;
+        var mongo, authDB;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -191,6 +204,9 @@ function start() {
                     return [4 /*yield*/, initDB(mongo)];
                 case 2:
                     _a.sent();
+                    return [4 /*yield*/, initAuthDB(mongo)];
+                case 3:
+                    authDB = _a.sent();
                     app.get('/users/list', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
                         var _a, _b, _c, e_1;
                         var _d;
@@ -215,87 +231,126 @@ function start() {
                         });
                     }); });
                     app.get('/users/find', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                        var uId, _a, _b, _c, e_2;
-                        var _d;
-                        return __generator(this, function (_e) {
-                            switch (_e.label) {
+                        var _a, uid, accessToken, user, e_2, _b, _c, _d, e_3;
+                        var _e;
+                        return __generator(this, function (_f) {
+                            switch (_f.label) {
                                 case 0:
-                                    _e.trys.push([0, 2, , 3]);
-                                    uId = req.body.uId;
-                                    _b = (_a = res.status(200)).send;
-                                    _d = {};
-                                    _c = 'status';
-                                    return [4 /*yield*/, checkUsers(mongo, uId)];
+                                    _a = req.body, uid = _a.uid, accessToken = _a.accessToken;
+                                    _f.label = 1;
                                 case 1:
-                                    _b.apply(_a, [(_d[_c] = _e.sent(),
-                                            _d)]);
-                                    return [3 /*break*/, 3];
+                                    _f.trys.push([1, 3, , 4]);
+                                    if (!uid || !accessToken)
+                                        res.status(400).send('Missing Information');
+                                    return [4 /*yield*/, authDB.findOne({ uid: uid })];
                                 case 2:
-                                    e_2 = _e.sent();
-                                    res.status(500).send(e_2);
-                                    return [3 /*break*/, 3];
-                                case 3: return [2 /*return*/];
+                                    user = _f.sent();
+                                    if (user === null)
+                                        res.status(400).send('User Does Not Exist');
+                                    else if (accessToken !== user.accessToken /* || !user.admin */)
+                                        res.status(400).send('Unauthorized Access');
+                                    return [3 /*break*/, 4];
+                                case 3:
+                                    e_2 = _f.sent();
+                                    console.log(e_2);
+                                    return [3 /*break*/, 4];
+                                case 4:
+                                    _f.trys.push([4, 6, , 7]);
+                                    _c = (_b = res.status(200)).send;
+                                    _e = {};
+                                    _d = 'status';
+                                    return [4 /*yield*/, checkUsers(mongo, uid)];
+                                case 5:
+                                    _c.apply(_b, [(_e[_d] = _f.sent(),
+                                            _e)]);
+                                    return [3 /*break*/, 7];
+                                case 6:
+                                    e_3 = _f.sent();
+                                    res.status(500).send(e_3);
+                                    return [3 /*break*/, 7];
+                                case 7: return [2 /*return*/];
                             }
                         });
                     }); });
-                    app.get('/user/:uId/files', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                        var uId, ret, e_3;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
+                    app.get('/user/:uid/files', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var _a, uid, accessToken, user, e_4, ret, e_5;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
                                 case 0:
-                                    _a.trys.push([0, 2, , 3]);
-                                    uId = req.params.uId;
-                                    return [4 /*yield*/, getFiles(mongo, uId)];
+                                    _a = req.body, uid = _a.uid, accessToken = _a.accessToken;
+                                    _b.label = 1;
                                 case 1:
-                                    ret = _a.sent();
-                                    res.status(201).json(ret);
-                                    return [3 /*break*/, 3];
+                                    _b.trys.push([1, 3, , 4]);
+                                    if (!uid || !accessToken)
+                                        res.status(400).send('Missing Information');
+                                    return [4 /*yield*/, authDB.findOne({ uid: uid })];
                                 case 2:
-                                    e_3 = _a.sent();
-                                    res.status(500).send(e_3);
-                                    return [3 /*break*/, 3];
-                                case 3: return [2 /*return*/];
+                                    user = _b.sent();
+                                    if (user === null)
+                                        res.status(400).send('User Does Not Exist');
+                                    else if (accessToken !== user.accessToken /* || !user.admin */)
+                                        res.status(400).send('Unauthorized Access');
+                                    return [3 /*break*/, 4];
+                                case 3:
+                                    e_4 = _b.sent();
+                                    console.log(e_4);
+                                    return [3 /*break*/, 4];
+                                case 4:
+                                    _b.trys.push([4, 6, , 7]);
+                                    return [4 /*yield*/, getFiles(mongo, uid)];
+                                case 5:
+                                    ret = _b.sent();
+                                    res.status(201).json(ret);
+                                    return [3 /*break*/, 7];
+                                case 6:
+                                    e_5 = _b.sent();
+                                    res.status(500).send(e_5);
+                                    return [3 /*break*/, 7];
+                                case 7: return [2 /*return*/];
                             }
                         });
                     }); });
                     app.post('/events', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a, type, data, uId, uId, ret, uId, fileId, ret, uId, fileId, ret;
+                        var _a, type, data, uid, accessToken, admin, uid, ret, uid, fileId, ret, uid, fileId, ret;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0:
                                     _a = req.body, type = _a.type, data = _a.data;
-                                    if (!(type === 'AccountCreated')) return [3 /*break*/, 2];
-                                    uId = data.uId;
-                                    return [4 /*yield*/, addUser(mongo, uId)];
+                                    if (!(type === 'AccountCreated')) return [3 /*break*/, 3];
+                                    uid = data.uid, accessToken = data.accessToken, admin = data.admin;
+                                    return [4 /*yield*/, authDB.insertOne({ uid: uid, accessToken: accessToken, admin: admin })];
                                 case 1:
                                     _b.sent();
-                                    res.status(201).json(uId);
-                                    return [3 /*break*/, 8];
+                                    return [4 /*yield*/, addUser(mongo, uid)];
                                 case 2:
-                                    if (!(type === 'AccountDeleted')) return [3 /*break*/, 4];
-                                    uId = data.uId;
-                                    return [4 /*yield*/, removeUser(mongo, uId)];
+                                    _b.sent();
+                                    res.status(201).json(uid);
+                                    return [3 /*break*/, 9];
                                 case 3:
-                                    ret = _b.sent();
-                                    res.status(201).json(ret);
-                                    return [3 /*break*/, 8];
+                                    if (!(type === 'AccountDeleted')) return [3 /*break*/, 5];
+                                    uid = data.uid;
+                                    return [4 /*yield*/, removeUser(mongo, uid)];
                                 case 4:
-                                    if (!(type === 'FileCreated')) return [3 /*break*/, 6];
-                                    uId = data.uId, fileId = data.fileId;
-                                    return [4 /*yield*/, addFile(mongo, uId, fileId)];
+                                    ret = _b.sent();
+                                    res.status(201).json(ret);
+                                    return [3 /*break*/, 9];
                                 case 5:
-                                    ret = _b.sent();
-                                    res.status(201).json(ret);
-                                    return [3 /*break*/, 8];
+                                    if (!(type === 'FileCreated')) return [3 /*break*/, 7];
+                                    uid = data.uid, fileId = data.fileId;
+                                    return [4 /*yield*/, addFile(mongo, uid, fileId)];
                                 case 6:
-                                    if (!(type === 'FileDeleted')) return [3 /*break*/, 8];
-                                    uId = data.uId, fileId = data.fileId;
-                                    return [4 /*yield*/, removeFile(mongo, uId, fileId)];
-                                case 7:
                                     ret = _b.sent();
                                     res.status(201).json(ret);
-                                    _b.label = 8;
-                                case 8: return [2 /*return*/];
+                                    return [3 /*break*/, 9];
+                                case 7:
+                                    if (!(type === 'FileDeleted')) return [3 /*break*/, 9];
+                                    uid = data.uid, fileId = data.fileId;
+                                    return [4 /*yield*/, removeFile(mongo, uid, fileId)];
+                                case 8:
+                                    ret = _b.sent();
+                                    res.status(201).json(ret);
+                                    _b.label = 9;
+                                case 9: return [2 /*return*/];
                             }
                         });
                     }); });

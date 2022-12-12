@@ -20,6 +20,16 @@ async function connectDB(): Promise<MongoClient>{
     return await Promise.resolve(mongo);
 }
 
+async function initAuthDB(mongo) {
+	try {
+		const auth = mongo.db().collection('auth');
+		return auth;
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+}
+
 async function initDB(mongo: MongoClient) {
     const db = mongo.db();
   
@@ -38,9 +48,9 @@ async function initDB(mongo: MongoClient) {
   
     const profiles = db.collection('profiles');
     const result = await profiles.insertMany([
-      { uId: 'user0', name: 'Shell', email: 'shell@gmail.com', bio: 'hi my name is shell', funFact: 'i like chips'},
-      { uId: 'user1', name: 'Fred', email: 'fred@gmail.com', bio: 'hi my name is fred', funFact: 'i like fruit'},
-      { uId: 'user2', name: 'May', email: 'may@gmail.com', bio: 'hi my name is may', funFact: 'spring is my favorite season'},
+      { uid: 'user0', name: 'Shell', email: 'shell@gmail.com', bio: 'hi my name is shell', funFact: 'i like chips'},
+      { uid: 'user1', name: 'Fred', email: 'fred@gmail.com', bio: 'hi my name is fred', funFact: 'i like fruit'},
+      { uid: 'user2', name: 'May', email: 'may@gmail.com', bio: 'hi my name is may', funFact: 'spring is my favorite season'},
     ]);
   
     console.log(`Initialized ${result.insertedCount} profiles`);
@@ -57,7 +67,7 @@ async function getProfiles(mongo: MongoClient) {
     const result = profiles.find();
 
     interface PROFILE {
-        uId: String,
+        uid: String,
         name: String,
         email: String,
         bio: String,
@@ -66,7 +76,7 @@ async function getProfiles(mongo: MongoClient) {
     const ret: PROFILE[] = [];
     await result.forEach((doc) => {
         const cur: PROFILE = {
-            uId: doc.uId,
+            uid: doc.uid,
             name: doc.name,
             email: doc.email,
             bio: doc.bio,
@@ -80,33 +90,33 @@ async function getProfiles(mongo: MongoClient) {
     return ret;
 }
 
-async function getProfile(mongo: MongoClient, uId: String) {
-    const query: { uId: String } = { uId: uId };
+async function getProfile(mongo: MongoClient, uid: String) {
+    const query: { uid: String } = { uid: uid };
     const profiles = mongo.db().collection('profiles');
     return profiles.findOne(query);
 }
 
-async function hasProfile(mongo: MongoClient, uId: String) {
-    const query: { uId: String } = { uId: uId };
+async function hasProfile(mongo: MongoClient, uid: String) {
+    const query: { uid: String } = { uid: uid };
     const profiles = mongo.db().collection('profiles');
     const result = await profiles.count(query);
     return result > 0;
 }
 
-async function updateProfile(mongo: MongoClient, uId: String, name: String, email: String, bio: String, funFact: String) {
+async function updateProfile(mongo: MongoClient, uid: String, name: String, email: String, bio: String, funFact: String) {
     const profiles = mongo.db().collection('profiles');
-    profiles.updateOne({ uId: uId }, { $set: { name: name, email: email, bio: bio, funFact: funFact } });
+    profiles.updateOne({ uid: uid }, { $set: { name: name, email: email, bio: bio, funFact: funFact } });
     return;
 }
 
-async function addProfile(mongo: MongoClient, uId: String, name: String, email: String, bio: String, funFact: String) {
+async function addProfile(mongo: MongoClient, uid: String, name: String, email: String, bio: String, funFact: String) {
     const profiles = mongo.db().collection('profiles');
-    profiles.insertOne({ uId: uId, name: name, email: email, bio: bio, funFact: funFact });
+    profiles.insertOne({ uid: uid, name: name, email: email, bio: bio, funFact: funFact });
     return;
 }
 
-async function deleteProfile(mongo: MongoClient, uId: String) {
-    const query: { uId: String} = { uId: uId };
+async function deleteProfile(mongo: MongoClient, uid: String) {
+    const query: { uid: String} = { uid: uid };
     const profiles = mongo.db().collection('profiles');
     profiles.deleteOne(query);
     return;
@@ -115,6 +125,7 @@ async function deleteProfile(mongo: MongoClient, uId: String) {
 async function start(){
     const mongo = await connectDB();
     await initDB(mongo);
+    const authDB = await initAuthDB(mongo);
 
     app.get('/getProfiles', async (req: Request, res: Response) => {
         if(
@@ -132,22 +143,29 @@ async function start(){
         }
     });
 
-    app.get('/getProfile/:uId', async (req: Request, res: Response) => {
-        const uId = req.params.uId;
-        console.log(req.params.uId);
+    app.get('/getProfile/:uid', async (req: Request, res: Response) => {
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
         if(
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string"
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string"
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else if(
-            await hasProfile(mongo, uId) === false
+            await hasProfile(mongo, uid) === false
         ){
             res.status(404).send({ message: 'User does not have a profile' });
         } else{
             try {
-                const check = await getProfile(mongo, uId);
+                const check = await getProfile(mongo, uid);
                 res.status(201).send(check);
             } catch (e) {
                 console.log(e);
@@ -157,17 +175,24 @@ async function start(){
     });
 
     app.get('/hasProfile', async (req: Request, res: Response) => {
-        const { uId } = req.body;
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
         if(
-            Object.keys(req.body).length !== 1 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string"
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string"
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else{
             try {
-                const check = await hasProfile(mongo, uId);
+                const check = await hasProfile(mongo, uid);
                 res.status(201).send(check);
             } catch (e) {
                 console.log(e);
@@ -176,13 +201,26 @@ async function start(){
         }
     });
 
-    app.put('/updateProfile', async (req, res) => {
-        const { uId, name, email, bio, funFact } = req.body;
+    app.put('/updateProfile/:uid/:name/:email/:bio/:funFact', async (req, res) => {
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
+        // const uid = req.params.uid;
+        const name = req.params.name;
+        const email = req.params.email;
+        const bio = req.params.bio;
+        const funFact = req.params.funFact;
+
         if(
-            Object.keys(req.body).length !== 5 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string" ||
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string" ||
             name === "" ||
             name === undefined ||
             typeof name !== "string" ||
@@ -198,12 +236,12 @@ async function start(){
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else if(
-            await hasProfile(mongo, uId) === false
+            await hasProfile(mongo, uid) === false
         ){
             res.status(404).send({ message: 'User does not have a profile' });
         } else{
            try{
-                await updateProfile(mongo, uId, name, email, bio, funFact);                
+                await updateProfile(mongo, uid, name, email, bio, funFact);                
                 res.status(201).send({ message: 'Profile updated'});
             } catch (error){
                 res.status(500).send(error);
@@ -212,12 +250,20 @@ async function start(){
     });
 
     app.post('/addProfile', async (req, res) => {
-        const { uId, name, email, bio, funFact } = req.body;
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
+        const { name, email, bio, funFact } = req.body;
         if(
-            Object.keys(req.body).length !== 5 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string" ||
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string" ||
             name === "" ||
             name === undefined ||
             typeof name !== "string" ||
@@ -233,12 +279,12 @@ async function start(){
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else if(
-            await hasProfile(mongo, uId) === true
+            await hasProfile(mongo, uid) === true
         ){
             res.status(304).send({ message: 'User already has a profile' });
         } else{
             try{
-                await addProfile(mongo, uId, name, email, bio, funFact);                
+                await addProfile(mongo, uid, name, email, bio, funFact);                
                 res.status(201).send({ message: 'Profile added'});
             } catch (error){
                 res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
@@ -247,22 +293,29 @@ async function start(){
     });
 
     app.delete('/deleteProfile', async (req, res) => {
-        const { uId } = req.body;
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
         
         if(
-            Object.keys(req.body).length !== 1 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string"
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string"
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else if( 
-            await hasProfile(mongo, uId) === false
+            await hasProfile(mongo, uid) === false
         ){
             res.status(404).send({ message: 'Profile does not exist' });
         } else{
             try{
-                await deleteProfile(mongo, uId);
+                await deleteProfile(mongo, uid);
                 res.status(201).send({ message: "Deleted profile" });
             } catch (error){
                 res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
@@ -283,21 +336,24 @@ async function start(){
         } else{
             try{
                 if (type === "AccountDeleted") {
-                    const { uId } = data;
+                    const { uid } = data;
                     if (
-                        uId === "" ||
-                        uId === undefined ||
-                        typeof uId !== "string"
+                        uid === "" ||
+                        uid === undefined ||
+                        typeof uid !== "string"
                     ){
                         res.status(400).send({ message: 'BAD REQUEST' });
                     } else if (
-                        await hasProfile(mongo, uId) === false
+                        await hasProfile(mongo, uid) === false
                     ){ 
                         res.status(404).send({ message: 'Profile does not exist' });
                     } else{
-                        await deleteProfile(mongo, uId);
+                        await deleteProfile(mongo, uid);
                         res.status(201).send({ message: "Profile deleted" });
                     }
+                } else if (type === 'AccountCreated') {
+                    const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body.data;
+                    authDB.insertOne({ uid, accessToken, admin });
                 }
                 res.send({ status: 'OK' });
             } catch (error){
