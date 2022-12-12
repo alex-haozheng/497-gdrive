@@ -13,7 +13,7 @@ const UploadFile = () => {
 
     const handleFileSubmit = async (e : React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const fileContent = await file.text().then((res: string) => res.slice(1, -1));
+        const fileContent = await file.text();
         const fileName = file.name.replace(/.txt$/, '');
         await axios.post('http://localhost:4011/files/upload', {
             name : fileName,
@@ -24,14 +24,12 @@ const UploadFile = () => {
     };
 
     return (
-        <Button variant="outlined" color="success" component="label" sx={{ marginBottom: 2, textTransform: "none", fontFamily: "Helvetica Neue", margin:4}} startIcon={<img src="https://img.icons8.com/ios/50/000000/upload.png" alt="upload" width="20" height="20"/>}>
-            Upload
-            <input
-                type="file"
-                onChange={handleFileChange}
-                hidden
-            />
-        </Button>
+        <Box sx={{position: 'relative', marginBottom: 3}}>
+            <form onSubmit={handleFileSubmit} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+                <input type="file" onChange={handleFileChange} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginLeft: 50}}/>
+                <Button variant="outlined" color="primary" type="submit" sx={{ width:200, position: 'relative', alignItems: 'center', textTransform: "none", fontFamily: "Helvetica Neue"}} startIcon={<img src="https://img.icons8.com/ios/50/000000/upload.png" alt="upload" width="20" height="20"/>}>Upload</Button>
+            </form>
+        </Box>
     );
 };
 
@@ -76,7 +74,7 @@ const ListFiles = () => {
                     return (
                         <Box key={file.fileId} sx={{ width: 200, height: 300, bgcolor: 'white', borderRadius: 2, boxShadow: 2, p: 2, m: 2 }}>
                             <Typography variant="h6" component="div" gutterBottom sx={{fontFamily: "Helvetica Neue"}}>
-                                {file.name}
+                                {file.name.slice(0, file.name.length - 4)}
                             </Typography>
                             <Typography variant="body2" gutterBottom sx={{fontFamily: "Helvetica Neue"}}>
                                 {file.content.slice(0, 25)}...
