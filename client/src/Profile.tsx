@@ -1,7 +1,7 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import axios from 'axios';
 
-const Profile = (data) => {
+const Profile = ({ uid, accessToken }) => {
     const [username, setUsername] = useState('blank');
     const [name, setName] = useState('blank');
     const [email, setEmail] = useState('blank');
@@ -10,8 +10,6 @@ const Profile = (data) => {
 
     const [onEdit, setOnEdit] = useState(false);
 
-    const uid = data.uid;
-
     const fetchProfile = async () => {
         const res = await axios.get(`http://localhost:4002/getProfile/${uid}`);
         setUsername(res.data.uid);
@@ -19,7 +17,6 @@ const Profile = (data) => {
         setEmail(res.data.email);
         setBio(res.data.bio);
         setFunFact(res.data.funFact);
-
         console.log(res.data);
     };
 
