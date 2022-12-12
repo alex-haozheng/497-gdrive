@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Button, createTheme, TextField, ThemeProvider, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { fontFamily } from '@mui/system';
+import { Box, Button, createTheme, TextField, ThemeProvider, Typography } from '@mui/material';
 
 interface File {
     fileId: string;
@@ -40,6 +38,7 @@ export default function EditDocument({fileId}) {
             .catch(err => {
                 console.log(err);
             });
+        handleTextChange(text);
     };
 
     const getFileContent = () => {
@@ -65,24 +64,37 @@ export default function EditDocument({fileId}) {
           ].join(','),
         },
       });
-
+    const [wordCount, setWordCount] = useState(0);
+    const handleTextChange = (text : string) => {
+        const wordCount = text.trim().split(/\s+/).length;
+        setWordCount(wordCount);
+    };
     return (
         <div>
             <ThemeProvider theme={theme}>
-                <Typography variant="h4" component="div" fontWeight="bold" sx={{fontFamily: "Helvetica Neue"}} fontSize="30px" gutterBottom>
-                    {file.name}
-                </Typography>
-                
+                <Box display="flex" flexDirection="row" justifyContent="space-between" padding={15} sx={{paddingBottom: "5px", paddingTop: "5px"}}>
+                    <Button variant="contained" color="success" sx={{marginBottom: "10px", textTransform: "none"}}>
+                        Back
+                    </Button>
+                    <Typography variant="h4" component="div" fontWeight="bold" sx={{fontFamily: "Helvetica Neue"}} fontSize="30px" gutterBottom>
+                        {file?.name}
+                    </Typography>
+                    <Button variant="contained" color="primary" sx={{marginBottom: "10px", textTransform: "none"}} onClick={() => alert("There are " + wordCount + " word(s) in this document.")}>
+                        {wordCount} words
+                    </Button>
+                </Box>
+                <Box padding={15} sx={{paddingTop: "0px", paddingBottom: "0px"}}>
                 <TextField 
                     id="outlined-multiline-static"
-                    multiline
+                    multiline={true}
+                    rows={30}
+                    fullWidth
                     defaultValue={getFileContent()}
                     variant="outlined"
                     onChange={(e) => handleSave(e.target.value)}
+                    sx={{fontFamily: "Helvetica Neue", boxShadow: "5"}}
                 />
-                <Typography variant="h6" component="div" fontWeight="normal" sx={{fontFamily: "Helvetica Neue"}} fontSize="20px" gutterBottom>
-                    Word Count: {getFileContent().split(' ').length}
-                </Typography>
+                </Box>
             </ThemeProvider>
         </div>
     );
