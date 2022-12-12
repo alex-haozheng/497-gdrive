@@ -34,7 +34,7 @@ interface AccountCreated {
   type: 'AccountCreated',
   data: {
     uid: string,
-    email: string
+    accessToken: string
   }
 }
 
