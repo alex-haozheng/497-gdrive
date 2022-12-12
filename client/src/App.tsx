@@ -9,7 +9,6 @@ import Profile from './Profile';
 import EditDocument from './EditDocument';
 
 function App() {
-  const [uid, setUid] = 
   return (
     <div className="App">
       <Login />
