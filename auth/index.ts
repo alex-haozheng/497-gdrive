@@ -13,12 +13,14 @@ function hash(password: string, salt: string): string {
 	return pbkdf2Sync(password, salt, 1000000, 32, 'sha256').toString('hex');
 }
 
-function generatePassword(password: string): { hash: string; salt: string } {
+function generatePassword(password: string): { hash: string, salt: string, accessToken: string } {
 	const salt: string = randomBytes(32).toString('hex');
+	const accessToken: string = randomBytes(32).toString('hex');
 	const hashedPassword: string = hash(password, salt);
 	return {
 		hash: hashedPassword,
-		salt: salt
+		salt: salt,
+		accessToken: accessToken
 	};
 }
 
@@ -58,76 +60,85 @@ async function start() {
 	if (auth === null) throw Error('Database initialization failed');
 
 	app.post('/register', async (req, res) => {
-		const { username, email, password }: { username: string; email: string; password: string } = req.body;
-		if (!username || !email || !password) {
-			res.status(400).send('Username, Email, and Password Required');
-		} else if ((await auth.findOne({ username: username })) !== null) {
+		const { uid, email, password }: { uid: string; email: string; password: string } = req.body;
+		if (!uid || !email || !password) {
+			res.status(400).send('uid, Email, and Password Required');
+		} else if ((await auth.findOne({ uid: uid })) !== null) {
 			res.status(400).send('User Already Exists');
 		} else {
-			const { hash, salt } = generatePassword(password);
+			const { hash, salt, accessToken } = generatePassword(password);
 			auth.insertOne({
-				username: username,
+				uid: uid,
 				hash: hash,
 				salt: salt,
+				accessToken: accessToken,
 				admin: true
 			});
+			console.log('Sending Account Created Event...');
 			axios.post('http://event-bus:4005/events', {
 				type: 'AccountCreated',
 				data: {
-					uid: req.body.username,
-					email: req.body.email
+					uid: req.body.uid,
+					accessToken: req.body.accessToken
 				}
 			});
-			res.send({ username: username, admin: true });
+			console.log('Account Created Event Sent');
+			res.send({ uid: uid, accessToken: accessToken, admin: true });
 		}
 	});
 
 	app.post('/login', async (req, res) => {
-		const { username, password }: { username: string; password: string } = req.body;
-		if (!username || !password) {
+		const { uid, password }: { uid: string; password: string } = req.body;
+		if (!uid || !password) {
 			res.status(400).send('Missing Information');
 		} else {
-			const user = await auth.findOne({ username: username });
+			const user = await auth.findOne({ uid: uid });
 			if (user === null) {
-				res.status(400).send('Incorrect Username');
+				res.status(400).send('Incorrect uid');
 			} else if (!validatePassword(password, user.hash, user.salt)) {
-				res.status(400).send('Inconnect Password');
+				res.status(400).send('Incorrect Password');
 			} else {
-				res.status(200).send({uid: user._id, admin: user.admin});
+				res.status(200).send({ uid: uid, accessToken: user.accessToken, admin: user.admin});
 			}
 		}
 	});
 
 	app.post('/unregister', async (req, res) => {
-		const uid = req.body.uid;
-		await auth.deleteOne({ _id: uid }, err => {
-			if (err) console.log(err);
-			console.log('Successful Account Deletion');
-		});
-		console.log('Sending Account Deleted Event...');
-		axios.post('http://event-bus:4005/events', {
-			type: 'AccountDeleted',
-			data: {
-				uid: username
-			}
-		});
-		console.log('Account Deleted Event Sent');
-		res.redirect('/login');
+		const { uid, accessToken }: {uid: string, accessToken: string } = req.body;
+		if (!uid || !accessToken) {
+			res.status(400).send('Missing Information');
+		}
+		const user = auth.findOne({ uid: uid });
+		if (accessToken !== user.accessToken) {
+			res.status(400).send('Unauthorized Access');
+		} else {
+			await auth.deleteOne({ _id: uid }, err => {
+				if (err) console.log(err);
+				console.log('Successful Account Deletion');
+			});
+			console.log('Sending Account Deleted Event...');
+			axios.post('http://event-bus:4005/events', {
+				type: 'AccountDeleted',
+				data: { uid }
+			});
+			console.log('Account Deleted Event Sent');
+			res.status(200).send('Successfully Deleted Account');
+		}
 	});
 
 	app.post('/events', async (req, res) => {
 		// user deleted, password changed
 		if (req.body.type === 'AdminAdded') {
-			const username = req.body.data.uId;
-			await auth.findOneAndUpdate({ username: username }, { admin: true });
+			const uid = req.body.data.uId;
+			await auth.findOneAndUpdate({ uid: uid }, { admin: true });
 		} else if (req.body.type === 'AdminRemoved') {
-			const username = req.body.data.uId;
-			await auth.findOneAndUpdate({ username: username }, { admin: false });
+			const uid = req.body.data.uId;
+			await auth.findOneAndUpdate({ uid: uid }, { admin: false });
 		} else if (req.body.type === 'ChangePassword') {
-			const username = req.body.data.uid;
+			const uid = req.body.data.uid;
 			const password = req.body.data.otp;
 			const { hash, salt } = generatePassword(password);
-			await auth.findOneAndUpdate({ username: username }, { password: hash, salt: salt });
+			await auth.findOneAndUpdate({ uid: uid }, { password: hash, salt: salt });
 		}
 		res.send({});
 	});
