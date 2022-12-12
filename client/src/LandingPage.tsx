@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Box, Button, createTheme, TextField, ThemeProvider, Typography, Grid } from '@mui/material';
+import { Box, Button, Typography, Grid } from '@mui/material';
 
 
 const UploadFile = () => {
@@ -18,6 +18,8 @@ const UploadFile = () => {
         await axios.post('http://localhost:4011/files/upload', {
             name : fileName,
             content : fileContent,
+        }).then(res => {
+            window.location.reload();
         });
         setFile(null);
         setFileList([...fileList, file]);
@@ -45,8 +47,14 @@ const DownloadButton = ({ fileId, fileName } : { fileId: string, fileName: strin
         link.click();
     };
     return (
-        <Button variant="outlined" color="primary" onClick={handleDownload} sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 120}} startIcon={<img src="https://img.icons8.com/ios/50/000000/download.png" alt="download" width="20" height="20"/>}>Download</Button>
+        <Button variant="outlined" color="primary" onClick={handleDownload} sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 72}} startIcon={<img src="https://img.icons8.com/ios/50/000000/download.png" alt="download" width="20" height="20"/>}>Download</Button>
     );
+};
+
+const handleDelete = async (fileId : string) => {
+    await axios.delete(`http://localhost:4009/files/${fileId}`).then((res) => {
+        window.location.reload();
+    });
 };
         
 const ListFiles = () => {
@@ -79,10 +87,11 @@ const ListFiles = () => {
                             <Typography variant="body2" gutterBottom sx={{fontFamily: "Helvetica Neue"}}>
                                 {file.content.slice(0, 25)}...
                             </Typography>
-                            <Typography variant="body2" gutterBottom sx={{ position: 'relative', top: 120, fontFamily: "Helvetica Neue", color: "grey"}}>
+                            <Typography variant="body2" gutterBottom sx={{ position: 'relative', top: 70, fontFamily: "Helvetica Neue", color: "grey"}}>
                                 Last Modified {file.date.toLocaleString().slice(0, 10)}
                             </Typography>
-                            <Button variant="contained" color="success" sx={{ width:200, textTransform: "none", position: 'relative', top: 125, marginBottom: 2}}>Edit</Button>
+                            <Button variant="contained" color="success" sx={{ width:200, textTransform: "none", position: 'relative', top: 77, marginBottom: 2}}>Edit</Button>
+                            <Button variant="outlined" color="error" sx={{ width:200, textTransform: "none", position: 'relative', top: 73, marginBottom: 2}} onClick={() => {handleDelete(file.fileId)}}>Delete</Button>
                             <DownloadButton fileId={file.fileId} fileName={file.name}/>
                         </Box>
                     );                      
