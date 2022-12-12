@@ -22,7 +22,9 @@ export default function Analytics({ uid, accessToken }: { uid: string, accessTok
 	const [badfiles, setBadfiles]: [badfiles: File[], setBadfiles: (arg: any) => void] = useState<File[]>([]);
 
 	const fetchAnalytics = async () => {
-		const analytics: Analytics = (await axios.get(`http://localhost:4004/analytics/${uid}/${accessToken}`)).data;
+		const analytics: Analytics = (await axios.post(`http://localhost:4004/analytics`, { uid, accessToken })).data;
+		console.log('analytics:');
+		console.log(analytics);
 		setNumFiles(analytics.numFiles);
 		setReadability(analytics.readability);
 		setBadfiles(analytics.badfiles);

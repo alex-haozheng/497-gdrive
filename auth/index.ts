@@ -80,13 +80,13 @@ async function start() {
 				admin: true
 			});
 			console.log('Sending Account Created Event...');
-			/* axios.post('http://event-bus:4005/events', {
+			axios.post('http://event-bus:4012/events', {
 				type: 'AccountCreated',
 				data: {
-					uid: req.body.uid,
-					accessToken: req.body.accessToken
+					uid: uid,
+					accessToken: accessToken
 				}
-			}); */
+			});
 			console.log('Account Created Event Sent');
 			res.send({ uid: uid, accessToken: accessToken, admin: true });
 		}
@@ -133,10 +133,10 @@ async function start() {
 				console.log('Successful Account Deletion');
 			});
 			console.log('Sending Account Deleted Event...');
-			/* axios.post('http://event-bus:4005/events', {
+			axios.post('http://event-bus:4012/events', {
 				type: 'AccountDeleted',
 				data: { uid }
-			}); */
+			});
 			console.log('Account Deleted Event Sent');
 			console.log('Successfully Deleted Account');
 			res.status(200).send('Successfully Deleted Account');

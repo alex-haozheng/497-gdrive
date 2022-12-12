@@ -110,7 +110,8 @@ async function start() {
 
 	async function isAuth(req, res, next) {
 		console.log('Checking Authorization');
-		const { uid, accessToken }: { uid: string, accessToken: string } = req.params;
+		console.log(await authDB.find());
+		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
 			if (!uid || !accessToken) {
 				res.status(400).send('Missing Information');
@@ -119,7 +120,7 @@ async function start() {
 			const user = await authDB.findOne({ uid });
 			if (user === null) {
 				res.status(400).send('User Does Not Exist');
-			} else if (accessToken !== user.accessToken /* || !user.admin */) {
+			} else if (accessToken !== user.accessToken || !user.admin) {
 				res.status(400).send('Unauthorized Access');
 			} else {
 				next();
@@ -131,7 +132,7 @@ async function start() {
 	}
 
 	// TODO: uncomment isAdmin
-	app.get('/analytics/:uid/:accessToken', isAuth, async (req, res) => {
+	app.post('/analytics', isAuth, async (req, res) => {
 		console.log('Made it to analytics service!');
 		try {
 			const results = await analytics.findOne({ key: 'analytics' });

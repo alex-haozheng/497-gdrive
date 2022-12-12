@@ -123,38 +123,42 @@ function start() {
     return __awaiter(this, void 0, void 0, function () {
         function isAuth(req, res, next) {
             return __awaiter(this, void 0, void 0, function () {
-                var _a, uid, accessToken, user, e_3;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
+                var _a, _b, _c, uid, accessToken, user, e_3;
+                return __generator(this, function (_d) {
+                    switch (_d.label) {
                         case 0:
                             console.log('Checking Authorization');
-                            _a = req.body, uid = _a.uid, accessToken = _a.accessToken;
-                            _b.label = 1;
+                            _b = (_a = console).log;
+                            return [4 /*yield*/, authDB.find()];
                         case 1:
-                            _b.trys.push([1, 3, , 4]);
+                            _b.apply(_a, [_d.sent()]);
+                            _c = req.body, uid = _c.uid, accessToken = _c.accessToken;
+                            _d.label = 2;
+                        case 2:
+                            _d.trys.push([2, 4, , 5]);
                             if (!uid || !accessToken) {
                                 res.status(400).send('Missing Information');
                                 return [2 /*return*/];
                             }
                             return [4 /*yield*/, authDB.findOne({ uid: uid })];
-                        case 2:
-                            user = _b.sent();
+                        case 3:
+                            user = _d.sent();
                             if (user === null) {
                                 res.status(400).send('User Does Not Exist');
                             }
-                            else if (accessToken !== user.accessToken /* || !user.admin */) {
+                            else if (accessToken !== user.accessToken || !user.admin) {
                                 res.status(400).send('Unauthorized Access');
                             }
                             else {
                                 next();
                             }
-                            return [3 /*break*/, 4];
-                        case 3:
-                            e_3 = _b.sent();
+                            return [3 /*break*/, 5];
+                        case 4:
+                            e_3 = _d.sent();
                             console.log('isAuth Error');
                             console.log(e_3);
-                            return [3 /*break*/, 4];
-                        case 4: return [2 /*return*/];
+                            return [3 /*break*/, 5];
+                        case 5: return [2 /*return*/];
                     }
                 });
             });
@@ -224,7 +228,7 @@ function start() {
                         });
                     }); }, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
                     // TODO: uncomment isAdmin
-                    app.get('/analytics', isAuth, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                    app.post('/analytics', isAuth, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
                         var results, e_4;
                         return __generator(this, function (_a) {
                             switch (_a.label) {

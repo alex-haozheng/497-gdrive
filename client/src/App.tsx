@@ -7,6 +7,7 @@ import LandingPage from './LandingPage';
 import Register from './Register';
 import Profile from './Profile';
 import EditDocument from './EditDocument';
+import Analytics from './Analytics';
 
 function App() {
   const [uid, setuid]: [uid: string | undefined, setuid: (arg: any) => void] = useState('');
@@ -39,6 +40,7 @@ function App() {
       <ForgotQuestions uid = {uid} accessToken = {accessToken}/>
       <Profile uid={uid} accessToken = {accessToken}/>
       <Admin uid={uid} accessToken = {accessToken}/>
+      <Analytics uid={uid} accessToken={accessToken} />
 
       <h1>Files</h1>
       {/* uncomment the line below to see a working concept of the landing page where all the files are shown on. Only works when fileService and uploadDownload service are running.} */}
