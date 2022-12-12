@@ -51,7 +51,7 @@ async function initDB(mongo: MongoClient) {
   }
 }
 
-async function initAuthDB(mongo) {
+async function initAuthDB(mongo: MongoClient) {
 	try {
 		const auth = mongo.db().collection('auth');
 		return auth;

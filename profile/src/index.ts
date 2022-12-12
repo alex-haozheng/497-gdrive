@@ -20,7 +20,7 @@ async function connectDB(): Promise<MongoClient>{
     return await Promise.resolve(mongo);
 }
 
-async function initAuthDB(mongo) {
+async function initAuthDB(mongo: MongoClient) {
 	try {
 		const auth = mongo.db().collection('auth');
 		return auth;
