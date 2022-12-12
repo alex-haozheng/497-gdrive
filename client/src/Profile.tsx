@@ -2,11 +2,11 @@ import React, { FormEvent, useEffect, useState } from 'react';
 import axios from 'axios';
 
 const Profile = (data) => {
-    const [username, setUsername] = useState('blank');
-    const [name, setName] = useState('blank');
-    const [email, setEmail] = useState('blank');
-    const [bio, setBio] = useState('blank');
-    const [funFact, setFunFact] = useState('blank');
+    const [username, setUsername] = useState('');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [bio, setBio] = useState('');
+    const [funFact, setFunFact] = useState('');
 
     const [onEdit, setOnEdit] = useState(false);
 
@@ -48,10 +48,11 @@ const Profile = (data) => {
                 uid, name, email, bio, funFact
             }
             if(name === "" || email === "" || bio === "" || funFact === ""){
-
+                console.log("Can not button change because field(s) empty");
             } else{
                 const hasProfile = await axios.get(`http://localhost:4002/hasProfile/${uid}`);
-                if(hasProfile){
+                console.log("has profile status"+ hasProfile.data);
+                if(hasProfile.data){
                     await axios.put(`http://localhost:4002/updateProfile/${uid}/${name}/${email}/${bio}/${funFact}`);
                 } else{
                     await axios.post(`http://localhost:4002/addProfile/${uid}/${name}/${email}/${bio}/${funFact}`);

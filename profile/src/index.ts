@@ -216,10 +216,10 @@ async function start(){
         }
     });
 
-    app.post('/addProfile', async (req, res) => {
-        const { uid, name, email, bio, funFact } = req.body;
+    app.post('/addProfile/:uid/:name/:email/:bio/:funFact', async (req, res) => {
+        const { uid, name, email, bio, funFact } = req.params;
         if(
-            Object.keys(req.body).length !== 5 ||
+            Object.keys(req.params).length !== 5 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string" ||
@@ -251,11 +251,11 @@ async function start(){
         }
     });
 
-    app.delete('/deleteProfile', async (req, res) => {
-        const { uid } = req.body;
+    app.delete('/deleteProfile/:uid', async (req, res) => {
+        const { uid } = req.params;
         
         if(
-            Object.keys(req.body).length !== 1 ||
+            Object.keys(req.params).length !== 1 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string"
