@@ -7,6 +7,7 @@ export default function ForgotQuestions(data) {
 	const [password, setPassword]: [password: string | undefined, setPassword: (arg: any) => void] = useState<string | undefined>('');
 
 	const uid = data.uid;
+	const accessToken = data.accessToken;
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		console.log(uid);
@@ -15,6 +16,7 @@ export default function ForgotQuestions(data) {
 		await axios.post('http://localhost:4006/verify', {
 			uid,
 			question,
+			accessToken,
 			password
 		});
 	};

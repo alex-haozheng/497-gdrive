@@ -31,10 +31,10 @@ function App() {
     <div className="App">
       <Login func={getUIDandToken} />
       <Register />
-      <Questions uid = {uid}/>
-      <ForgotQuestions uid = {uid}/>
-      <Profile uid={uid}/>
-      <Admin uid={uid}/>
+      <Questions uid = {uid} accessToken = {accessToken}/>
+      <ForgotQuestions uid = {uid} accessToken = {accessToken}/>
+      <Profile uid={uid} accessToken = {accessToken}/>
+      <Admin uid={uid} accessToken = {accessToken}/>
 
       <h1>Files</h1>
       {/* uncomment the line below to see a working concept of the landing page where all the files are shown on. Only works when fileService and uploadDownload service are running.} */}
