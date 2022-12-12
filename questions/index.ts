@@ -85,7 +85,7 @@ async function start() {
 	const mongo = await connectDB();
 	await initDB(mongo);
 	// will be used for checking and returning
-	app.get('/verify', isAuth, async (req: Request, res: Response) => {
+	app.get('/verify', async (req: Request, res: Response) => {
 		const { uid, accessToken, question, otp }: { uid: string, accessToken: string, question: string, otp: string } = req.body;
 		try {
 			if ( Object.keys(req.body).length > 7 ){
