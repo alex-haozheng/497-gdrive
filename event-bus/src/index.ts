@@ -123,7 +123,7 @@ app.post('/events', (req, res) => {
   console.log(req.body.data);
 
   // yuri's services
-  /* axios.post('http://admin:4000/events', event).catch((err: Error) => {
+  axios.post('http://admin:4000/events', event).catch((err: Error) => {
     console.log(err.message);
   });
 
@@ -133,7 +133,7 @@ app.post('/events', (req, res) => {
 
   axios.post('http://profile:4002/events', event).catch((err: Error) => {
     console.log(err.message);
-  }); */
+  });
 
   // kays service
   axios.post('http://auth:4003/events', event).catch((err: Error) => {
@@ -144,7 +144,7 @@ app.post('/events', (req, res) => {
     console.log(err.message);
   });
 
-  /* axios.post('http://moderator:4005/events', event).catch((err: Error) => {
+  axios.post('http://moderator:4005/events', event).catch((err: Error) => {
     console.log(err.message);
   });
   
@@ -173,8 +173,8 @@ app.post('/events', (req, res) => {
 
   axios.post('http://uploaddownload:4011/events', event).catch((err: Error) => {
     console.log(err.message);
-  }); */
-
+  });
+  
   res.send({}); // don't delete. if res doesn't send a response, requests never get satisfied
 });
 

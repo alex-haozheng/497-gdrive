@@ -32,8 +32,12 @@ function App() {
   /* return ( 
     <div className="App">
       <Login func={getuidandToken} />
+      <Login func={getuidandToken} />
       <Register />
       <Questions uid = {uid} accessToken = {accessToken} />
+      <ForgotQuestions />
+      <Profile uid={uid}/>
+      <Admin uid={uid}/>
       <ForgotQuestions />
       <Profile uid={uid}/>
       <Admin uid={uid}/>

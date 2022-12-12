@@ -20,16 +20,6 @@ async function connectDB(): Promise<MongoClient>{
     return await Promise.resolve(mongo);
 }
 
-async function initAuthDB(mongo: MongoClient) {
-	try {
-		const auth = mongo.db().collection('auth');
-		return auth;
-	} catch (e) {
-		console.log(e);
-		return null;
-	}
-}
-
 async function initDB(mongo: MongoClient) {
     const db = mongo.db();
   
@@ -125,11 +115,10 @@ async function deleteProfile(mongo: MongoClient, uid: String) {
 async function start(){
     const mongo = await connectDB();
     await initDB(mongo);
-    const authDB = await initAuthDB(mongo);
 
-    app.get('/getProfiles/:uid/:adminAccess', async (req: Request, res: Response) => {
+    app.get('/getProfiles', async (req: Request, res: Response) => {
         if(
-            Object.keys(req.body).length !== 2
+            Object.keys(req.body).length !== 0
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else{
@@ -143,16 +132,9 @@ async function start(){
         }
     });
 
-    app.get('/getProfile/:uid/:accessToken', async (req: Request, res: Response) => {
-        const { uid, accessToken } = req.params;
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
-			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
+    app.get('/getProfile/:uid', async (req: Request, res: Response) => {
+        const uid = req.params.uid;
+        console.log(req.params.uid);
         if(
             uid === "" ||
             uid === undefined ||
@@ -174,17 +156,10 @@ async function start(){
         }
     });
 
-    app.get('/hasProfile/:uid/:accessToken', async (req: Request, res: Response) => {
-        const { uid, accessToken } = req.params;
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
-			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
+    app.get('/hasProfile/:uid', async (req: Request, res: Response) => {
+        const { uid } = req.params;
         if(
+            Object.keys(req.params).length !== 1 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string"
@@ -201,25 +176,15 @@ async function start(){
         }
     });
 
-    app.put('/updateProfile/:uid/:name/:email/:bio/:funFact/:accessToken', async (req, res) => {
-        const accessToken = req.params.accessToken;
+    app.put('/updateProfile/:uid/:name/:email/:bio/:funFact', async (req, res) => {
         const uid = req.params.uid;
-
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
-			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
-        // const uid = req.params.uid;
         const name = req.params.name;
         const email = req.params.email;
         const bio = req.params.bio;
         const funFact = req.params.funFact;
 
         if(
+            Object.keys(req.params).length !== 5 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string" ||
@@ -251,18 +216,10 @@ async function start(){
         }
     });
 
-    app.post('/addProfile/:uid/:name/:email/:bio/:funFact/:accessToken', async (req, res) => {
-        const { uid, accessToken } = req.params;
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
-			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
-        const { name, email, bio, funFact } = req.params;
+    app.post('/addProfile/:uid/:name/:email/:bio/:funFact', async (req, res) => {
+        const { uid, name, email, bio, funFact } = req.params;
         if(
+            Object.keys(req.params).length !== 5 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string" ||
@@ -294,18 +251,11 @@ async function start(){
         }
     });
 
-    app.delete('/deleteProfile/:uid/:accessToken', async (req, res) => {
-        const { uid, accessToken } = req.params;
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
-			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
+    app.delete('/deleteProfile/:uid', async (req, res) => {
+        const { uid } = req.params;
         
         if(
+            Object.keys(req.params).length !== 1 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string"
@@ -353,9 +303,6 @@ async function start(){
                         await deleteProfile(mongo, uid);
                         res.status(201).send({ message: "Profile deleted" });
                     }
-                } else if (type === 'AccountCreated') {
-                    const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body.data;
-                    authDB.insertOne({ uid, accessToken, admin });
                 }
                 res.send({ status: 'OK' });
             } catch (error){

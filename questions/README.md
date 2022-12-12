@@ -76,4 +76,4 @@ Description: This endpoint will generate a change password event to the authenti
     $ npm start
     ```
 ### **Step 5: View the Application**
-- The command from Step 4 will locally host the website on `http://localhost:3000`.
+- The command from Step 4 will locally host the website on `http://localhost:4006`.

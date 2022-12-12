@@ -1,28 +1,62 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import axios from 'axios';
 
-const Profile = ({ uid, accessToken }) => {
-    const [username, setUsername] = useState('blank');
-    const [name, setName] = useState('blank');
-    const [email, setEmail] = useState('blank');
-    const [bio, setBio] = useState('blank');
-    const [funFact, setFunFact] = useState('blank');
+const Profile = (data) => {
+    const [username, setUsername] = useState('');
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [bio, setBio] = useState('');
+    const [funFact, setFunFact] = useState('');
 
     const [onEdit, setOnEdit] = useState(false);
 
+    const uid = data.uid;
+    //const uid = "user0";
+
     const fetchProfile = async () => {
-        const res = await axios.get(`http://localhost:4002/getProfile/${uid}/${accessToken}`);
+        let res;
+        if(uid === '' || undefined){
+            res = {
+                data :{
+                    uid: "",
+                    name: "",
+                    email: "",
+                    bio: "",
+                    funFact: ""
+                }};
+        } else{
+        const hasProfile = await axios.get(`http://localhost:4002/hasProfile/${uid}`);
+        if(!hasProfile.data){
+            res = {
+                data :{
+                    uid: uid,
+                    name: "",
+                    email: "",
+                    bio: "",
+                    funFact: ""
+                }};
+        } else{
+            res = await axios.get(`http://localhost:4002/getProfile/${uid}`);
+        }
+        }
         setUsername(res.data.uid);
         setName(res.data.name);
         setEmail(res.data.email);
         setBio(res.data.bio);
         setFunFact(res.data.funFact);
+
         console.log(res.data);
+        console.log(uid);
+        console.log(name);
+        console.log(email);
+        console.log(bio);
+        console.log(funFact);
+        console.log("what we got for profile render");
     };
 
     useEffect(() => {
       fetchProfile();
-    }, []);
+    }, [uid]);
 
     const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -31,45 +65,34 @@ const Profile = ({ uid, accessToken }) => {
             const profile = {
                 uid, name, email, bio, funFact
             }
-            if(profile.uid === ""){
-                profile.uid = "blank";
-                setUsername("blank");
+            if(name === "" || email === "" || bio === "" || funFact === ""){
+                console.log("Can not button change because field(s) empty");
+            } else{
+                const hasProfile = await axios.get(`http://localhost:4002/hasProfile/${uid}`);
+                console.log("has profile status"+ hasProfile.data);
+                if(hasProfile.data){
+                    await axios.put(`http://localhost:4002/updateProfile/${uid}/${name}/${email}/${bio}/${funFact}`);
+                } else{
+                    await axios.post(`http://localhost:4002/addProfile/${uid}/${name}/${email}/${bio}/${funFact}`);
+                }
+                setOnEdit(!onEdit);
             }
-            if(profile.name === ""){
-                profile.name = "blank";
-                setName("blank");
-            }
-            if(profile.email === ""){
-                profile.email = "blank";
-                setEmail("blank");
-            }
-            if(profile.bio === ""){
-                profile.bio = "blank";
-                setBio("blank");
-            }
-            if(profile.funFact === ""){
-                profile.funFact = "blank";
-                setFunFact("blank");
-            }
-            await axios.put(`http://localhost:4002/updateProfile/${uid}/${name}/${email}/${bio}/${funFact}/${accessToken}`);
             //setProfile(profile);
             console.log(profile);
+            fetchProfile();
+        } else{
+            setOnEdit(!onEdit);
         }
-        setOnEdit(!onEdit);
     };
 
     const renderedProfile = 
         ( onEdit ? 
             <div>
+                <h3>Must have no empty fields in form to add/update your profile</h3>
                 <form onSubmit={onSubmit}>
                     <button className="btn btn-primary">Save</button>
                 </form>
-                <h3>Username:</h3>
-                <input
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="form-control"
-                ></input>
+                <h3>Username: {uid}</h3>
 
                 <h3>Name:</h3>
                 <input
@@ -104,7 +127,7 @@ const Profile = ({ uid, accessToken }) => {
                 <form onSubmit={onSubmit}>
                     <button className="btn btn-primary">Edit</button>
                 </form>
-                <h3>Username: {username}</h3>
+                <h3>Username: {uid}</h3>
                 <h3>Name: {name}</h3>
                 <h3>Email: {email}</h3>
                 <h3>Bio: {bio}</h3>
