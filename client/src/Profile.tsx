@@ -11,11 +11,22 @@ const Profile = (data) => {
     const [onEdit, setOnEdit] = useState(false);
 
     const uid = data.uid;
+    //const uid = "user0";
 
     const fetchProfile = async () => {
-        const hasProfile = await axios.get(`http://localhost:4002/hasProfile/${uid}`);
         let res;
-        if(!hasProfile){
+        if(uid === '' || undefined){
+            res = {
+                data :{
+                    uid: "",
+                    name: "",
+                    email: "",
+                    bio: "",
+                    funFact: ""
+                }};
+        } else{
+        const hasProfile = await axios.get(`http://localhost:4002/hasProfile/${uid}`);
+        if(!hasProfile.data){
             res = {
                 data :{
                     uid: uid,
@@ -27,6 +38,7 @@ const Profile = (data) => {
         } else{
             res = await axios.get(`http://localhost:4002/getProfile/${uid}`);
         }
+        }
         setUsername(res.data.uid);
         setName(res.data.name);
         setEmail(res.data.email);
@@ -34,11 +46,17 @@ const Profile = (data) => {
         setFunFact(res.data.funFact);
 
         console.log(res.data);
+        console.log(uid);
+        console.log(name);
+        console.log(email);
+        console.log(bio);
+        console.log(funFact);
+        console.log("what we got for profile render");
     };
 
     useEffect(() => {
       fetchProfile();
-    }, []);
+    }, [uid]);
 
     const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -61,6 +79,7 @@ const Profile = (data) => {
             }
             //setProfile(profile);
             console.log(profile);
+            fetchProfile();
         } else{
             setOnEdit(!onEdit);
         }
