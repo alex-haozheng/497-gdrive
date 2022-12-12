@@ -51,16 +51,6 @@ async function initDB(mongo: MongoClient) {
   }
 }
 
-async function initAuthDB(mongo: MongoClient) {
-	try {
-		const auth = mongo.db().collection('auth');
-		return auth;
-	} catch (e) {
-		console.log(e);
-		return null;
-	}
-}
-
 // import { getRequests, checkRequest, addRequest, removeRequest } from './database.js';
 async function getRequests(mongo: MongoClient) {
     const requests = mongo.db().collection('requests');
@@ -97,11 +87,10 @@ async function removeRequest(mongo: MongoClient, uid: String) {
 async function start() {
     const mongo = await connectDB();
     await initDB(mongo);
-    const authDB = await initAuthDB(mongo);
     
-    app.get('/getRequests/:uid/:accessToken', async (req: Request, res: Response) => {
+    app.get('/getRequests', async (req: Request, res: Response) => {
         if(
-            Object.keys(req.params).length !== 2
+            Object.keys(req.body).length !== 0
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else{
@@ -115,18 +104,10 @@ async function start() {
         }
     });
 
-    app.get('/checkRequest/:uid/:accessToken', async (req: Request, res: Response) => {
-        const { uid, accessToken } = req.params;
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
-			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
-
+    app.get('/checkRequest/:uid', async (req: Request, res: Response) => {
+        const uid = req.params.uid;
         if(
+            Object.keys(req.params).length !== 1 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string"
@@ -143,18 +124,11 @@ async function start() {
         }
     });
 
-    app.post('/addRequest/:uid/:accessToken', async (req, res) => {
-        const { uid, accessToken } = req.params;
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
-			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
+    app.post('/addRequest', async (req, res) => {
+        const { uid } = req.body;
         
         if(
+            Object.keys(req.body).length !== 1 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string"
@@ -174,18 +148,11 @@ async function start() {
         }
     });
 
-    app.delete('/removeRequest/:uid/:accessToken', async (req, res) => {
-        const { uid, accessToken } = req.params;
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
-			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
+    app.delete('/removeRequest/:uid', async (req, res) => {
+        const uid = req.params.uid;
 
         if(
+            Object.keys(req.params).length !== 1 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string"
@@ -204,14 +171,6 @@ async function start() {
             }
         }
     });
-
-    app.post('/events', (req, res) => {
-		if (req.body.type === 'AccountCreated') {
-			const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body.data;
-			authDB.insertOne({ uid, accessToken, admin });
-		}
-		res.send({});
-	});
 
     /*
     app.post('/events', async (req, res) => {

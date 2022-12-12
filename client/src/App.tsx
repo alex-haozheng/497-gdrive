@@ -13,7 +13,7 @@ function App() {
   const [uid, setuid]: [uid: string | undefined, setuid: (arg: any) => void] = useState('');
 	const [accessToken, setAccessToken]: [accessToken: string | undefined, setAccessToken: (arg: any) => void] = useState('');
 
-  const getUIDandToken = (uid1, accessToken1) => {
+  const getuidandToken = (uid1, accessToken1) => {
     setuid(uid1);
     setAccessToken(accessToken1);
   }
@@ -28,18 +28,14 @@ function App() {
 
 
 
-  return (
+  return ( 
     <div className="App">
-      <Login func={getUIDandToken} />
+      <Login func={getuidandToken} />
       <Register />
       <Questions uid = {uid} accessToken = {accessToken} />
       <ForgotQuestions uid = {uid} accessToken = {accessToken} />
-      <Profile uid = {uid} accessToken = {accessToken} />
-      <Admin uid = {uid} accessToken = {accessToken} />
-      <Questions uid = {uid} accessToken = {accessToken}/>
-      <ForgotQuestions uid = {uid} accessToken = {accessToken}/>
-      <Profile uid={uid} accessToken = {accessToken}/>
-      <Admin uid={uid} accessToken = {accessToken}/>
+      <Profile uid={uid}/>
+      <Admin uid={uid}/>
       <Analytics uid={uid} accessToken={accessToken} />
 
       <h1>Files</h1>

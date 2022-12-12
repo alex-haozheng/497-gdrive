@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminCard from './AdminCard';
 
-const AdminList = (uid, accessToken) => {
+const AdminList = (data) => {
     const [admins, setAdmins] = useState([]);
 
     const fetchAdmins = async () => {
-      const res = await axios.get(`http://localhost:4000/getAdmins/${uid}/${accessToken}`);
+      const res = await axios.get('http://localhost:4000/getAdmins');
       setAdmins(res.data);
       console.log(res.data);
     };
@@ -26,7 +26,7 @@ const AdminList = (uid, accessToken) => {
                 className="card-body"  
                 style={{ backgroundColor: 'pink', margin: '5%', border: '1px solid black'}}
             >
-              <AdminCard uid = {uid} accessToken = {accessToken} />
+              <AdminCard uid={p} edit={data.edit}/>
             </div>
           </div>
         );

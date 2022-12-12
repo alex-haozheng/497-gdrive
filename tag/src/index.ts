@@ -53,16 +53,6 @@ async function initDB(mongo: MongoClient) {
     }
 }
 
-async function initAuthDB(mongo: MongoClient) {
-	try {
-		const auth = mongo.db().collection('auth');
-		return auth;
-	} catch (e) {
-		console.log(e);
-		return null;
-	}
-}
-
 // import { getFiles, getTags, hasTag, addTag, removeTag } from './database.js';
 async function getFiles(mongo: MongoClient, tag: String) {
     const tags = mongo.db().collection('tags');
@@ -136,7 +126,6 @@ async function removeFile(mongo: MongoClient, fileId: String) {
 async function start(){
     const mongo = await connectDB();
     await initDB(mongo);
-    const authDB = await initAuthDB(mongo);
 
     app.get('/getFiles', async (req: Request, res: Response) => {
         const { tag } = req.body;
@@ -259,9 +248,6 @@ async function start(){
                         await removeFile(mongo, fileId);
                         res.status(201).send({ message: "File deleted" });
                     }
-                } else if (type === 'AccountCreated') {
-                    const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body;
-                    authDB.insertOne({ uid, accessToken, admin });
                 }
                 res.send({ status: 'OK' });
             } catch (error){

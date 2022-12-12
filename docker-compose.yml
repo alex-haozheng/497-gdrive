@@ -9,9 +9,9 @@ services:
     ports:
       - "4000:4000"
     depends_on:
-      - mongodb_container
+      - admin-mongo
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+      DATABASE_URL: mongodb://root:rootpassword@admin-mongo:27017/mydb?directConnection=true&authSource=admin
   admin-mongo:
     image: mongo:latest
     container_name: admin-mongo
@@ -25,9 +25,9 @@ services:
     ports:
       - "4001:4001"
     depends_on:
-      - mongodb_container
+      - tag-mongo
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+      DATABASE_URL: mongodb://root:rootpassword@tag-mongo:27017/mydb?directConnection=true&authSource=admin
   tag-mongo:
     image: mongo:latest
     container_name: tag-mongo
@@ -41,9 +41,9 @@ services:
     ports:
       - "4002:4002"
     depends_on:
-      - mongodb_container
+      - profile-mongo
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+      DATABASE_URL: mongodb://root:rootpassword@profile-mongo:27017/mydb?directConnection=true&authSource=admin
   profile-mongo:
     image: mongo:latest
     container_name: profile-mongo
@@ -155,9 +155,9 @@ services:
     ports:
       - "4013:4013"
     depends_on:
-      - mongodb_container
+      - requests-mongo
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+      DATABASE_URL: mongodb://root:rootpassword@requests-mongo:27017/mydb?directConnection=true&authSource=admin
   requests-mongo:
     image: mongo:latest
     container_name: requests-mongo
