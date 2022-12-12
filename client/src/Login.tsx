@@ -13,7 +13,7 @@ export default function Login() {
 		await axios.post('http://localhost:4003/login', {
 			username,
 			password
-		}, { withCredentials: true });
+		});
 		/* await fetch('http://localhost:4003/login', {
 			method: 'POST',
 			credentials: 'include',
