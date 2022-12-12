@@ -26,7 +26,7 @@ const AdminList = () => {
                 className="card-body"  
                 style={{ backgroundColor: 'pink', margin: '5%', border: '1px solid black'}}
             >
-              <AdminCard uId={p}/>
+              <AdminCard uid={p}/>
             </div>
           </div>
         );

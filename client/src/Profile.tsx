@@ -10,11 +10,11 @@ const Profile = (data) => {
 
     const [onEdit, setOnEdit] = useState(false);
 
-    const uId = data.uId;
+    const uid = data.uid;
 
     const fetchProfile = async () => {
-        const res = await axios.get(`http://localhost:4002/getProfile/${uId}`);
-        setUsername(res.data.uId);
+        const res = await axios.get(`http://localhost:4002/getProfile/${uid}`);
+        setUsername(res.data.uid);
         setName(res.data.name);
         setEmail(res.data.email);
         setBio(res.data.bio);
@@ -32,10 +32,10 @@ const Profile = (data) => {
 
         if(onEdit === true){
             const profile = {
-                uId, name, email, bio, funFact
+                uid, name, email, bio, funFact
             }
-            if(profile.uId === ""){
-                profile.uId = "blank";
+            if(profile.uid === ""){
+                profile.uid = "blank";
                 setUsername("blank");
             }
             if(profile.name === ""){
@@ -54,7 +54,7 @@ const Profile = (data) => {
                 profile.funFact = "blank";
                 setFunFact("blank");
             }
-            await axios.put(`http://localhost:4002/updateProfile/${uId}/${name}/${email}/${bio}/${funFact}`);
+            await axios.put(`http://localhost:4002/updateProfile/${uid}/${name}/${email}/${bio}/${funFact}`);
             //setProfile(profile);
             console.log(profile);
         }
