@@ -45,7 +45,7 @@ var app = express();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(cors());
-;
+// uid : security question
 function connectDB() {
     return __awaiter(this, void 0, void 0, function () {
         var uri, mongo;
@@ -92,9 +92,9 @@ function initDB(mongo) {
                     }
                     questions = db.collection('questions');
                     return [4 /*yield*/, questions.insertMany([
-                            { 'a': 'test' },
-                            { 'b': 'test' },
-                            { 'c': 'test' },
+                            { uid: 'a', question: 'test' },
+                            { uid: 'b', question: 'test' },
+                            { uid: 'c', question: 'test' },
                         ])];
                 case 3:
                     result = _a.sent();
@@ -105,6 +105,22 @@ function initDB(mongo) {
                     }
                     return [2 /*return*/];
             }
+        });
+    });
+}
+function initAuthDB(mongo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var auth;
+        return __generator(this, function (_a) {
+            try {
+                auth = mongo.db().collection('auth');
+                return [2 /*return*/, auth];
+            }
+            catch (e) {
+                console.log(e);
+                return [2 /*return*/, null];
+            }
+            return [2 /*return*/];
         });
     });
 }
@@ -149,7 +165,7 @@ function insertQuestion(mongo, uid, question) {
 }
 function start() {
     return __awaiter(this, void 0, void 0, function () {
-        var mongo;
+        var mongo, authDB;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -159,26 +175,48 @@ function start() {
                     return [4 /*yield*/, initDB(mongo)];
                 case 2:
                     _a.sent();
+                    return [4 /*yield*/, initAuthDB(mongo)];
+                case 3:
+                    authDB = _a.sent();
                     // will be used for checking and returning
                     app.get('/verify', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a, uid, question, otp, ret, e_1;
+                        var _a, uid, accessToken, question, otp, user, e_1, ret, e_2;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0:
-                                    _b.trys.push([0, 4, , 5]);
-                                    if (!(Object.keys(req.body).length !== 3)) return [3 /*break*/, 1];
-                                    res.status(400).send({ message: 'BAD REQUEST' });
-                                    return [3 /*break*/, 3];
+                                    _a = req.body, uid = _a.uid, accessToken = _a.accessToken, question = _a.question, otp = _a.otp;
+                                    _b.label = 1;
                                 case 1:
-                                    _a = req.body, uid = _a.uid, question = _a.question, otp = _a.otp;
-                                    return [4 /*yield*/, verify(mongo, uid, question)];
+                                    _b.trys.push([1, 3, , 4]);
+                                    if (!uid || !accessToken)
+                                        res.status(400).send('Missing Information');
+                                    return [4 /*yield*/, authDB.findOne({ uid: uid })];
                                 case 2:
+                                    user = _b.sent();
+                                    if (user === null)
+                                        res.status(400).send('User Does Not Exist');
+                                    else if (accessToken !== user.accessToken /* || !user.admin */)
+                                        res.status(400).send('Unauthorized Access');
+                                    return [3 /*break*/, 4];
+                                case 3:
+                                    e_1 = _b.sent();
+                                    console.log(e_1);
+                                    return [3 /*break*/, 4];
+                                case 4:
+                                    _b.trys.push([4, 8, , 9]);
+                                    if (!(Object.keys(req.body).length !== 3)) return [3 /*break*/, 5];
+                                    res.status(400).send({ message: 'BAD REQUEST' });
+                                    return [3 /*break*/, 7];
+                                case 5: return [4 /*yield*/, verify(mongo, uid, question)];
+                                case 6:
                                     ret = _b.sent();
                                     if (ret.length > 0) {
                                         axios_1.default.post('http://event-bus:4005/events', {
                                             type: 'ChangePassword',
                                             data: {
                                                 uid: uid,
+                                                accessToken: accessToken,
+                                                question: question,
                                                 otp: otp
                                             }
                                         });
@@ -187,29 +225,46 @@ function start() {
                                     else {
                                         res.status(404).send({ message: 'NOT FOUND' });
                                     }
-                                    _b.label = 3;
-                                case 3: return [3 /*break*/, 5];
-                                case 4:
-                                    e_1 = _b.sent();
-                                    res.status(500).send(e_1);
-                                    return [3 /*break*/, 5];
-                                case 5: return [2 /*return*/];
+                                    _b.label = 7;
+                                case 7: return [3 /*break*/, 9];
+                                case 8:
+                                    e_2 = _b.sent();
+                                    res.status(500).send(e_2);
+                                    return [3 /*break*/, 9];
+                                case 9: return [2 /*return*/];
                             }
                         });
                     }); });
                     app.post('/new/user', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a, uid, question, ret, e_2;
+                        var _a, uid, accessToken, question, user, e_3, ret, e_4;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0:
-                                    _b.trys.push([0, 4, , 5]);
-                                    if (!(Object.keys(req.body).length !== 2)) return [3 /*break*/, 1];
-                                    res.status(400).send({ message: 'BAD REQUEST' });
-                                    return [3 /*break*/, 3];
+                                    _a = req.body, uid = _a.uid, accessToken = _a.accessToken, question = _a.question;
+                                    _b.label = 1;
                                 case 1:
-                                    _a = req.body, uid = _a.uid, question = _a.question;
-                                    return [4 /*yield*/, insertQuestion(mongo, uid, question)];
+                                    _b.trys.push([1, 3, , 4]);
+                                    if (!uid || !accessToken)
+                                        res.status(400).send('Missing Information');
+                                    return [4 /*yield*/, authDB.findOne({ uid: uid })];
                                 case 2:
+                                    user = _b.sent();
+                                    if (user === null)
+                                        res.status(400).send('User Does Not Exist');
+                                    else if (accessToken !== user.accessToken /* || !user.admin */)
+                                        res.status(400).send('Unauthorized Access');
+                                    return [3 /*break*/, 4];
+                                case 3:
+                                    e_3 = _b.sent();
+                                    console.log(e_3);
+                                    return [3 /*break*/, 4];
+                                case 4:
+                                    _b.trys.push([4, 8, , 9]);
+                                    if (!(Object.keys(req.body).length !== 1)) return [3 /*break*/, 5];
+                                    res.status(400).send({ message: 'BAD REQUEST' });
+                                    return [3 /*break*/, 7];
+                                case 5: return [4 /*yield*/, insertQuestion(mongo, uid, question)];
+                                case 6:
                                     ret = _b.sent();
                                     if (ret.acknowledged) {
                                         res.status(201).send(ret);
@@ -217,18 +272,18 @@ function start() {
                                     else {
                                         res.status(400).send(ret);
                                     }
-                                    _b.label = 3;
-                                case 3: return [3 /*break*/, 5];
-                                case 4:
-                                    e_2 = _b.sent();
-                                    res.status(500).send(e_2);
-                                    return [3 /*break*/, 5];
-                                case 5: return [2 /*return*/];
+                                    _b.label = 7;
+                                case 7: return [3 /*break*/, 9];
+                                case 8:
+                                    e_4 = _b.sent();
+                                    res.status(500).send(e_4);
+                                    return [3 /*break*/, 9];
+                                case 9: return [2 /*return*/];
                             }
                         });
                     }); });
                     app.delete('/reset', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                        var ret, e_3;
+                        var ret, e_5;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -239,15 +294,15 @@ function start() {
                                     res.status(201).send(ret);
                                     return [3 /*break*/, 3];
                                 case 2:
-                                    e_3 = _a.sent();
-                                    res.status(500).send(e_3);
+                                    e_5 = _a.sent();
+                                    res.status(500).send(e_5);
                                     return [3 /*break*/, 3];
                                 case 3: return [2 /*return*/];
                             }
                         });
                     }); });
                     app.post('/events', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                        var _a, type, data, uid, ret;
+                        var _a, type, data, uid, ret, uid, accessToken, admin;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0:
@@ -263,8 +318,14 @@ function start() {
                                     else {
                                         res.status(400).send(ret);
                                     }
-                                    _b.label = 2;
+                                    return [3 /*break*/, 3];
                                 case 2:
+                                    if (type === 'AccountCreated') {
+                                        uid = data.uid, accessToken = data.accessToken, admin = data.admin;
+                                        authDB.insertOne({ uid: uid, accessToken: accessToken, admin: admin });
+                                    }
+                                    _b.label = 3;
+                                case 3:
                                     res.send({ status: 'ok' });
                                     return [2 /*return*/];
                             }

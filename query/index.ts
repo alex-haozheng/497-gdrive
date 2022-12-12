@@ -53,6 +53,16 @@ async function initDB(mongo: MongoClient) {
 	}
 }
 
+async function initAuthDB(mongo) {
+	try {
+		const auth = mongo.db().collection('auth');
+		return auth;
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+}
+
 async function getUsers(mongo: MongoClient) {
 	const query = mongo.db().collection('query');
 	const result = query.find();
@@ -61,42 +71,43 @@ async function getUsers(mongo: MongoClient) {
 	return ret;
 }
 
-async function checkUsers(mongo: MongoClient, uId: string) {
+async function checkUsers(mongo: MongoClient, uid: string) {
 	const query = mongo.db().collection('query');
 	const result = query.find();
 
-	return uId in result;
+	return uid in result;
 }
 
-async function addUser(mongo: MongoClient, uId: string) {
+async function addUser(mongo: MongoClient, uid: string) {
 	const query = mongo.db().collection('query');
-	query.insertOne({[uId]: []});
+	query.insertOne({[uid]: []});
 	return;
 }
 
-async function removeUser(mongo: MongoClient, uId: string) {
+async function removeUser(mongo: MongoClient, uid: string) {
 	const query = mongo.db().collection('query');
-	return query.updateOne({}, {$unset: { [uId]: ""}});
+	return query.updateOne({}, {$unset: { [uid]: ""}});
 }
 
-async function getFiles(mongo: MongoClient, uId: string) {
+async function getFiles(mongo: MongoClient, uid: string) {
 	const query = mongo.db().collection('query');
-	return query.findOne()[uId];
+	return query.findOne()[uid];
 }
 
-async function addFile(mongo: MongoClient, uId: string, fileId: string) {
+async function addFile(mongo: MongoClient, uid: string, fileId: string) {
 	const query = mongo.db().collection('query');
-	return query.updateOne({}, {$push: { [uId]: fileId}});
+	return query.updateOne({}, {$push: { [uid]: fileId}});
 }
 
-async function removeFile(mongo: MongoClient, uId: string, fileId: string) {
+async function removeFile(mongo: MongoClient, uid: string, fileId: string) {
 	const query = mongo.db().collection('query');
-	return query.updateOne({}, {$pull: { [uId]: fileId}});
+	return query.updateOne({}, {$pull: { [uid]: fileId}});
 }
 
 async function start() {
 	const mongo = await connectDB();
 	await initDB(mongo);
+	const authDB = await initAuthDB(mongo);
 
 	app.get('/users/list', async (req: Request, res: Response) => {
 		try {
@@ -109,20 +120,36 @@ async function start() {
 	});
 
 	app.get('/users/find', async (req: Request, res: Response) => {
+		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
-			const { uId }: { uId: string } = req.body;
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
+		try {
 			res.status(200).send({
-				'status': await checkUsers(mongo, uId)
+				'status': await checkUsers(mongo, uid)
 			});
 		} catch (e) {
 			res.status(500).send(e);
 		}
 	});
 
-	app.get('/user/:uId/files', async (req: Request, res: Response) => {
+	app.get('/user/:uid/files', async (req: Request, res: Response) => {
+		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
-			const uId = req.params.uId;
-			const ret = await getFiles(mongo, uId);
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
+		try {
+			const ret = await getFiles(mongo, uid);
 			res.status(201).json(ret);
 		} catch (e) {
 			res.status(500).send(e);
@@ -132,20 +159,21 @@ async function start() {
 	app.post('/events', async (req: Request, res: Response) => {
 		const {type, data} = req.body;
 		if (type === 'AccountCreated') {
-			const { uId }: { uId: string } = data;
-			await addUser(mongo, uId);
-			res.status(201).json(uId);
+			const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean} = data;
+			await authDB.insertOne({ uid, accessToken, admin });
+			await addUser(mongo, uid);
+			res.status(201).json(uid);
 		} else if (type === 'AccountDeleted') {
-			const { uId }: { uId: string } = data;
-			const ret = await removeUser(mongo, uId);
+			const { uid }: { uid: string } = data;
+			const ret = await removeUser(mongo, uid);
 			res.status(201).json(ret);
 		} else if (type === 'FileCreated') {
-			const { uId, fileId }: { uId: string, fileId: string } = data;
-			const ret = await addFile(mongo, uId, fileId);
+			const { uid, fileId }: { uid: string, fileId: string } = data;
+			const ret = await addFile(mongo, uid, fileId);
 			res.status(201).json(ret);
 		} else if (type === 'FileDeleted') {
-			const { uId, fileId }: { uId: string, fileId: string } = data;
-			const ret = await removeFile(mongo, uId, fileId);
+			const { uid, fileId }: { uid: string, fileId: string } = data;
+			const ret = await removeFile(mongo, uid, fileId);
 			res.status(201).json(ret);
 		}
 	});

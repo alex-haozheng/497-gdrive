@@ -12,9 +12,6 @@ app.use(express.json());
 app.use(cors());
 
 // uid : security question
-interface database {
-	[key: string]: string
-};
 
 async function connectDB(): Promise<MongoClient>{
 	const uri = process.env.DATABASE_URL;
@@ -59,6 +56,16 @@ async function initDB(mongo: MongoClient) {
 	}
 }
 
+async function initAuthDB(mongo) {
+	try {
+		const auth = mongo.db().collection('auth');
+		return auth;
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+}
+
 async function verify(mongo: MongoClient, uid: string, question: string) {
 	const questions = mongo.db().collection('questions');
 	const ret = questions.find({$and: 
@@ -83,25 +90,33 @@ async function insertQuestion(mongo: MongoClient, uid: string, question: string)
 	return questions.insertOne({uid, question});
 }
 
-
 async function start() {
 	const mongo = await connectDB();
 	await initDB(mongo);
-	
+	const authDB = await initAuthDB(mongo);
 	// will be used for checking and returning
 	app.get('/verify', async (req: Request, res: Response) => {
+		const { uid, accessToken, question, otp }: { uid: string, accessToken: string, question: string, otp: string } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
 		try {
 			if ( Object.keys(req.body).length !== 3 ){
 				res.status(400).send({ message: 'BAD REQUEST' });
 			} else {
-				const { uid, question, otp} = req.body;
-
 				const ret = await verify(mongo, uid, question);
 				if (ret.length > 0) {
 					axios.post('http://event-bus:4005/events', {
 						type: 'ChangePassword',
 						data: {
 							uid,
+							accessToken,
+							question,
 							otp
 						}
 					});
@@ -116,11 +131,19 @@ async function start() {
 	});	
 
 	app.post('/new/user', async (req: Request, res: Response) => {
+		const { uid, accessToken, question }: { uid: string, accessToken: string, question: string } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch (e) {
+			console.log(e);
+		}
 		try {
 			if ( Object.keys(req.body).length !== 1 ){
 				res.status(400).send({ message: 'BAD REQUEST' });
 			} else {
-				const { uid, question } = req.body;
 				const ret = await insertQuestion(mongo, uid, question);
 				if (ret.acknowledged) {
 					res.status(201).send(ret);
@@ -144,7 +167,7 @@ async function start() {
 
 
 	app.post('/events', async (req: Request, res: Response) => {
-		const {type, data }: {type: string, data: { uid: string, email?: string }} = req.body;
+		const {type, data}: {type: string, data: { uid: string, email?: string, accessToken?: string, admin?: boolean }} = req.body;
 		if (type === 'AccountDeleted') {
 			const { uid }: { uid: string, email?: string } = data;
 			const ret = await deleteUser(mongo, uid);
@@ -153,6 +176,9 @@ async function start() {
 			} else {
 				res.status(400).send(ret);
 			}
+		} else if (type === 'AccountCreated') {
+			const { uid, accessToken, admin } = data;
+			authDB.insertOne({ uid, accessToken, admin });
 		}
 		res.send({status: 'ok'});
 	});

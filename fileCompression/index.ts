@@ -53,6 +53,7 @@ async function initDB(mongo: MongoClient) {
 		console.log(`  Inserted user with ID ${result.insertedIds[key]}`);
 	}
 }
+
 //db crud operations
 async function insertFile(mongo: MongoClient, fileId: string, content: string) {
 	const fc = mongo.db().collection('filecompression');
@@ -73,7 +74,6 @@ async function modifyFile(mongo: MongoClient, fileId: string, content: string) {
 	const fc = mongo.db().collection('filecompression');
 	return fc.updateOne({fileId}, {$set: {content}});
 }
-
 
 async function start() {
 	const mongo = await connectDB();
