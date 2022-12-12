@@ -159,7 +159,7 @@ async function start(){
     app.get('/hasProfile/:uid', async (req: Request, res: Response) => {
         const { uid } = req.params;
         if(
-            Object.keys(req.body).length !== 1 ||
+            Object.keys(req.params).length !== 1 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string"
