@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var cors = require("cors");
+var axios_1 = require("axios");
 var crypto_1 = require("crypto");
 var mongodb_1 = require("mongodb");
 var app = express();
@@ -147,13 +148,13 @@ function start() {
                                             admin: true
                                         });
                                         console.log('Sending Account Created Event...');
-                                        /* axios.post('http://event-bus:4005/events', {
+                                        axios_1.default.post('http://event-bus:4012/events', {
                                             type: 'AccountCreated',
                                             data: {
-                                                uid: req.body.uid,
-                                                accessToken: req.body.accessToken
+                                                uid: uid,
+                                                accessToken: accessToken
                                             }
-                                        }); */
+                                        });
                                         console.log('Account Created Event Sent');
                                         res.send({ uid: uid, accessToken: accessToken, admin: true });
                                     }
@@ -220,10 +221,10 @@ function start() {
                                 case 2:
                                     _b.sent();
                                     console.log('Sending Account Deleted Event...');
-                                    /* axios.post('http://event-bus:4005/events', {
+                                    axios_1.default.post('http://event-bus:4012/events', {
                                         type: 'AccountDeleted',
-                                        data: { uid }
-                                    }); */
+                                        data: { uid: uid }
+                                    });
                                     console.log('Account Deleted Event Sent');
                                     console.log('Successfully Deleted Account');
                                     res.status(200).send('Successfully Deleted Account');
