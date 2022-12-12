@@ -16,13 +16,13 @@ interface Analytics {
 	badfiles: File[];
 }
 
-export default function Analytics() {
+export default function Analytics({ uid, accessToken }: { uid: string, accessToken: string }) {
 	const [numFiles, setNumFiles]: [numFiles: number, setNumFiles: (arg: number) => void] = useState<number>(0);
 	const [readability, setReadability]: [readability: ReadabilityMap, setReadability: (arg: ReadabilityMap) => void] = useState<ReadabilityMap>({});
 	const [badfiles, setBadfiles]: [badfiles: File[], setBadfiles: (arg: any) => void] = useState<File[]>([]);
 
 	const fetchAnalytics = async () => {
-		const analytics: Analytics = await axios.get('http://localhost:4004/analytics');
+		const analytics: Analytics = (await axios.get(`http://localhost:4004/analytics/${uid}/${accessToken}`)).data;
 		setNumFiles(analytics.numFiles);
 		setReadability(analytics.readability);
 		setBadfiles(analytics.badfiles);

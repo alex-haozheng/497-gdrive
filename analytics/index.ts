@@ -110,7 +110,7 @@ async function start() {
 
 	async function isAuth(req, res, next) {
 		console.log('Checking Authorization');
-		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
+		const { uid, accessToken }: { uid: string, accessToken: string } = req.params;
 		try {
 			if (!uid || !accessToken) {
 				res.status(400).send('Missing Information');
@@ -131,7 +131,7 @@ async function start() {
 	}
 
 	// TODO: uncomment isAdmin
-	app.get('/analytics', isAuth, async (req, res) => {
+	app.get('/analytics/:uid/:accessToken', isAuth, async (req, res) => {
 		console.log('Made it to analytics service!');
 		try {
 			const results = await analytics.findOne({ key: 'analytics' });
