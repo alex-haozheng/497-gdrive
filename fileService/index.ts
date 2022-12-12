@@ -148,12 +148,14 @@ app.put('/files/:fileId', async (req : any , res : any) => {
             };
             updateFile(fileId, file);
             res.status(200).send(file as File);
+            /*
             axios.post('http://event-bus:4012/events', {
                 type: 'GetFileAnalytics',
                 data: {
                     files: await readFromFileById(fileId)
                 },
             });
+            */
         }
         else{
             res.status(400).send('Bad request');

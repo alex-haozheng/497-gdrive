@@ -7,6 +7,7 @@ import ForgotQuestions from './ForgotQuestions';
 import LandingPage from './LandingPage';
 import Register from './Register';
 import Profile from './Profile';
+import EditDocument from './EditDocument';
 
 function App() {
   return (
@@ -16,16 +17,12 @@ function App() {
       <Profile uId={"user0"}/>
       <AdminList />
       <AdminRequests />
-<<<<<<< Updated upstream
       <Questions uId = {'test'}/>
       <ForgotQuestions uId = {'test'}/>
 
-=======
->>>>>>> Stashed changes
       <h1>Files</h1>
       {/* uncomment the line below to see a working concept of the landing page where all the files are shown on. Only works when fileService and uploadDownload service are running.} */}
-      <LandingPage />
-
+      {/*<LandingPage /> */}
     </div>
   );
 }
