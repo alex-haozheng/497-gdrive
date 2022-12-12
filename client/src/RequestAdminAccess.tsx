@@ -5,10 +5,10 @@ const RequestAdminAccess = (data) => {
     const [requested, setRequested] = useState(false);
     console.log("Request admin access receives");
     console.log(data);
-    const uId = data.uId;
+    const uid = data.uid;
 
     const fetchRequested = async () => {
-        const res = await axios.get(`http://localhost:4013/checkRequest/${uId}`);
+        const res = await axios.get(`http://localhost:4013/checkRequest/${uid}`);
         setRequested(res.data);
         console.log(res.data);
     };
@@ -21,7 +21,7 @@ const RequestAdminAccess = (data) => {
         event.preventDefault();
     
         await axios.post(`http://localhost:4013/addRequest`, {
-            uId: uId
+            uid: uid
         });
     
         fetchRequested();
