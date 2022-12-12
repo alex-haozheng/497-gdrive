@@ -143,10 +143,18 @@ async function start() {
 		}
 	});
 
-	app.get('/accessToken', async (req, res) => {
+	app.post('/authData', async (req, res) => {
 		const { uid }: { uid: string } = req.body;
+		console.log(`Auth uid: ${uid}`);
 		const user = await auth.findOne({ uid });
-		res.send(user.accessToken);
+		console.log(`user: ${user}`);
+		console.log(`accessToken: ${user.accessToken}`);
+		console.log(`admin: ${user.admin}`);
+		if (!user) {
+			res.send({});
+			return;
+		}
+		res.send({ dbAccessToken: user.accessToken, admin: user.admin });
 	});
 
 	app.post('/events', async (req, res) => {
