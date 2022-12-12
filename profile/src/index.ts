@@ -176,10 +176,15 @@ async function start(){
         }
     });
 
-    app.put('/updateProfile', async (req, res) => {
-        const { uId, name, email, bio, funFact } = req.body;
+    app.put('/updateProfile/:uId/:name/:email/:bio/:funFact', async (req, res) => {
+        const uId = req.params.uId;
+        const name = req.params.name;
+        const email = req.params.email;
+        const bio = req.params.bio;
+        const funFact = req.params.funFact;
+
         if(
-            Object.keys(req.body).length !== 5 ||
+            Object.keys(req.params).length !== 5 ||
             uId === "" ||
             uId === undefined ||
             typeof uId !== "string" ||
