@@ -73,7 +73,7 @@ export default function EditDocument({fileId}) {
         <div>
             <ThemeProvider theme={theme}>
                 <Box display="flex" flexDirection="row" justifyContent="space-between" padding={15} sx={{paddingBottom: "5px", paddingTop: "5px"}}>
-                    <Button variant="outlined" color="primary" sx={{marginBottom: "10px", textTransform: "none"}} onClick={() => window.location.href = "/landing"} startIcon={<img src="https://img.icons8.com/ios/50/000000/back--v1.png" alt="back" width="20px" height="20px"/>}>
+                    <Button variant="outlined" color="primary" sx={{marginBottom: "10px", textTransform: "none"}} onClick={() => window.location.href = "/files"} startIcon={<img src="https://img.icons8.com/ios/50/000000/back--v1.png" alt="back" width="20px" height="20px"/>}>
                         Back
                     </Button>
                     <Typography variant="h4" component="div" fontWeight="bold" sx={{fontFamily: "Helvetica Neue"}} fontSize="30px" gutterBottom>

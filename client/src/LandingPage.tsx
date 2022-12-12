@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Button, Typography, Grid } from '@mui/material';
+import EditDocument from './EditDocument';
 
 
 const UploadFile = () => {
@@ -56,7 +57,7 @@ const handleDelete = async (fileId : string) => {
         window.location.reload();
     });
 };
-        
+
 const ListFiles = () => {
     interface File {
         fileId: string;
@@ -90,7 +91,7 @@ const ListFiles = () => {
                             <Typography variant="body2" gutterBottom sx={{ position: 'relative', top: 70, fontFamily: "Helvetica Neue", color: "grey"}}>
                                 Last Modified {file.date.toLocaleString().slice(0, 10)}
                             </Typography>
-                            <Button variant="contained" color="success" sx={{ width:200, textTransform: "none", position: 'relative', top: 77, marginBottom: 2}}>Edit</Button>
+                            <Button variant="contained" color="success" sx={{ width:200, textTransform: "none", position: 'relative', top: 77, marginBottom: 2}} onClick={() => {window.location.href = `/files/${file.fileId}/edit`}}>Edit</Button>
                             <Button variant="outlined" color="error" sx={{ width:200, textTransform: "none", position: 'relative', top: 73, marginBottom: 2}} onClick={() => {handleDelete(file.fileId)}}>Delete</Button>
                             <DownloadButton fileId={file.fileId} fileName={file.name}/>
                         </Box>
@@ -101,12 +102,15 @@ const ListFiles = () => {
 };
 
 const LandingPage = () => {
+    return ( window.location.pathname === '/files' ? <div> <UploadFile /> <ListFiles /> </div> : <div> <EditDocument fileId={window.location.pathname.split('/')[2]}/> </div> );
+    /*
     return (
         <div>
             <UploadFile />
             <ListFiles />
         </div>
-    );              
+    );  
+    */            
 };
 
 export default LandingPage;

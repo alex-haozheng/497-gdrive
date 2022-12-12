@@ -25,7 +25,7 @@ export default function ForgotQuestions({uid, accessToken}) {
 				<input type="question" onChange={e => setQuestion(e.target.value)} value={question} />
 				<label>Password</label>
 				<input type="password" onChange={e => setPassword(e.target.value)} value={password} />
-				<div><button type="submit">Submit</button></div>
+				<div><button type="submit" onClick={() => window.location.href = "/"}>Submit</button></div>
 			</form>
 		</div>
 	);
