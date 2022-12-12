@@ -38,7 +38,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var cors = require("cors");
-var axios_1 = require("axios");
 var crypto_1 = require("crypto");
 var mongodb_1 = require("mongodb");
 var app = express();
@@ -114,23 +113,28 @@ function start() {
                     mongo = _a.sent();
                     if (mongo === null)
                         throw Error('Database connection failed');
+                    console.log('Database Connection Success');
                     return [4 /*yield*/, initDB(mongo)];
                 case 2:
                     auth = _a.sent();
                     if (auth === null)
                         throw Error('Database initialization failed');
+                    console.log('Database Init Success');
                     app.post('/register', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
                         var _a, uid, email, password, _b, hash_1, salt, accessToken;
                         return __generator(this, function (_c) {
                             switch (_c.label) {
                                 case 0:
                                     _a = req.body, uid = _a.uid, email = _a.email, password = _a.password;
+                                    console.log('Register');
                                     if (!(!uid || !email || !password)) return [3 /*break*/, 1];
-                                    res.status(400).send('uid, Email, and Password Required');
+                                    console.log('Missing Information');
+                                    res.status(400).send('Missing Information');
                                     return [3 /*break*/, 3];
                                 case 1: return [4 /*yield*/, auth.findOne({ uid: uid })];
                                 case 2:
                                     if ((_c.sent()) !== null) {
+                                        console.log('User Already Exists');
                                         res.status(400).send('User Already Exists');
                                     }
                                     else {
@@ -143,13 +147,13 @@ function start() {
                                             admin: true
                                         });
                                         console.log('Sending Account Created Event...');
-                                        axios_1.default.post('http://event-bus:4005/events', {
+                                        /* axios.post('http://event-bus:4005/events', {
                                             type: 'AccountCreated',
                                             data: {
                                                 uid: req.body.uid,
                                                 accessToken: req.body.accessToken
                                             }
-                                        });
+                                        }); */
                                         console.log('Account Created Event Sent');
                                         res.send({ uid: uid, accessToken: accessToken, admin: true });
                                     }
@@ -164,19 +168,27 @@ function start() {
                             switch (_b.label) {
                                 case 0:
                                     _a = req.body, uid = _a.uid, password = _a.password;
+                                    console.log('Login');
+                                    console.log(uid);
+                                    console.log(password);
                                     if (!(!uid || !password)) return [3 /*break*/, 1];
+                                    console.log('Missing Information');
                                     res.status(400).send('Missing Information');
                                     return [3 /*break*/, 3];
                                 case 1: return [4 /*yield*/, auth.findOne({ uid: uid })];
                                 case 2:
                                     user = _b.sent();
+                                    console.log(user);
                                     if (user === null) {
+                                        console.log('Incorrect uid');
                                         res.status(400).send('Incorrect uid');
                                     }
                                     else if (!validatePassword(password, user.hash, user.salt)) {
+                                        console.log('Incorrect Password');
                                         res.status(400).send('Incorrect Password');
                                     }
                                     else {
+                                        console.log('Successful Login');
                                         res.status(200).send({ uid: uid, accessToken: user.accessToken, admin: user.admin });
                                     }
                                     _b.label = 3;
@@ -190,11 +202,14 @@ function start() {
                             switch (_b.label) {
                                 case 0:
                                     _a = req.body, uid = _a.uid, accessToken = _a.accessToken;
+                                    console.log('Unregister');
                                     if (!uid || !accessToken) {
+                                        console.log('Missing Information');
                                         res.status(400).send('Missing Information');
                                     }
                                     user = auth.findOne({ uid: uid });
                                     if (!(accessToken !== user.accessToken)) return [3 /*break*/, 1];
+                                    console.log('Wrong Access Token');
                                     res.status(400).send('Unauthorized Access');
                                     return [3 /*break*/, 3];
                                 case 1: return [4 /*yield*/, auth.deleteOne({ _id: uid }, function (err) {
@@ -205,14 +220,29 @@ function start() {
                                 case 2:
                                     _b.sent();
                                     console.log('Sending Account Deleted Event...');
-                                    axios_1.default.post('http://event-bus:4005/events', {
+                                    /* axios.post('http://event-bus:4005/events', {
                                         type: 'AccountDeleted',
-                                        data: { uid: uid }
-                                    });
+                                        data: { uid }
+                                    }); */
                                     console.log('Account Deleted Event Sent');
+                                    console.log('Successfully Deleted Account');
                                     res.status(200).send('Successfully Deleted Account');
                                     _b.label = 3;
                                 case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    app.get('/accessToken', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var uid, user;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    uid = req.body.uid;
+                                    return [4 /*yield*/, auth.findOne({ uid: uid })];
+                                case 1:
+                                    user = _a.sent();
+                                    res.send(user.accessToken);
+                                    return [2 /*return*/];
                             }
                         });
                     }); });
@@ -221,6 +251,7 @@ function start() {
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0:
+                                    console.log('Auth Events');
                                     if (!(req.body.type === 'AdminAdded')) return [3 /*break*/, 2];
                                     uid = req.body.data.uId;
                                     return [4 /*yield*/, auth.findOneAndUpdate({ uid: uid }, { admin: true })];

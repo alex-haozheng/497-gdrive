@@ -80,13 +80,13 @@ async function start() {
 				admin: true
 			});
 			console.log('Sending Account Created Event...');
-			axios.post('http://event-bus:4005/events', {
+			/* axios.post('http://event-bus:4005/events', {
 				type: 'AccountCreated',
 				data: {
 					uid: req.body.uid,
 					accessToken: req.body.accessToken
 				}
-			});
+			}); */
 			console.log('Account Created Event Sent');
 			res.send({ uid: uid, accessToken: accessToken, admin: true });
 		}
@@ -95,11 +95,14 @@ async function start() {
 	app.post('/login', async (req, res) => {
 		const { uid, password }: { uid: string; password: string } = req.body;
 		console.log('Login');
+		console.log(uid);
+		console.log(password);
 		if (!uid || !password) {
 			console.log('Missing Information');
 			res.status(400).send('Missing Information');
 		} else {
 			const user = await auth.findOne({ uid: uid });
+			console.log(user);
 			if (user === null) {
 				console.log('Incorrect uid');
 				res.status(400).send('Incorrect uid');
@@ -130,10 +133,10 @@ async function start() {
 				console.log('Successful Account Deletion');
 			});
 			console.log('Sending Account Deleted Event...');
-			axios.post('http://event-bus:4005/events', {
+			/* axios.post('http://event-bus:4005/events', {
 				type: 'AccountDeleted',
 				data: { uid }
-			});
+			}); */
 			console.log('Account Deleted Event Sent');
 			console.log('Successfully Deleted Account');
 			res.status(200).send('Successfully Deleted Account');
