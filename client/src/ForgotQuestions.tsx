@@ -21,7 +21,7 @@ export default function ForgotQuestions() {
 			<h1>Forgot Question</h1>
 			<form onSubmit={handleSubmit}>
 				<label>Username</label>
-				<input type="uid" onChange={e => setQuestion(e.target.value)} value={uid} />
+				<input type="uid" onChange={e => setuid(e.target.value)} value={uid} />
 				<label>Security Question</label>
 				<input type="question" onChange={e => setQuestion(e.target.value)} value={question} />
 				<label>Password</label>
