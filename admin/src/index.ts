@@ -100,9 +100,9 @@ async function start() {
     await initDB(mongo);
     const authDB = await initAuthDB(mongo);
     
-    app.get('/getAdmins', async (req: Request, res: Response) => {
+    app.get('/getAdmins/:uid/:accessToken', async (req: Request, res: Response) => {
         if(
-            Object.keys(req.body).length !== 0
+            Object.keys(req.params).length !== 2
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else{
@@ -116,10 +116,10 @@ async function start() {
         }
     });
 
-    app.get('/checkAdmin/:uid', async (req: Request, res: Response) => {
-        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+    app.get('/checkAdmin/:uid/:accessToken', async (req: Request, res: Response) => {
+        const { uid, accessToken } = req.param;
 		try {
-			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
 			const user = await authDB.findOne({ uid });
 			if (user === null) res.status(400).send('User Does Not Exist');
 			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
@@ -143,10 +143,10 @@ async function start() {
         }
     });
 
-    app.post('/addAdmin', async (req, res) => {
-        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+    app.post('/addAdmin/:uid/:accessToken', async (req, res) => {
+        const { uid, accessToken } = req.param;
 		try {
-			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
 			const user = await authDB.findOne({ uid });
 			if (user === null) res.status(400).send('User Does Not Exist');
 			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
@@ -168,10 +168,11 @@ async function start() {
             try{
                 await addAdmin(mongo, uid);
 
-                axios.post('http://event-bus:4012/events', {
+                axios.post('http://event-bus:4012/events/', {
                     type: 'AdminAdded',
                     data: {
-                        uid: uid
+                        uid: uid,
+                        accessToken: accessToken
                     }
                 });
                 
@@ -182,10 +183,10 @@ async function start() {
         }
     });
 
-    app.delete('/removeAdmin/:uid', async (req, res) => {
-        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+    app.delete('/removeAdmin/:uid/:accessToken', async (req, res) => {
+        const { uid, accessToken } = req.param;
 		try {
-			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
 			const user = await authDB.findOne({ uid });
 			if (user === null) res.status(400).send('User Does Not Exist');
 			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
@@ -210,7 +211,8 @@ async function start() {
                 axios.post('http://event-bus:4012/events', {
                     type: 'AdminRemoved',
                     data: {
-                        uid: uid
+                        uid: uid,
+                        accessToken: accessToken
                     }
                 });
                 

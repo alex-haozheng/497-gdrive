@@ -1,13 +1,11 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import axios from 'axios';
 
-const AdminRequestCard = (data) => {
+const AdminRequestCard = (uid, accessToken) => {
     const [profile, setProfile] = useState({uid: 'new', name: 'new', email: 'new', bio: 'new', funFact: 'new'});
 
-    const uid = data.uid;
-
     const fetchProfile = async () => {
-        const res = await axios.get(`http://localhost:4002/getProfile/${uid}`);
+        const res = await axios.get(`http://localhost:4002/getProfile/${uid}/${accessToken}`);
         setProfile(res.data);
         console.log(res.data);
     };
@@ -19,9 +17,7 @@ const AdminRequestCard = (data) => {
     const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
     
-        await Promise.all([axios.delete(`http://localhost:4013/removeRequest/${uid}`), axios.post(`http://localhost:4000/addAdmin`, {
-            uid: uid
-        })]);
+        await Promise.all([axios.delete(`http://localhost:4013/removeRequest/${uid}/${accessToken}`), axios.post(`http://localhost:4000/addAdmin/${uid}/${accessToken}`)]);
     
         fetchProfile();
     };

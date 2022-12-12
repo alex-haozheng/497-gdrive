@@ -11,7 +11,7 @@ const Profile = ({ uid, accessToken }) => {
     const [onEdit, setOnEdit] = useState(false);
 
     const fetchProfile = async () => {
-        const res = await axios.get(`http://localhost:4002/getProfile/${uid}`);
+        const res = await axios.get(`http://localhost:4002/getProfile/${uid}/${accessToken}`);
         setUsername(res.data.uid);
         setName(res.data.name);
         setEmail(res.data.email);
@@ -51,7 +51,7 @@ const Profile = ({ uid, accessToken }) => {
                 profile.funFact = "blank";
                 setFunFact("blank");
             }
-            await axios.put(`http://localhost:4002/updateProfile/${uid}/${name}/${email}/${bio}/${funFact}`);
+            await axios.put(`http://localhost:4002/updateProfile/${uid}/${name}/${email}/${bio}/${funFact}/${accessToken}`);
             //setProfile(profile);
             console.log(profile);
         }

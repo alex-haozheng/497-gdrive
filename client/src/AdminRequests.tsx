@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminRequestCard from './AdminRequestCard';
 
-const AdminRequests = () => {
+const AdminRequests = (uid, accessToken) => {
     const [users, setUsers] = useState([]);
 
     const fetchRequests = async () => {
-      const res = await axios.get('http://localhost:4013/getRequests');
+      const res = await axios.get(`http://localhost:4013/getRequests/${uid}/${accessToken}`);
       setUsers(res.data);
       console.log(res.data);
     };
@@ -26,7 +26,7 @@ const AdminRequests = () => {
                 className="card-body"  
                 style={{ backgroundColor: 'pink', margin: '5%', border: '1px solid black'}}
             >
-              <AdminRequestCard uId={p}/>
+              <AdminRequestCard uid={uid} accessToken={accessToken}/>
             </div>
           </div>
         );

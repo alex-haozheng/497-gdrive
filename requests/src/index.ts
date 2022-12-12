@@ -99,9 +99,9 @@ async function start() {
     await initDB(mongo);
     const authDB = await initAuthDB(mongo);
     
-    app.get('/getRequests', async (req: Request, res: Response) => {
+    app.get('/getRequests/:uid/:accessToken', async (req: Request, res: Response) => {
         if(
-            Object.keys(req.body).length !== 0
+            Object.keys(req.params).length !== 2
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else{
@@ -115,10 +115,10 @@ async function start() {
         }
     });
 
-    app.get('/checkRequest/:uid', async (req: Request, res: Response) => {
-        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+    app.get('/checkRequest/:uid/:accessToken', async (req: Request, res: Response) => {
+        const { uid, accessToken } = req.params;
 		try {
-			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
 			const user = await authDB.findOne({ uid });
 			if (user === null) res.status(400).send('User Does Not Exist');
 			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
@@ -143,10 +143,10 @@ async function start() {
         }
     });
 
-    app.post('/addRequest', async (req, res) => {
-        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+    app.post('/addRequest/:uid/:accessToken', async (req, res) => {
+        const { uid, accessToken } = req.params;
 		try {
-			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
 			const user = await authDB.findOne({ uid });
 			if (user === null) res.status(400).send('User Does Not Exist');
 			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
@@ -174,10 +174,10 @@ async function start() {
         }
     });
 
-    app.delete('/removeRequest/:uid', async (req, res) => {
-        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+    app.delete('/removeRequest/:uid/:accessToken', async (req, res) => {
+        const { uid, accessToken } = req.params;
 		try {
-			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return ;}
 			const user = await authDB.findOne({ uid });
 			if (user === null) res.status(400).send('User Does Not Exist');
 			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
