@@ -122,10 +122,10 @@ async function start() {
 	app.get('/users/find', async (req: Request, res: Response) => {
 		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
-			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			if (!uid || !accessToken)  { res.status(400).send('Missing Information'); return; }
 			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+			if (user === null) { res.status(400).send('User Does Not Exist'); return; }
+			else if (accessToken !== user.accessToken /* || !user.admin */)  { res.status(400).send('Unauthorized Access'); }
 		} catch(e) {
 			console.log(e);
 		}
@@ -141,9 +141,11 @@ async function start() {
 	app.get('/user/:uid/files', async (req: Request, res: Response) => {
 		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
-			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			if (!uid || !accessToken)  {
+				res.status(400).send('Missing Information'); return;
+			}
 			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
+			if (user === null) { res.status(400).send('User Does Not Exist'); return; }
 			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
 		} catch(e) {
 			console.log(e);
