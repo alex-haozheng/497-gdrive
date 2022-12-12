@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function Questions(data) {
+export default function Questions({uid, accessToken}) {
 	// const [username, setUsername]: [username: string | undefined, setUsername: (arg: any) => void] = useState<string | undefined>('');
 	const [question, setQuestion]: [question: string | undefined, setQuestion: (arg: any) => void] = useState<string | undefined>('');
 
-	const uid = data.uid;
 	// const uid = 'test';
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		console.log(uid);
@@ -14,6 +13,7 @@ export default function Questions(data) {
 		//axios.defaults.withCredentials = true;
 		await axios.post('http://localhost:4006/new/user', {
 			uid,
+			accessToken,
 			question
 		});
 	};

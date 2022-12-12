@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function ForgotQuestions(data) {
+export default function ForgotQuestions({uid, accessToken}) {
 	// const [username, setUsername]: [username: string | undefined, setUsername: (arg: any) => void] = useState<string | undefined>('');
 	const [question, setQuestion]: [question: string | undefined, setQuestion: (arg: any) => void] = useState<string | undefined>('');
 	const [password, setPassword]: [password: string | undefined, setPassword: (arg: any) => void] = useState<string | undefined>('');
-
-	const uid = data.uid;
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		console.log(uid);
@@ -15,6 +13,7 @@ export default function ForgotQuestions(data) {
 		await axios.post('http://localhost:4006/verify', {
 			uid,
 			question,
+			accessToken,
 			password
 		});
 	};
