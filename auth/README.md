@@ -12,50 +12,59 @@ This service is the Authentication (auth) service.
 
 # Service Description:
 
-This service allows users to register an account, log in and log out, and use authorized-only routes/services. The service also keeps track of whether a user is an admin. The service provides two APIs to other services for restricted access to only authorized users. The service uses passport js, local strategy, and creates a session for the user to stay logged in.
+This service allows users to register an account, log in and log out, and use authorized-only routes/services. The service also keeps track of whether a user is an admin. The service provides two APIs to other services for restricted access to only authorized users. The service accessTokens. These accessTokens are stored in local storage while a user is logged in. The auth service also directly communicates with all services to authenticate requests. 
 
 # Interaction with other services:
 
-The authentication service sends out an account created event when a user registers and an account deleted event when a user decides to delete their account through the profile service. The authentication service listens for AdminAdded and AdminRemoved events from the admin service and updates the database accordingly. The service also listens for a ChangePassword event from the forgot password service.
+The authentication service sends out an account created event when a user registers and an account deleted event when a user decides to delete their account through the profile service. The authentication service listens for AdminAdded and AdminRemoved events from the admin service and updates the database accordingly. The service also listens for a ChangePassword event from the forgot password service. 
+
+The authentication service also has an endpoint that all other services have direct access to (not through the event-bus). ALL services that need to authenticate users verify their uid and accessToken credentials with the auth service through this endpoint. The auth service provides an API for all services to use as middleware for authenticaiton. 
+
+```javascript
+export async function isAuth(req, res, next) {
+    const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
+    try {
+        if (!uid || !accessToken) {
+            res.status(400).send('Missing Information');
+            return;
+        }
+        const { dbAccessToken, admin } = (await axios.post('http://auth:4003/authData', { uid })).data;
+        if (!dbAccessToken) {
+            res.status(400).send('User Does Not Exist');
+        } else if (accessToken !== dbAccessToken) {
+            res.status(400).send('Unauthorized Access');
+        } else {
+            next();
+        }
+    } catch(e) {
+        console.log(e);
+    }
+}
+```
+
+Example Usage: (isAuth function used as middleware)
+
+```javascript
+app.httpmethod('/endpoint', isAuth, async (req, res) => {
+	console.log('Passed Authentication! Reached Endpoint!')
+}
+```
 
 -   `POST /login`
     -   Description: logs the user into the application.
     -   Request: 
 ```json
 {
-	"username": "kays",
+	"uid": "kays",
 	"password": "****"
 }
 ```
 	-   Response:
-```html
-<html>
-	<h3>Success!</h3>
-    <br />
-	<a href="/auth-route">Go to authorized-only route</a>
-	<br />
-	<a href="/auth-route">Go to admin-only route</a>
-</html>
-```
-
--   `GET /login`
-    -   Description: delivers static HTML login page
-    -   Request: None
-	-   Response:
-```html
-<html>
-	<h1>Log In</h1>
-	<form method="POST" action="/login">
-		<br />Enter Username:<br />
-		<input type="text" name="username" />
-		<br />Enter Password:<br />
-		<input type="password" name="password" />
-		<br />
-		<input type="submit" value="Submit" />
-        <br />
-        <a href="/register">register</a>
-	</form>
-</html>
+```json
+{
+	"uid": "kays",
+	"accessToken": "f9981f8fd472f2e8028eee6b8200f2088bbbb34b5a203d2d42e45b3588725f75"
+}
 ```
 
 -   `POST /register`
@@ -63,73 +72,38 @@ The authentication service sends out an account created event when a user regist
     -   Request:
 ```json
 {
-	"username": kays,
+	"uid": kays,
 	"email": kays@email.com,
 	"password": ****
 }
 ```
-	-   Response: 
-```html
-<html>
-	<h1>Log In</h1>
-	<form method="POST" action="/login">
-		<br />Enter Username:<br />
-		<input type="text" name="username" />
-		<br />Enter Password:<br />
-		<input type="password" name="password" />
-		<br />
-		<input type="submit" value="Submit" />
-        <br />
-        <a href="/register">register</a>
-	</form>
-</html>
-```
-
--   `GET /register`
-    -   Description: logs the user into the application.
-    -   Request: None
-	-   Response: 
-```html
-<html>
-	<h1>Register</h1>
-	<form method="POST" action="/register">
-		<br />Enter Username:<br />
-		<input type="text" name="username" />
-		<br />Enter Email:<br />
-		<input type="text" name="email" />
-		<br />Enter Password:<br />
-		<input type="password" name="password" />
-		<br />
-		<input type="submit" value="Submit" />
-        <br />
-        <a href="/login">login</a>
-	</form>
-</html>
-```
+	-   Response: None
 
 -   `POST /unregister`
     -   Description: logs the user into the application.
     -   Request:
 ```json
 {
-	"username": kays
+	"uid": kays
 }
 ```
-	-   Response: 
-```html
-<html>
-	<h1>Log In</h1>
-	<form method="POST" action="/login">
-		<br />Enter Username:<br />
-		<input type="text" name="username" />
-		<br />Enter Password:<br />
-		<input type="password" name="password" />
-		<br />
-		<input type="submit" value="Submit" />
-        <br />
-        <a href="/register">register</a>
-	</form>
-</html>
+	-   Response: None
+
+-   `POST /authData`
+    -   Description: logs the user into the application.
+    -   Request:
+```json
+{
+	"uid": "kays",
+	"accessToken": "f9981f8fd472f2e8028eee6b8200f2088bbbb34b5a203d2d42e45b3588725f75"
+}
+```
+	-   Response: None
+```json
+{
+	"dbAccessToken": "f9981f8fd472f2e8028eee6b8200f2088bbbb34b5a203d2d42e45b3588725f75",
+	"admin": "true",
+}
 ```
 
 # How to run service:
