@@ -39,8 +39,8 @@ async function initDB(mongo: MongoClient) {
 
   const admins = db.collection('requests');
   const result = await admins.insertMany([
-    { uId: 'user1'},
-    { uId: 'user2'},
+    { uid: 'user1'},
+    { uid: 'user2'},
   ]);
 
   console.log(`Initialized ${result.insertedCount} admin requests`);
@@ -51,6 +51,16 @@ async function initDB(mongo: MongoClient) {
   }
 }
 
+async function initAuthDB(mongo) {
+	try {
+		const auth = mongo.db().collection('auth');
+		return auth;
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+}
+
 // import { getRequests, checkRequest, addRequest, removeRequest } from './database.js';
 async function getRequests(mongo: MongoClient) {
     const requests = mongo.db().collection('requests');
@@ -58,27 +68,27 @@ async function getRequests(mongo: MongoClient) {
 
     const ret: String[] = [];
     await result.forEach((doc) => {
-        ret.push(doc.uId);
+        ret.push(doc.uid);
     });
     return ret;
 }
 
-async function checkRequest(mongo: MongoClient, uId: String) {
-    const query: { uId: String } = { uId: uId };
+async function checkRequest(mongo: MongoClient, uid: String) {
+    const query: { uid: String } = { uid: uid };
     const requests = mongo.db().collection('requests');
     const result = await requests.count(query);
     return result > 0;
 }
 
-async function addRequest(mongo: MongoClient, uId: String) {
-    const query: { uId: String } = { uId: uId };
+async function addRequest(mongo: MongoClient, uid: String) {
+    const query: { uid: String } = { uid: uid };
     const requests = mongo.db().collection('requests');
     requests.insertOne(query);
     return;
 }
 
-async function removeRequest(mongo: MongoClient, uId: String) {
-    const query: { uId: String } = { uId: uId };
+async function removeRequest(mongo: MongoClient, uid: String) {
+    const query: { uid: String } = { uid: uid };
     const requests = mongo.db().collection('requests');
     requests.deleteOne(query);
     return;
@@ -87,6 +97,7 @@ async function removeRequest(mongo: MongoClient, uId: String) {
 async function start() {
     const mongo = await connectDB();
     await initDB(mongo);
+    const authDB = await initAuthDB(mongo);
     
     app.get('/getRequests', async (req: Request, res: Response) => {
         if(
@@ -104,18 +115,26 @@ async function start() {
         }
     });
 
-    app.get('/checkRequest/:uId', async (req: Request, res: Response) => {
-        const uId = req.params.uId;
+    app.get('/checkRequest/:uid', async (req: Request, res: Response) => {
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
+
         if(
-            Object.keys(req.params).length !== 1 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string"
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string"
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else{
             try {
-                const check = await checkRequest(mongo, uId);
+                const check = await checkRequest(mongo, uid);
                 res.status(201).send(check);
             } catch (e) {
                 console.log(e);
@@ -125,22 +144,29 @@ async function start() {
     });
 
     app.post('/addRequest', async (req, res) => {
-        const { uId } = req.body;
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
         
         if(
-            Object.keys(req.body).length !== 1 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string"
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string"
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else if(
-            await checkRequest(mongo, uId)
+            await checkRequest(mongo, uid)
         ){
             res.status(304).send({ message: 'User has already submitted a pending request for admin access' });
         } else{
             try{
-                await addRequest(mongo, uId);
+                await addRequest(mongo, uid);
                 res.status(201).send({ message: 'Request submitted'});
             } catch (error){
                 res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
@@ -148,29 +174,44 @@ async function start() {
         }
     });
 
-    app.delete('/removeRequest/:uId', async (req, res) => {
-        const uId = req.params.uId;
+    app.delete('/removeRequest/:uid', async (req, res) => {
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
 
         if(
-            Object.keys(req.params).length !== 1 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string"
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string"
         ){
             res.status(400).send({ message: 'BAD REQUEST'});
         } else if( 
-            !await checkRequest(mongo, uId) 
+            !await checkRequest(mongo, uid) 
         ){
             res.status(304).send({ message: 'User is not an admin' });
         } else{
             try{
-                await removeRequest(mongo, uId);
+                await removeRequest(mongo, uid);
                 res.status(201).send({ message: "Removed request for admin access" });
             } catch (error){
                 res.status(500).send({ message: 'INTERNAL SERVER ERROR' });
             }
         }
     });
+
+    app.post('/events', (req, res) => {
+		if (req.body.type === 'AccountCreated') {
+			const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body.data;
+			authDB.insertOne({ uid, accessToken, admin });
+		}
+		res.send({});
+	});
 
     /*
     app.post('/events', async (req, res) => {
@@ -186,19 +227,19 @@ async function start() {
         } else{
             try{
                 if (type === "AdminAdded") {
-                    const { uId } = data;
+                    const { uid } = data;
                     if (
-                        uId === "" ||
-                        uId === undefined ||
-                        typeof uId !== "string"
+                        uid === "" ||
+                        uid === undefined ||
+                        typeof uid !== "string"
                     ){
                         res.status(400).send({ message: 'BAD REQUEST' });
                     } else if (
-                        !await checkRequest(mongo, uId)
+                        !await checkRequest(mongo, uid)
                     ){ 
                         res.status(304).send({ message: 'There is no pending admin access request from this user' });
                     } else{
-                        await removeRequest(mongo, uId);
+                        await removeRequest(mongo, uid);
                         res.status(201).send({ message: "Removed user's admin access request" });
                     }
                 }

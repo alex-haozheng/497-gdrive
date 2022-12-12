@@ -39,9 +39,9 @@ async function initDB(mongo: MongoClient) {
 
   const admins = db.collection('admins');
   const result = await admins.insertMany([
-    { uId: 'user0'},
-    { uId: 'user1'},
-    { uId: 'user2'},
+    { uid: 'user0'},
+    { uid: 'user1'},
+    { uid: 'user2'},
   ]);
 
   console.log(`Initialized ${result.insertedCount} admins`);
@@ -52,6 +52,16 @@ async function initDB(mongo: MongoClient) {
   }
 }
 
+async function initAuthDB(mongo) {
+	try {
+		const auth = mongo.db().collection('auth');
+		return auth;
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+}
+
 // import { getAdmins, checkAdmin, addAdmin, removeAdmin } from './database.js';
 async function getAdmins(mongo: MongoClient) {
     const admins = mongo.db().collection('admins');
@@ -59,27 +69,27 @@ async function getAdmins(mongo: MongoClient) {
 
     const ret: String[] = [];
     await result.forEach((doc) => {
-        ret.push(doc.uId);
+        ret.push(doc.uid);
     });
     return ret;
 }
 
-async function checkAdmin(mongo: MongoClient, uId: String) {
-    const query: { uId: String } = { uId: uId };
+async function checkAdmin(mongo: MongoClient, uid: String) {
+    const query: { uid: String } = { uid: uid };
     const admins = mongo.db().collection('admins');
     const result = await admins.count(query);
     return result > 0;
 }
 
-async function addAdmin(mongo: MongoClient, uId: String) {
-    const query: { uId: String } = { uId: uId };
+async function addAdmin(mongo: MongoClient, uid: String) {
+    const query: { uid: String } = { uid: uid };
     const admins = mongo.db().collection('admins');
     admins.insertOne(query);
     return;
 }
 
-async function removeAdmin(mongo: MongoClient, uId: String) {
-    const query: { uId: String } = { uId: uId };
+async function removeAdmin(mongo: MongoClient, uid: String) {
+    const query: { uid: String } = { uid: uid };
     const admins = mongo.db().collection('admins');
     admins.deleteOne(query);
     return;
@@ -88,6 +98,7 @@ async function removeAdmin(mongo: MongoClient, uId: String) {
 async function start() {
     const mongo = await connectDB();
     await initDB(mongo);
+    const authDB = await initAuthDB(mongo);
     
     app.get('/getAdmins', async (req: Request, res: Response) => {
         if(
@@ -105,18 +116,25 @@ async function start() {
         }
     });
 
-    app.get('/checkAdmin/:uId', async (req: Request, res: Response) => {
-        const uId = req.params.uId;
+    app.get('/checkAdmin/:uid', async (req: Request, res: Response) => {
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
         if(
-            Object.keys(req.params).length !== 1 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string"
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string"
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else{
             try {
-                const check = await checkAdmin(mongo, uId);
+                const check = await checkAdmin(mongo, uid);
                 res.status(201).send(check);
             } catch (e) {
                 console.log(e);
@@ -126,27 +144,34 @@ async function start() {
     });
 
     app.post('/addAdmin', async (req, res) => {
-        const { uId } = req.body;
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
         
         if(
-            Object.keys(req.body).length !== 1 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string"
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string"
         ){
             res.status(400).send({ message: 'BAD REQUEST' });
         } else if(
-            await checkAdmin(mongo, uId)
+            await checkAdmin(mongo, uid)
         ){
             res.status(304).send({ message: 'User is already an admin' });
         } else{
             try{
-                await addAdmin(mongo, uId);
+                await addAdmin(mongo, uid);
 
                 axios.post('http://event-bus:4012/events', {
                     type: 'AdminAdded',
                     data: {
-                        uId: uId
+                        uid: uid
                     }
                 });
                 
@@ -157,28 +182,35 @@ async function start() {
         }
     });
 
-    app.delete('/removeAdmin/:uId', async (req, res) => {
-        const uId = req.params.uId;
+    app.delete('/removeAdmin/:uid', async (req, res) => {
+        const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+		try {
+			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			const user = await authDB.findOne({ uid });
+			if (user === null) res.status(400).send('User Does Not Exist');
+			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+		} catch(e) {
+			console.log(e);
+		}
 
         if(
-            Object.keys(req.params).length !== 1 ||
-            uId === "" ||
-            uId === undefined ||
-            typeof uId !== "string"
+            uid === "" ||
+            uid === undefined ||
+            typeof uid !== "string"
         ){
             res.status(400).send({ message: 'BAD REQUEST'});
         } else if( 
-            !await checkAdmin(mongo, uId) 
+            !await checkAdmin(mongo, uid) 
         ){
             res.status(304).send({ message: 'User is not an admin' });
         } else{
             try{
-                await removeAdmin(mongo, uId);
+                await removeAdmin(mongo, uid);
                 
                 axios.post('http://event-bus:4012/events', {
                     type: 'AdminRemoved',
                     data: {
-                        uId: uId
+                        uid: uid
                     }
                 });
                 
@@ -202,22 +234,26 @@ async function start() {
         } else{
             try{
                 if (type === "AccountDeleted") {
-                    const { uId } = data;
+                    const { uid } = data;
                     if (
-                        uId === "" ||
-                        uId === undefined ||
-                        typeof uId !== "string"
+                        uid === "" ||
+                        uid === undefined ||
+                        typeof uid !== "string"
                     ){
                         res.status(400).send({ message: 'BAD REQUEST' });
                     } else if (
-                        !await checkAdmin(mongo, uId)
+                        !await checkAdmin(mongo, uid)
                     ){ 
                         res.status(304).send({ message: 'User is not an admin' });
                     } else{
-                        await removeAdmin(mongo, uId);
+                        await removeAdmin(mongo, uid);
                         res.status(201).send({ message: "Removed user's admin access" });
                     }
+                } else if (type === 'AccountCreated') {
+                    const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body.data;
+                    authDB.insertOne({ uid, accessToken, admin });
                 }
+                
                 res.send({ status: 'OK' });
             } catch (error){
                 // Send 500 Error if Internal Server Error

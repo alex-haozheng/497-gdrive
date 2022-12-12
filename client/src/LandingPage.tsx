@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Box, Button, createTheme, TextField, ThemeProvider, Typography, Grid } from '@mui/material';
 
 
 const UploadFile = () => {
@@ -23,12 +24,14 @@ const UploadFile = () => {
     };
 
     return (
-        <div>
-            <form onSubmit={handleFileSubmit}>
-                <input type="file" onChange={handleFileChange} />
-                <button type="submit">Upload</button>
-            </form>
-        </div>
+        <Button variant="outlined" color="success" component="label" sx={{ marginBottom: 2, textTransform: "none", fontFamily: "Helvetica Neue", margin:4}} startIcon={<img src="https://img.icons8.com/ios/50/000000/upload.png" alt="upload" width="20" height="20"/>}>
+            Upload
+            <input
+                type="file"
+                onChange={handleFileChange}
+                hidden
+            />
+        </Button>
     );
 };
 
@@ -44,7 +47,7 @@ const DownloadButton = ({ fileId, fileName } : { fileId: string, fileName: strin
         link.click();
     };
     return (
-        <button onClick={handleDownload}>Download</button>
+        <Button variant="outlined" color="primary" onClick={handleDownload} sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 120}} startIcon={<img src="https://img.icons8.com/ios/50/000000/download.png" alt="download" width="20" height="20"/>}>Download</Button>
     );
 };
         
@@ -68,27 +71,32 @@ const ListFiles = () => {
     }, []);    
 
     return (
-        <div>
-            <ul>
-                {fileList.map((file : File) => {
+        <Grid container spacing={2} direction="row" justifyContent="center" alignItems="center">
+            {fileList.map((file : File) => {
                     return (
-                        <><li key={file.fileId}>
-                            <h3>{file.name}</h3>
-                            <p>{file.content}</p>
-                        </li><DownloadButton fileId={file.fileId} fileName={file.name}/></>
-                    );
-                })}
-            </ul>
-        </div>
+                        <Box key={file.fileId} sx={{ width: 200, height: 300, bgcolor: 'white', borderRadius: 2, boxShadow: 2, p: 2, m: 2 }}>
+                            <Typography variant="h6" component="div" gutterBottom sx={{fontFamily: "Helvetica Neue"}}>
+                                {file.name}
+                            </Typography>
+                            <Typography variant="body2" gutterBottom sx={{fontFamily: "Helvetica Neue"}}>
+                                {file.content.slice(0, 25)}...
+                            </Typography>
+                            <Typography variant="body2" gutterBottom sx={{ position: 'relative', top: 120, fontFamily: "Helvetica Neue", color: "grey"}}>
+                                Last Modified {file.date.toLocaleString().slice(0, 10)}
+                            </Typography>
+                            <Button variant="contained" color="success" sx={{ width:200, textTransform: "none", position: 'relative', top: 125, marginBottom: 2}}>Edit</Button>
+                            <DownloadButton fileId={file.fileId} fileName={file.name}/>
+                        </Box>
+                    );                      
+            })}
+        </Grid>
     );
 };
 
 const LandingPage = () => {
     return (
         <div>
-            <h1>Upload File</h1>
             <UploadFile />
-            <h1>File List</h1>
             <ListFiles />
         </div>
     );              
