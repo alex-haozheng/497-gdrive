@@ -5,6 +5,7 @@ const app = express();
 import { Analytics, File } from './interfaces.js';
 import { isAdmin, processFiles, condense } from './utils.js';
 import { MongoClient } from 'mongodb';
+import { convertTypeAcquisitionFromJson } from 'typescript';
 
 // TODO questions:
 //! questions about design, global database
@@ -49,7 +50,7 @@ async function initDB(mongo) {
 	}
 }
 
-async function initAuthDB(mongo) {
+/* async function initAuthDB(mongo) {
 	try {
 		const auth = mongo.db().collection('auth');
 		return auth;
@@ -57,14 +58,14 @@ async function initAuthDB(mongo) {
 		console.log(e);
 		return null;
 	}
-}
+} */
 
 async function start() {
 	const mongo = await connectDB();
 	if (mongo === null) throw Error('Database connection failed');
 	let analytics = await initDB(mongo);
 	if (analytics === null) throw Error('Database initialization failed');
-	const authDB = await initAuthDB(mongo);
+	//const authDB = await initAuthDB(mongo);
 
 	setInterval(async () => {
 		try {
@@ -108,9 +109,10 @@ async function start() {
 		}, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly.
 	}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
 
-	async function isAuth(req, res, next) {
+	/* async function isAuth(req, res, next) {
 		console.log('Checking Authorization');
-		console.log(await authDB.find());
+		const users = await authDB.find();
+		users.forEach(user => console.log(`user.uid: ${user.uid}, user.accessToken: ${user.accessToken}`));
 		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
 			if (!uid || !accessToken) {
@@ -120,7 +122,41 @@ async function start() {
 			const user = await authDB.findOne({ uid });
 			if (user === null) {
 				res.status(400).send('User Does Not Exist');
-			} else if (accessToken !== user.accessToken || !user.admin) {
+			} else if (accessToken !== user.accessToken) {
+				console.log(`accessToken: ${accessToken} | dbAccessToken: ${user.accessToken}`);
+				console.log(`accessToken === dbAccessToken ${accessToken === user.accessToken}`);
+				console.log(user.admin);
+				res.status(400).send('Unauthorized Access');
+			} else {
+				next();
+			}
+		} catch(e) {
+			console.log('isAuth Error');
+			console.log(e);
+		}
+	} */
+
+	async function isAuth(req, res, next) {
+		console.log('isAuth2');
+		console.log('Checking Authorization');
+		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
+		console.log(`isAuth uid: ${uid}, isAuth accessToken: ${accessToken}`);
+		try {
+			if (!uid || !accessToken) {
+				console.log('1 Missing Information');
+				res.status(400).send('Missing Information');
+				return;
+			}
+			const { dbAccessToken, admin } = (await axios.post('http://auth:4003/authData', { uid })).data;
+			console.log(`dbAccessToken: ${dbAccessToken}`);
+			console.log(`admin: ${admin}`);
+			if (!dbAccessToken || !admin) {
+				console.log('User does not exist');
+				res.status(400).send('User Does Not Exist');
+			} else if (accessToken !== dbAccessToken) {
+				console.log(`accessToken: ${accessToken} | dbAccessToken: ${dbAccessToken}`);
+				console.log(`accessToken === dbAccessToken ${accessToken === dbAccessToken}`);
+				console.log(admin);
 				res.status(400).send('Unauthorized Access');
 			} else {
 				next();
@@ -148,10 +184,10 @@ async function start() {
 			badfiles = req.body.data.files;
 		} else if (req.body.type === 'GetFileAnalytics') {
 			files = req.body.data.files;
-		} else if (req.body.type === 'AccountCreated') {
+		} /* else if (req.body.type === 'AccountCreated') {
 			const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body.data;
 			authDB.insertOne({ uid, accessToken, admin });
-		}
+		} */
 		res.send({});
 	});
 

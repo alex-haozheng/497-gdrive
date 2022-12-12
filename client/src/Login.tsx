@@ -28,6 +28,7 @@ export default function Login({ func }) {
 				<input type="password" onChange={e => setPassword(e.target.value)} value={password} />
 				<div><button type="submit">Submit</button></div>
 			</form>
+			<button onClick={e => func('', '')} value={uid} >Log Out</button>
 		</div>
 	);
 }

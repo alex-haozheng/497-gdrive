@@ -77,7 +77,7 @@ services:
     depends_on:
       - analytics-mongo
     environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
+      DATABASE_URL: mongodb://root:rootpassword@analytics-mongo:27017/mydb?directConnection=true&authSource=admin
   analytics-mongo:
     image: mongo:latest
     container_name: analytics-mongo
@@ -86,6 +86,23 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
       - analytics-mongo-data:/data/db
+  moderator:
+    build: .
+    container_name: moderator
+    ports:
+      - "4005:4005"
+    depends_on:
+      - moderator-mongo
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@moderator-mongo:27017/mydb?directConnection=true&authSource=admin
+  moderator-mongo:
+    image: mongo:latest
+    container_name: moderator-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - moderator_mongo-data:/data/db
   questions:
     build: questions
     ports:
@@ -184,4 +201,3 @@ volumes:
   analytics-mongo-data:
   auth-mongo-data:
   moderator-mongo-data:
-  mongodb_data_container:

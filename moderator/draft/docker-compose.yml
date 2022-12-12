@@ -17,7 +17,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
-      - mongodb_data_container:/data/db
+      - moderator_mongo-data:/data/db
 
 volumes:
-  mongodb_data_container:
+  moderator_mongo-data:

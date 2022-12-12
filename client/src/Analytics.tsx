@@ -30,9 +30,7 @@ export default function Analytics({ uid, accessToken }: { uid: string, accessTok
 		setBadfiles(analytics.badfiles);
 	};
 
-	useEffect(() => {
-		fetchAnalytics();
-	}, []);
+	useEffect(() => {});
 
 	const renderedReadability = Object.entries(readability).map((p: [string | number, number], i: number) => (<div key={i}>Number of Files in System with Grade Level {p[0]}: {p[1]}</div>));
     const renderedBadfiles = Object.values(badfiles).map((f: File, i: number) => (
@@ -43,6 +41,7 @@ export default function Analytics({ uid, accessToken }: { uid: string, accessTok
 
 	return (
         <div>
+			<button onClick={e => fetchAnalytics()}>Fetch Analytics</button>
             <div>NumFiles: {numFiles}</div>
             <div>Readability: {renderedReadability}</div>
             <div>Bad Files: {renderedBadfiles}</div>
