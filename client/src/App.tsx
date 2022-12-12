@@ -14,14 +14,14 @@ function App() {
     <div className="App">
       <Login />
       <Register />
-      <Profile uId={"user0"}/>
-      <Admin uId={"user5"}/>
-      <Questions uId = {'test'}/>
-      <ForgotQuestions uId = {'test'}/>
+      <Profile uid={"user0"}/>
+      <Admin uid={"user5"}/>
+      <Questions uid = {'test'}/>
+      <ForgotQuestions uid = {'test'}/>
 
       <h1>Files</h1>
       {/* uncomment the line below to see a working concept of the landing page where all the files are shown on. Only works when fileService and uploadDownload service are running.} */}
-      {/*<LandingPage /> */}
+      <LandingPage /> 
       <EditDocument fileId={'ab03b4c5'}/>
     </div>
   );

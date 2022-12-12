@@ -6,7 +6,7 @@ export default function ForgotQuestions(data) {
 	const [question, setQuestion]: [question: string | undefined, setQuestion: (arg: any) => void] = useState<string | undefined>('');
 	const [password, setPassword]: [password: string | undefined, setPassword: (arg: any) => void] = useState<string | undefined>('');
 
-	const uid = data.uId;
+	const uid = data.uid;
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		console.log(uid);

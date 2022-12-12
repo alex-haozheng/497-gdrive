@@ -5,7 +5,7 @@ export default function Questions(data) {
 	// const [username, setUsername]: [username: string | undefined, setUsername: (arg: any) => void] = useState<string | undefined>('');
 	const [question, setQuestion]: [question: string | undefined, setQuestion: (arg: any) => void] = useState<string | undefined>('');
 
-	const uid = data.uId;
+	const uid = data.uid;
 	// const uid = 'test';
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		console.log(uid);
