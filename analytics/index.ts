@@ -108,17 +108,31 @@ async function start() {
 		}, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly.
 	}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
 
-	// TODO: uncomment isAdmin
-	app.get('/analytics', async (req, res) => {
-		const { uid, accessToken }: { uid: string, accessToken: string, admin: boolean } = req.body;
+	async function isAuth(req, res, next) {
+		console.log('Checking Authorization');
+		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
-			if (!uid || !accessToken) res.status(400).send('Missing Information');
+			if (!uid || !accessToken) {
+				res.status(400).send('Missing Information');
+				return;
+			}
 			const user = await authDB.findOne({ uid });
-			if (user === null) res.status(400).send('User Does Not Exist');
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
+			if (user === null) {
+				res.status(400).send('User Does Not Exist');
+			} else if (accessToken !== user.accessToken /* || !user.admin */) {
+				res.status(400).send('Unauthorized Access');
+			} else {
+				next();
+			}
 		} catch(e) {
+			console.log('isAuth Error');
 			console.log(e);
 		}
+	}
+
+	// TODO: uncomment isAdmin
+	app.get('/analytics', isAuth, async (req, res) => {
+		console.log('Made it to analytics service!');
 		try {
 			const results = await analytics.findOne({ key: 'analytics' });
 			res.status(200).send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
@@ -134,7 +148,7 @@ async function start() {
 		} else if (req.body.type === 'GetFileAnalytics') {
 			files = req.body.data.files;
 		} else if (req.body.type === 'AccountCreated') {
-			const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body;
+			const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body.data;
 			authDB.insertOne({ uid, accessToken, admin });
 		}
 		res.send({});

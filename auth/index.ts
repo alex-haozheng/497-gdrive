@@ -140,6 +140,12 @@ async function start() {
 		}
 	});
 
+	app.get('/accessToken', async (req, res) => {
+		const { uid }: { uid: string } = req.body;
+		const user = await auth.findOne({ uid });
+		res.send(user.accessToken);
+	});
+
 	app.post('/events', async (req, res) => {
 		console.log('Auth Events');
 		// user deleted, password changed

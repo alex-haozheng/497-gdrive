@@ -103,9 +103,63 @@ function initDB(mongo) {
         });
     });
 }
+function initAuthDB(mongo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var auth;
+        return __generator(this, function (_a) {
+            try {
+                auth = mongo.db().collection('auth');
+                return [2 /*return*/, auth];
+            }
+            catch (e) {
+                console.log(e);
+                return [2 /*return*/, null];
+            }
+            return [2 /*return*/];
+        });
+    });
+}
 function start() {
     return __awaiter(this, void 0, void 0, function () {
-        var mongo, analytics;
+        function isAuth(req, res, next) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, uid, accessToken, user, e_3;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            console.log('Checking Authorization');
+                            _a = req.body, uid = _a.uid, accessToken = _a.accessToken;
+                            _b.label = 1;
+                        case 1:
+                            _b.trys.push([1, 3, , 4]);
+                            if (!uid || !accessToken) {
+                                res.status(400).send('Missing Information');
+                                return [2 /*return*/];
+                            }
+                            return [4 /*yield*/, authDB.findOne({ uid: uid })];
+                        case 2:
+                            user = _b.sent();
+                            if (user === null) {
+                                res.status(400).send('User Does Not Exist');
+                            }
+                            else if (accessToken !== user.accessToken /* || !user.admin */) {
+                                res.status(400).send('Unauthorized Access');
+                            }
+                            else {
+                                next();
+                            }
+                            return [3 /*break*/, 4];
+                        case 3:
+                            e_3 = _b.sent();
+                            console.log('isAuth Error');
+                            console.log(e_3);
+                            return [3 /*break*/, 4];
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            });
+        }
+        var mongo, analytics, authDB;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -119,6 +173,9 @@ function start() {
                     analytics = _a.sent();
                     if (analytics === null)
                         throw Error('Database initialization failed');
+                    return [4 /*yield*/, initAuthDB(mongo)];
+                case 3:
+                    authDB = _a.sent();
                     setInterval(function () { return __awaiter(_this, void 0, void 0, function () {
                         var _this = this;
                         return __generator(this, function (_a) {
@@ -167,23 +224,26 @@ function start() {
                         });
                     }); }, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
                     // TODO: uncomment isAdmin
-                    app.get('/analytics', /* isAdmin ,*/ function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-                        var results, e_3;
+                    app.get('/analytics', isAuth, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+                        var results, e_4;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 2, , 3]);
-                                    return [4 /*yield*/, analytics.findOne({ key: 'analytics' })];
+                                    console.log('Made it to analytics service!');
+                                    _a.label = 1;
                                 case 1:
+                                    _a.trys.push([1, 3, , 4]);
+                                    return [4 /*yield*/, analytics.findOne({ key: 'analytics' })];
+                                case 2:
                                     results = _a.sent();
                                     res.status(200).send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
-                                    return [3 /*break*/, 3];
-                                case 2:
-                                    e_3 = _a.sent();
-                                    console.log(e_3);
+                                    return [3 /*break*/, 4];
+                                case 3:
+                                    e_4 = _a.sent();
+                                    console.log(e_4);
                                     res.status(500).send({});
-                                    return [3 /*break*/, 3];
-                                case 3: return [2 /*return*/];
+                                    return [3 /*break*/, 4];
+                                case 4: return [2 /*return*/];
                             }
                         });
                     }); });
@@ -193,6 +253,10 @@ function start() {
                         }
                         else if (req.body.type === 'GetFileAnalytics') {
                             files = req.body.data.files;
+                        }
+                        else if (req.body.type === 'AccountCreated') {
+                            var _a = req.body.data, uid = _a.uid, accessToken = _a.accessToken, admin = _a.admin;
+                            authDB.insertOne({ uid: uid, accessToken: accessToken, admin: admin });
                         }
                         res.send({});
                     });
