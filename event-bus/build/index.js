@@ -23,6 +23,9 @@ app.post('/events', function (req, res) {
     axios_1.default.post('http://profile:4002/events', event).catch(function (err) {
         console.log(err.message);
     });
+    axios_1.default.post('http://requests:4013/events', event).catch(function (err) {
+        console.log(err.message);
+    });
     // kays service
     axios_1.default.post('http://auth:4003/events', event).catch(function (err) {
         console.log(err.message);
