@@ -63,6 +63,7 @@ async function start() {
 
 	app.post('/register', async (req, res) => {
 		const { uid, email, password }: { uid: string; email: string; password: string } = req.body;
+		console.log('Register');
 		if (!uid || !email || !password) {
 			console.log('Missing Information');
 			res.status(400).send('Missing Information');
@@ -93,6 +94,7 @@ async function start() {
 
 	app.post('/login', async (req, res) => {
 		const { uid, password }: { uid: string; password: string } = req.body;
+		console.log('Login');
 		if (!uid || !password) {
 			console.log('Missing Information');
 			res.status(400).send('Missing Information');
@@ -113,6 +115,7 @@ async function start() {
 
 	app.post('/unregister', async (req, res) => {
 		const { uid, accessToken }: {uid: string, accessToken: string } = req.body;
+		console.log('Unregister');
 		if (!uid || !accessToken) {
 			console.log('Missing Information');
 			res.status(400).send('Missing Information');
@@ -138,6 +141,7 @@ async function start() {
 	});
 
 	app.post('/events', async (req, res) => {
+		console.log('Auth Events');
 		// user deleted, password changed
 		if (req.body.type === 'AdminAdded') {
 			const uid = req.body.data.uId;
