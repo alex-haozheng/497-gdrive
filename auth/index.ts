@@ -88,7 +88,7 @@ async function start() {
 				}
 			});
 			console.log('Account Created Event Sent');
-			res.send({ uid: uid, accessToken: accessToken, admin: true });
+			res.send({ uid: uid, accessToken: accessToken });
 		}
 	});
 
@@ -111,7 +111,7 @@ async function start() {
 				res.status(400).send('Incorrect Password');
 			} else {
 				console.log('Successful Login');
-				res.status(200).send({ uid: uid, accessToken: user.accessToken, admin: user.admin});
+				res.status(200).send({ uid: uid, accessToken: user.accessToken });
 			}
 		}
 	});

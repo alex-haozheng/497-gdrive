@@ -33,7 +33,7 @@ function App() {
       <Login func={getuidandToken} />
       <Register />
       <Questions uid = {uid} accessToken = {accessToken} />
-      <ForgotQuestions uid = {uid} accessToken = {accessToken} />
+      <ForgotQuestions />
       <Profile uid={uid}/>
       <Admin uid={uid}/>
       <Analytics uid={uid} accessToken={accessToken} />

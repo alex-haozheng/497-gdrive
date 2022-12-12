@@ -2,6 +2,7 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import { MongoClient } from 'mongodb';
 import * as cors from 'cors';
+import {isAuth } from './auth';
 
 const app = express();
 
@@ -53,16 +54,6 @@ async function initDB(mongo: MongoClient) {
 	}
 }
 
-async function initAuthDB(mongo) {
-	try {
-		const auth = mongo.db().collection('auth');
-		return auth;
-	} catch (e) {
-		console.log(e);
-		return null;
-	}
-}
-
 async function getUsers(mongo: MongoClient) {
 	const query = mongo.db().collection('query');
 	const result = query.find();
@@ -107,7 +98,6 @@ async function removeFile(mongo: MongoClient, uid: string, fileId: string) {
 async function start() {
 	const mongo = await connectDB();
 	await initDB(mongo);
-	const authDB = await initAuthDB(mongo);
 
 	app.get('/users/list', async (req: Request, res: Response) => {
 		try {
@@ -122,14 +112,6 @@ async function start() {
 	app.get('/users/find', async (req: Request, res: Response) => {
 		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
-			if (!uid || !accessToken)  { res.status(400).send('Missing Information'); return; }
-			const user = await authDB.findOne({ uid });
-			if (user === null) { res.status(400).send('User Does Not Exist'); return; }
-			else if (accessToken !== user.accessToken /* || !user.admin */)  { res.status(400).send('Unauthorized Access'); }
-		} catch(e) {
-			console.log(e);
-		}
-		try {
 			res.status(200).send({
 				'status': await checkUsers(mongo, uid)
 			});
@@ -138,18 +120,8 @@ async function start() {
 		}
 	});
 
-	app.get('/user/:uid/files', async (req: Request, res: Response) => {
+	app.get('/user/:uid/files', isAuth, async (req: Request, res: Response) => {
 		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
-		try {
-			if (!uid || !accessToken)  {
-				res.status(400).send('Missing Information'); return;
-			}
-			const user = await authDB.findOne({ uid });
-			if (user === null) { res.status(400).send('User Does Not Exist'); return; }
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
 		try {
 			const ret = await getFiles(mongo, uid);
 			res.status(201).json(ret);
@@ -162,7 +134,6 @@ async function start() {
 		const {type, data} = req.body;
 		if (type === 'AccountCreated') {
 			const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean} = data;
-			await authDB.insertOne({ uid, accessToken, admin });
 			await addUser(mongo, uid);
 			res.status(201).json(uid);
 		} else if (type === 'AccountDeleted') {

@@ -4,6 +4,7 @@ import * as logger from 'morgan';
 import * as cors from 'cors';
 import axios from 'axios';
 import { MongoClient } from 'mongodb';
+import {isAuth } from './auth';
 
 const app = express();
 
@@ -56,16 +57,6 @@ async function initDB(mongo: MongoClient) {
 	}
 }
 
-async function initAuthDB(mongo) {
-	try {
-		const auth = mongo.db().collection('auth');
-		return auth;
-	} catch (e) {
-		console.log(e);
-		return null;
-	}
-}
-
 async function verify(mongo: MongoClient, uid: string, question: string) {
 	const questions = mongo.db().collection('questions');
 	const ret = questions.find({$and: 
@@ -91,25 +82,11 @@ async function insertQuestion(mongo: MongoClient, uid: string, question: string)
 }
 
 async function start() {
-	console.log('index questions')
-	await axios.post('http://event-bus:4012/events', {
-						type: 'ChangePassword',
-						data: {'test': 2}
-					});
 	const mongo = await connectDB();
 	await initDB(mongo);
-	const authDB = await initAuthDB(mongo);
 	// will be used for checking and returning
 	app.get('/verify', async (req: Request, res: Response) => {
 		const { uid, accessToken, question, otp }: { uid: string, accessToken: string, question: string, otp: string } = req.body;
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return; }
-			const user = await authDB.findOne({ uid });
-			if (user === null) { res.status(400).send('User Does Not Exist'); return; }
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch(e) {
-			console.log(e);
-		}
 		try {
 			if ( Object.keys(req.body).length > 7 ){
 				res.status(400).send({ message: 'BAD REQUEST' });
@@ -135,21 +112,9 @@ async function start() {
 		}
 	});	
 
-	app.post('/new/user', async (req: Request, res: Response) => {
+	app.post('/new/user', isAuth, async (req: Request, res: Response) => {
 		const { uid, accessToken, question }: { uid: string, accessToken: string, question: string } = req.body;
 		console.log(`accesToken inside endpoint: ${accessToken} ${uid}`);
-		try {
-			if (!uid || !accessToken) { res.status(400).send('Missing Information'); return; }
-			const user = await authDB.findOne({ uid });
-			if (user === null) { 
-				console.log('user is empty from authentication database');
-				res.status(400).send('User Does Not Exist'); 
-				return;
-			}
-			else if (accessToken !== user.accessToken /* || !user.admin */) res.status(400).send('Unauthorized Access');
-		} catch (e) {
-			console.log(e);
-		}
 		try {
 			const ret = await insertQuestion(mongo, uid, question);
 			if (ret.acknowledged) {
@@ -182,11 +147,7 @@ async function start() {
 			} else {
 				res.status(400).send(ret);
 			}
-		} else if (type === 'AccountCreated') {
-			const { uid, accessToken, admin } = data;
-			authDB.insertOne({ uid, accessToken, admin });
 		}
-		res.send({status: 'ok'});
 	});
 
 	app.listen(4006, () => {
