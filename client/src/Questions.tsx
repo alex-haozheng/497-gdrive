@@ -8,7 +8,7 @@ export default function Questions({uid, accessToken}) {
 	// const uid = 'test';
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		console.log(uid);
-		console.log(question);
+		console.log(`accesToken inside Questions.tsx: ${accessToken}`);
 		e.preventDefault();
 		//axios.defaults.withCredentials = true;
 		await axios.post('http://localhost:4006/new/user', {
