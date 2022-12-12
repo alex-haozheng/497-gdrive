@@ -15,8 +15,6 @@ function App() {
       <Register />
       <Profile uId={"user0"}/>
       <Admin uId={"user5"}/>
-      <AdminList />
-      <AdminRequests />
       <Questions uId = {'test'}/>
       <ForgotQuestions uId = {'test'}/>
 
