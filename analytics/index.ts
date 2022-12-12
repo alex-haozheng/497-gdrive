@@ -110,7 +110,8 @@ async function start() {
 
 	async function isAuth(req, res, next) {
 		console.log('Checking Authorization');
-		console.log(await authDB.find());
+		const users = await authDB.find();
+		users.forEach(user => console.log(`user.uid: ${user.uid}, user.accessToken: ${user.accessToken}`));
 		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
 			if (!uid || !accessToken) {
@@ -120,7 +121,10 @@ async function start() {
 			const user = await authDB.findOne({ uid });
 			if (user === null) {
 				res.status(400).send('User Does Not Exist');
-			} else if (accessToken !== user.accessToken || !user.admin) {
+			} else if (accessToken !== user.accessToken) {
+				console.log(`reqAccessToken: ${accessToken} | dbAccessToken: ${user.accessToken}`);
+				console.log(`reqAccessToken === dbAccessToken ${accessToken === user.accessToken}`);
+				console.log(user.admin);
 				res.status(400).send('Unauthorized Access');
 			} else {
 				next();
