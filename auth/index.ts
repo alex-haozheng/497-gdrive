@@ -56,14 +56,18 @@ async function initDB(mongo) {
 async function start() {
 	const mongo = await connectDB();
 	if (mongo === null) throw Error('Database connection failed');
+	console.log('Database Connection Success');
 	let auth = await initDB(mongo);
 	if (auth === null) throw Error('Database initialization failed');
+	console.log('Database Init Success');
 
 	app.post('/register', async (req, res) => {
 		const { uid, email, password }: { uid: string; email: string; password: string } = req.body;
 		if (!uid || !email || !password) {
-			res.status(400).send('uid, Email, and Password Required');
+			console.log('Missing Information');
+			res.status(400).send('Missing Information');
 		} else if ((await auth.findOne({ uid: uid })) !== null) {
+			console.log('User Already Exists');
 			res.status(400).send('User Already Exists');
 		} else {
 			const { hash, salt, accessToken } = generatePassword(password);
@@ -90,14 +94,18 @@ async function start() {
 	app.post('/login', async (req, res) => {
 		const { uid, password }: { uid: string; password: string } = req.body;
 		if (!uid || !password) {
+			console.log('Missing Information');
 			res.status(400).send('Missing Information');
 		} else {
 			const user = await auth.findOne({ uid: uid });
 			if (user === null) {
+				console.log('Incorrect uid');
 				res.status(400).send('Incorrect uid');
 			} else if (!validatePassword(password, user.hash, user.salt)) {
+				console.log('Incorrect Password');
 				res.status(400).send('Incorrect Password');
 			} else {
+				console.log('Successful Login');
 				res.status(200).send({ uid: uid, accessToken: user.accessToken, admin: user.admin});
 			}
 		}
@@ -106,10 +114,12 @@ async function start() {
 	app.post('/unregister', async (req, res) => {
 		const { uid, accessToken }: {uid: string, accessToken: string } = req.body;
 		if (!uid || !accessToken) {
+			console.log('Missing Information');
 			res.status(400).send('Missing Information');
 		}
 		const user = auth.findOne({ uid: uid });
 		if (accessToken !== user.accessToken) {
+			console.log('Wrong Access Token');
 			res.status(400).send('Unauthorized Access');
 		} else {
 			await auth.deleteOne({ _id: uid }, err => {
@@ -122,6 +132,7 @@ async function start() {
 				data: { uid }
 			});
 			console.log('Account Deleted Event Sent');
+			console.log('Successfully Deleted Account');
 			res.status(200).send('Successfully Deleted Account');
 		}
 	});
