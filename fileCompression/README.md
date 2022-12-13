@@ -5,10 +5,11 @@ Alex Zheng
 sazzle2
 
 # Service Description: 
-The endpoint will handle the file compression, whenever an update is made on the UI or when a user enters something the endpoint will use this information. 
+The endpoint will handle the file compression, whenever an update is made on the UI or when a user enters something the endpoint will use this information. not only is it a microservice its a zipping compression microservice even more scalability. :)
+
 
 # Interaction with other services: 
-This server will handle opening and closing files and handling the changes made 
+This server will handle opening and closing files and handling the changes made through the file service. This will also have events coming in from the frontend service which will activte a zip to be downloaded to the user desktop
 
 ## **Endpoint Information:**
 
@@ -22,13 +23,19 @@ This server will handle opening and closing files and handling the changes made
 - `fileChanged`
     Description: compress the content and push into database
 
-- `GET user/:id/file/zip` 
+- `GET user/file/zip` 
     - Description: downloads a zip functionality for users
     - Request:
     ```json
     {
         "fileid": "ab03b4c5" 
     } 
+    ```
+    - Response:
+    ```json
+    {
+        "content": "string"
+    }
     ```
 # How to run service:
 

@@ -20,15 +20,51 @@ Description: Listens to all the events (userCreation, userDeletion, adminCreatio
 
 Description: Returns a list of all the users
 
-`GET user/:uid/files`
+- Request: None
 
-Description: Returns a list of all files under that uid
+- Response: 
+```json
+{
+    "files": "files"
+}
+```
 
-`GET user/:uid/files/:keyword/search`
+`GET user/find`
+
+Description: Returns a status if user exists in database
+
+- Request: None
+```json
+{
+    "uid": "string",
+    "accessToken": "string"
+}
+```
+
+- Response: 
+```json
+{
+    "status": "status"
+}
+```
+
+`GET user/files`
 
 Description: Returns a list of files that contains the keyword
 
-- will add endpoints as I go
+```json
+{
+    "uid": "string",
+    "accessToken": "string"
+}
+```
+
+- Response: 
+```json
+{
+    "files": "files"
+}
+```
 
 # How to run service:
 
