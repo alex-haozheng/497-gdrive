@@ -75,7 +75,7 @@ async function start() {
 			}
 		} else if (type === 'ShootWordAnalytics') {
             const badfiles = await getBadfiles(badfilesDB);
-			axios.post('http://event-bus:4005/events', {
+			axios.post('http://event-bus:4012/events', {
 				type: 'GetWordAnalytics',
 				data: {
 					files: badfiles

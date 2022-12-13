@@ -13,7 +13,7 @@ function hash(password: string, salt: string): string {
 	return pbkdf2Sync(password, salt, 1000000, 32, 'sha256').toString('hex');
 }
 
-function generatePassword(password: string): { hash: string, salt: string, accessToken: string } {
+function generatePassword(password: string): { hash: string; salt: string; accessToken: string } {
 	const salt: string = randomBytes(32).toString('hex');
 	const accessToken: string = randomBytes(32).toString('hex');
 	const hashedPassword: string = hash(password, salt);
@@ -117,7 +117,7 @@ async function start() {
 	});
 
 	app.post('/unregister', async (req, res) => {
-		const { uid, accessToken }: {uid: string, accessToken: string } = req.body;
+		const { uid, accessToken }: { uid: string; accessToken: string } = req.body;
 		console.log('Unregister');
 		if (!uid || !accessToken) {
 			console.log('Missing Information');
@@ -144,33 +144,45 @@ async function start() {
 	});
 
 	app.post('/authData', async (req, res) => {
-		const { uid }: { uid: string } = req.body;
-		console.log(`Auth uid: ${uid}`);
-		const user = await auth.findOne({ uid });
-		console.log(`user: ${user}`);
-		console.log(`accessToken: ${user.accessToken}`);
-		console.log(`admin: ${user.admin}`);
-		if (!user) {
-			res.send({});
-			return;
+		try {
+			const { uid }: { uid: string } = req.body;
+			console.log(`Auth uid: ${uid}`);
+			const user = await auth.findOne({ uid });
+			console.log(`user: ${user}`);
+			console.log(`accessToken: ${user.accessToken}`);
+			console.log(`admin: ${user.admin}`);
+			if (!user) {
+				res.send({});
+				return;
+			}
+			res.send({ dbAccessToken: user.accessToken, admin: user.admin });
+		} catch (e) {
+			console.log(e);
 		}
-		res.send({ dbAccessToken: user.accessToken, admin: user.admin });
 	});
 
 	app.post('/events', async (req, res) => {
-		console.log('Auth Events');
-		// user deleted, password changed
-		if (req.body.type === 'AdminAdded') {
-			const uid = req.body.data.uId;
-			await auth.findOneAndUpdate({ uid: uid }, { admin: true });
-		} else if (req.body.type === 'AdminRemoved') {
-			const uid = req.body.data.uId;
-			await auth.findOneAndUpdate({ uid: uid }, { admin: false });
-		} else if (req.body.type === 'ChangePassword') {
-			const uid = req.body.data.uid;
-			const password = req.body.data.otp;
-			const { hash, salt } = generatePassword(password);
-			await auth.findOneAndUpdate({ uid: uid }, { password: hash, salt: salt });
+		try {
+			console.log('Auth Events');
+			// user deleted, password changed
+			if (req.body.type === 'AdminAdded') {
+				const uid = req.body.data.uId;
+				await auth.findOneAndUpdate({ uid: uid }, {$set: { admin: true } });
+			} else if (req.body.type === 'AdminRemoved') {
+				const uid = req.body.data.uId;
+				await auth.findOneAndUpdate({ uid: uid }, {$set: { admin: false } });
+			} else if (req.body.type === 'ChangePassword') {
+				console.log('AUTH CHANGE PASSWORD');
+				console.log(`auth change password uid: ${req.body.data.uid}`);
+				console.log(`auth change password uid: ${req.body.data.otp}`);
+				const uid = req.body.data.uid;
+				const password = req.body.data.otp;
+				const { hash, salt } = generatePassword(password);
+				await auth.findOneAndUpdate({ uid: uid }, {$set: { hash: hash, salt: salt} });
+				console.log('Successful Password Change');
+			}
+		} catch (e) {
+			console.log(e);
 		}
 		res.send({});
 	});

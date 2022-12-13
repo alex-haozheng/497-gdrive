@@ -148,14 +148,14 @@ app.put('/files/:fileId', async (req : any , res : any) => {
             };
             updateFile(fileId, file);
             res.status(200).send(file as File);
-            /*
+            
             axios.post('http://event-bus:4012/events', {
-                type: 'GetFileAnalytics',
+                type: 'FileUpdated',
                 data: {
-                    files: await readFromFileById(fileId)
+                    file: await readFromFileById(fileId)
                 },
             });
-            */
+           
         }
         else{
             res.status(400).send('Bad request');
@@ -193,12 +193,6 @@ app.post('/events', async (req : any , res : any) => {
             data: {
                 files: await readFromFile() as File[]
             },
-        } as FileEventMessage);
-    }
-    else if(type === 'FileUpdated'){
-        axios.post('http://event-bus:4012/events', {
-            type: 'FileUpdated',
-            data,
         } as FileEventMessage);
     }
     else if(type === 'FileDeleted'){

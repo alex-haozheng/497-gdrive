@@ -50,16 +50,6 @@ async function initDB(mongo) {
 	}
 }
 
-/* async function initAuthDB(mongo) {
-	try {
-		const auth = mongo.db().collection('auth');
-		return auth;
-	} catch (e) {
-		console.log(e);
-		return null;
-	}
-} */
-
 async function start() {
 	const mongo = await connectDB();
 	if (mongo === null) throw Error('Database connection failed');
@@ -68,7 +58,7 @@ async function start() {
 	//const authDB = await initAuthDB(mongo);
 
 	setTimeout(() => {
-	setInterval(async () => {
+	setInterval(() => {
 		try {
 			Promise.all([
 				axios.post('http://event-bus:4012/events', {
@@ -78,6 +68,7 @@ async function start() {
 					type: 'ShootWordAnalytics'
 				})
 			]);
+			console.log('SENT SHOOT MESSAGES');
 		} catch (e) {
 			console.log(e);
 			return;
@@ -93,7 +84,7 @@ async function start() {
 		setTimeout(async () => {
 			try {
 				const indexes = processFiles(files);
-				analytics.updateOne(
+				await analytics.updateOne(
 					{ key: 'analytics' },
 					{
 						$set: {
@@ -109,34 +100,7 @@ async function start() {
 			}
 		}, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly.
 	}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
-	}, 1000 * 60 * 2);
-
-	/* async function isAuth(req, res, next) {
-		console.log('Checking Authorization');
-		const users = await authDB.find();
-		users.forEach(user => console.log(`user.uid: ${user.uid}, user.accessToken: ${user.accessToken}`));
-		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
-		try {
-			if (!uid || !accessToken) {
-				res.status(400).send('Missing Information');
-				return;
-			}
-			const user = await authDB.findOne({ uid });
-			if (user === null) {
-				res.status(400).send('User Does Not Exist');
-			} else if (accessToken !== user.accessToken) {
-				console.log(`accessToken: ${accessToken} | dbAccessToken: ${user.accessToken}`);
-				console.log(`accessToken === dbAccessToken ${accessToken === user.accessToken}`);
-				console.log(user.admin);
-				res.status(400).send('Unauthorized Access');
-			} else {
-				next();
-			}
-		} catch(e) {
-			console.log('isAuth Error');
-			console.log(e);
-		}
-	} */
+	}, 1000 * 60);
 
 	async function isAuth(req, res, next) {
 		console.log('isAuth2');
@@ -183,13 +147,12 @@ async function start() {
 
 	app.post('/events', (req, res) => {
 		if (req.body.type === 'GetWordAnalytics') {
-			badfiles = req.body.data.files;
+			console.log('GOT MODERATOR MESSAGE');
+			badfiles = req.body.files;
 		} else if (req.body.type === 'GetFileAnalytics') {
-			files = req.body.data.files;
-		} /* else if (req.body.type === 'AccountCreated') {
-			const { uid, accessToken, admin }: { uid: string, accessToken: string, admin: boolean } = req.body.data;
-			authDB.insertOne({ uid, accessToken, admin });
-		} */
+			console.log('GOT FILE MESSAGE');
+			files = req.body.files;
+		}
 		res.send({});
 	});
 
