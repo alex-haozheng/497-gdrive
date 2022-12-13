@@ -162,7 +162,7 @@ app.get('/files', async (req : any , res : any) => {
 app.get('/files/:fileId', async (req : any , res : any) => {
     try {
         const file = await getFileById(mongo, req.params.fileId);
-        res.status(200).send({file} as {file: File});
+        res.status(200).send(file as File);
     } catch (err) {
         res.status(500).send(err);
     }
