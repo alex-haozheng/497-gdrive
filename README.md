@@ -1,3 +1,13 @@
+BUGS:
+
+Analytics
+
+TO TEST:
+File Service
+Moderator
+File Compression
+Tags
+
 # Milestone 2 Implementation Team 0 #
 
 # Team #

@@ -69,10 +69,8 @@ interface FileUpdated {
 interface ChangedPassword {
   type: 'ChangedPassword',
   data: {
-    file: {
-      fileId: string,
-      content: string
-    }
+    uid: string,
+    otp: string
   }
 }
 
@@ -153,7 +151,7 @@ app.post('/events', (req, res) => {
     console.log(err.message);
   });
 
-  axios.post('http://filequery:4007/events', event).catch((err: Error) => {
+  axios.post('http://query:4007/events', event).catch((err: Error) => {
     console.log(err.message);
   });
 
