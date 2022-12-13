@@ -32,6 +32,7 @@ export default function Login({ func }) {
 	};
 
 	return (<div>
+			<div>Username: {uid}</div>
 			<h1>Log In</h1>
 			<form onSubmit={handleSubmit}>
 				<label>uid</label>
@@ -41,10 +42,12 @@ export default function Login({ func }) {
 				<div><button type="submit">Submit</button></div>
 			</form>
 			{/* <button onClick={e => func('', '')} value={uid} >Log Out</button> */ }
-			<button onClick={() => window.location.href = '/forgotquestions'} value={uid} >Forgot Password</button>
+			<button onClick={() => window.location.href = '/questions'} value={uid} >Enter Security Question</button>
+			<button onClick={() => window.location.href = '/forgotquestions'} value={uid} >Forgot Password?</button>
 			<button onClick={() => window.location.href = '/register'} value={uid} >Register</button>
 			<button onClick={() => window.location.href = '/dashboard'} value={uid} >Dashboard</button>
 			<button onClick={e => deleteCookie()} value={uid} >Log Out</button>
+
 		</div>
 	);
 }

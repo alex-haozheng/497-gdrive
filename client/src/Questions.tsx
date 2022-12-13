@@ -23,8 +23,11 @@ export default function Questions({uid, accessToken}) {
 			<form onSubmit={handleSubmit}>
 				<label>Security Question</label>
 				<input type="question" onChange={e => setQuestion(e.target.value)} value={question} />
-				<div><button type="submit" onClick={() => window.location.href = "/files"}>Submit</button></div>
+				<div><button type="submit" >Submit</button></div>
 			</form>
+			<p></p>
+			<button onClick={() => window.location.href = '/dashboard'} value={uid} >Dashboard</button>
+			<p></p>
 		</div>
 	);
 }

@@ -29,7 +29,7 @@ export default function Register() {
 				<div><button type="submit">Submit</button></div>
 			</form>
 			<button onClick={() => window.location.href = '/questions'} value={uid} >Security Questions</button>
-			<button onClick={() => window.location.href = '/login'} value={uid} >Login</button>
+			<button onClick={() => window.location.href = '/'} value={uid} >Login</button>
 		</div>
 	);
 }
