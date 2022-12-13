@@ -71,6 +71,10 @@ app.post('/files/upload', async (req : express.Request, res : express.Response) 
     }
 });
 
+app.post('/events', (req, res) => {
+    res.send({});
+});
+
 app.listen(4011, () => {
     console.log('uploadDownload service listening on port 4011');
 });
