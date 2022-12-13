@@ -42,6 +42,10 @@ app.put('/files/:fileId/time', async (req : express.Request, res : express.Respo
     }
 });
 
+app.post('/events', (req, res) => {
+    res.send({});
+});
+
 app.listen(4010, () => {
     console.log('timeLogger service listening on port 4010');
 });

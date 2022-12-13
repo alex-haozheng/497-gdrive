@@ -34,7 +34,7 @@ Description: This will update the database indicating a new security question ha
 }
 ```
 
-`GET /verify`
+`POST /verify`
 
 Description: This will check if the security question passed is valid to what is stored
 

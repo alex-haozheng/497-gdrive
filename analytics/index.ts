@@ -67,6 +67,7 @@ async function start() {
 	if (analytics === null) throw Error('Database initialization failed');
 	//const authDB = await initAuthDB(mongo);
 
+	setTimeout(() => {
 	setInterval(async () => {
 		try {
 			Promise.all([
@@ -108,6 +109,7 @@ async function start() {
 			}
 		}, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly.
 	}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
+	}, 1000 * 60 * 2);
 
 	/* async function isAuth(req, res, next) {
 		console.log('Checking Authorization');
