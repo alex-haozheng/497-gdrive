@@ -18,10 +18,25 @@ const Admin = (data) => {
       fetchIsAdmin();
     }, []);
 
+    const removeMeAdmin = async () => {
+        const res = await axios.delete(`http://localhost:4000/removeAdmin/${uid}`);
+        const check = await axios.get(`http://localhost:4000/checkAdmin/${uid}`);
+        setIsAdmin(res.data);
+        console.log(res.data);
+    };
+
+    const addMeAdmin = async () => {
+        const res = await axios.post(`http://localhost:4000/addAdmin/${uid}`);
+        const check = await axios.get(`http://localhost:4000/checkAdmin/${uid}`);
+        setIsAdmin(res.data);
+        console.log(res.data);
+    };
+
     return ( isAdmin ?
         <div>
         <AdminList edit={true}/>
         <AdminRequests edit={true}/>
+        <button className="btn btn-primary" onClick={removeMeAdmin}>Remove myself as an admin</button>
         </div> : 
         <div>
             <RequestAdminAccess uid={uid} />
@@ -30,6 +45,7 @@ const Admin = (data) => {
             <h3>Because you are not an admin, you are unable to remove admins / add admins.</h3>
             <AdminList edit={false}/>
             <AdminRequests edit={false}/>
+            <button className="btn btn-primary" onClick={addMeAdmin}>Add myself as an admin</button>
         </div>
     );
 }
