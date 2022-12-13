@@ -48,7 +48,7 @@ const Admin = (data) => {
             <h3>Because you are not an admin, you are unable to remove admins / add admins.</h3>
             <AdminList edit={false}/>
             <AdminRequests edit={false}/>
-            <button className="btn btn-primary" /*onClick={addMeAdmin}*/>Add myself as an admin</button>
+            <button className="btn btn-primary" /*onClick={addMeAdmin}*/>Force add myself as an admin</button>
         </div>
     );
 }
