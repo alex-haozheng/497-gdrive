@@ -120,7 +120,7 @@ async function start() {
 		}
 	});
 
-	app.get('/user/:uid/files', isAuth, async (req: Request, res: Response) => {
+	app.get('/user/files', isAuth, async (req: Request, res: Response) => {
 		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
 		try {
 			const ret = await getFiles(mongo, uid);
