@@ -15,7 +15,7 @@ Admin UI will allow adding of an admin and removing of an admin.
 
 Profile UI will allow viewing a user's profile details and editing parts of a user's profile details.
 
-The Forgot Password UI will allow the client to access the forgotpw endpoint.
+The Forgot Password UI will allow the client to access the questions endpoint.
 
 The File Compression UI will allow the client to download files onto their local machine.
 

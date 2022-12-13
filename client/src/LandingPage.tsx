@@ -102,7 +102,7 @@ const ListFiles = () => {
 };
 
 const LandingPage = () => {
-    return ( window.location.pathname === '/files' ? <div> <UploadFile /> <ListFiles /> </div> : <div> <EditDocument fileId={window.location.pathname.split('/')[2]}/> </div> );
+    return ( (window.location.pathname === '/files' || window.location.pathname === '/files/*') ? <div> <UploadFile /> <ListFiles /> </div> : <div> <EditDocument fileId={window.location.pathname.split('/')[2]}/> </div> );
     /*
     return (
         <div>

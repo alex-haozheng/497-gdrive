@@ -149,7 +149,7 @@ app.post('/events', (req, res) => {
   });
   
   // alex's service
-  axios.post('http://forgotpw:4006/events', event).catch((err: Error) => {
+  axios.post('http://questions:4006/events', event).catch((err: Error) => {
     console.log(err.message);
   });
 
