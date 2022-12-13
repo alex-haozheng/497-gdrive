@@ -28,7 +28,7 @@ export default function ForgotQuestions() {
 				<input type="password" onChange={e => setPassword(e.target.value)} value={password} />
 				<div><button type="submit" >Submit</button></div>
 			</form>
-			<button type="login" onClick={() => window.location.href = "/"}>Login Page</button>
+			<button onClick={() => window.location.href = "/"}>Login Page</button>
 		</div>
 	);
 }
