@@ -18,7 +18,7 @@ export default function EditDocument({fileId}) {
     useEffect(() => {
         axios.get(`http://localhost:4009/files/${fileId}`)
             .then(res => {
-                setFile(res.data); 
+                setFile(res.data.file);
             })
             .catch(err => {
                 console.log(err);
