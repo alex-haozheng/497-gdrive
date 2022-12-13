@@ -6,9 +6,10 @@ import RequestAdminAccess from './RequestAdminAccess';
 
 const Admin = (data) => {
     const [isAdmin, setIsAdmin] = useState(false);
-    const [uid, setuid] = useState('');
+    // const [uid, setuid] = useState('');
+    const uid = data.uid;
 
-    setuid(data.uid);
+    // setuid(data.uid);
 
     const fetchIsAdmin = async () => {
         const res = await axios.get(`http://localhost:4000/checkAdmin/${uid}`);
@@ -21,24 +22,24 @@ const Admin = (data) => {
     }, []);
 
     const removeMeAdmin = async () => {
-        const res = await axios.delete(`http://localhost:4000/removeAdmin/${uid}`);
+        await axios.delete(`http://localhost:4000/removeAdmin/${uid}`);
         const check = await axios.get(`http://localhost:4000/checkAdmin/${uid}`);
-        setIsAdmin(res.data);
-        console.log(res.data);
+        setIsAdmin(check.data);
+        console.log(check.data);
     };
 
     const addMeAdmin = async () => {
-        const res = await axios.post(`http://localhost:4000/addAdmin`, {uid: uid});
+        await axios.post(`http://localhost:4000/addAdmin`, {uid: uid});
         const check = await axios.get(`http://localhost:4000/checkAdmin/${uid}`);
-        setIsAdmin(res.data);
-        console.log(res.data);
+        setIsAdmin(check.data);
+        console.log(check.data);
     };
 
     return ( isAdmin ?
         <div>
         <AdminList edit={true}/>
         <AdminRequests edit={true}/>
-        <button className="btn btn-primary" onClick={removeMeAdmin}>Remove myself as an admin</button>
+        <button className="btn btn-primary" /*onClick={removeMeAdmin}*/>Remove myself as an admin</button>
         </div> : 
         <div>
             <RequestAdminAccess uid={uid} />
@@ -47,7 +48,7 @@ const Admin = (data) => {
             <h3>Because you are not an admin, you are unable to remove admins / add admins.</h3>
             <AdminList edit={false}/>
             <AdminRequests edit={false}/>
-            <button className="btn btn-primary" onClick={addMeAdmin}>Add myself as an admin</button>
+            <button className="btn btn-primary" /*onClick={addMeAdmin}*/>Force add myself as an admin</button>
         </div>
     );
 }
