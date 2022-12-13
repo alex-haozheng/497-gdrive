@@ -57,7 +57,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         {/* protected routes, will only be rendered if the user is logged in */}
         <Route path="/questions" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<Questions uid = {localStorage.getItem('uid')} accessToken = {localStorage.getItem('accessToken')} />} </ProtectedRoute>} />
-        <Route path="/forgotquestions" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<ForgotQuestions  />} </ProtectedRoute>} />
+        <Route path="/forgotquestions" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<ForgotQuestions />} </ProtectedRoute>} />
         <Route path="/profile" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<Profile uid = {localStorage.getItem('uid')} />} </ProtectedRoute>} />
         <Route path="/admin" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<Admin uid = {localStorage.getItem('uid')} />} </ProtectedRoute>} />
         <Route path="/analytics" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<Analytics uid = {localStorage.getItem('uid')} accessToken = {localStorage.getItem('accessToken')} />} </ProtectedRoute>} />
