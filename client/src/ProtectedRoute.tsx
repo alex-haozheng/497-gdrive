@@ -8,6 +8,8 @@ interface ProtectedRouteProp {
 }
 
 export default function ProtectedRoute({uid, accessToken, children}: ProtectedRouteProp) {
+    console.log(`protected route: ${uid}`);
+    console.log(`protected route: ${accessToken}`);
     if (uid && accessToken) {
         return children;
     }

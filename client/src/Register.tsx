@@ -26,8 +26,10 @@ export default function Register() {
 				<input type="text" onChange={e => setEmail(e.target.value)} value={email} />
 				<label>Password</label>
 				<input type="password" onChange={e => setPassword(e.target.value)} value={password} />
-				<div><button type="submit" onClick={() => window.location.href = "/questions"}>Submit</button></div>
+				<div><button type="submit">Submit</button></div>
 			</form>
+			<button onClick={() => window.location.href = '/questions'} value={uid} >Security Questions</button>
+			<button onClick={() => window.location.href = '/login'} value={uid} >Login</button>
 		</div>
 	);
 }

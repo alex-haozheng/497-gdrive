@@ -9,6 +9,7 @@ import Profile from './Profile';
 import Analytics from './Analytics';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
+import Dashboard from './Dashboard';
 
 function App() {
   const [uid, setuid]: [uid: string | undefined, setuid: (arg: any) => void] = useState('');
@@ -62,6 +63,7 @@ function App() {
         <Route path="/admin" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<Admin uid = {localStorage.getItem('uid')} />} </ProtectedRoute>} />
         <Route path="/analytics" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<Analytics uid = {localStorage.getItem('uid')} accessToken = {localStorage.getItem('accessToken')} />} </ProtectedRoute>} />
         <Route path="/files/*" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<LandingPage />} </ProtectedRoute>} />
+        <Route path="/dashboard" element = {<ProtectedRoute uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')}> {<Dashboard uid={localStorage.getItem('uid')} accessToken={localStorage.getItem('accessToken')} />} </ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );
