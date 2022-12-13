@@ -6,7 +6,9 @@ import RequestAdminAccess from './RequestAdminAccess';
 
 const Admin = (data) => {
     const [isAdmin, setIsAdmin] = useState(false);
-    const uid = data.uid;
+    const [uid, setuid] = useState('');
+
+    setuid(data.uid);
 
     const fetchIsAdmin = async () => {
         const res = await axios.get(`http://localhost:4000/checkAdmin/${uid}`);
@@ -26,7 +28,7 @@ const Admin = (data) => {
     };
 
     const addMeAdmin = async () => {
-        const res = await axios.post(`http://localhost:4000/addAdmin/${uid}`);
+        const res = await axios.post(`http://localhost:4000/addAdmin`, {uid: uid});
         const check = await axios.get(`http://localhost:4000/checkAdmin/${uid}`);
         setIsAdmin(res.data);
         console.log(res.data);
