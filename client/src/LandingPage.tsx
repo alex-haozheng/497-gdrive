@@ -102,15 +102,18 @@ const ListFiles = () => {
 };
 
 const LandingPage = () => {
-    return ( (window.location.pathname === '/files' || window.location.pathname === '/files/*') ? <div> <UploadFile /> <ListFiles /> </div> : <div> <EditDocument fileId={window.location.pathname.split('/')[2]}/> </div> );
-    /*
-    return (
-        <div>
-            <UploadFile />
-            <ListFiles />
-        </div>
-    );  
-    */            
+        if ((window.location.pathname === '/files' || window.location.pathname === '/files/*')){
+            return ( <div> <UploadFile /> <ListFiles /> </div> );
+        }
+        else if(window.location.pathname.endsWith('/edit')){
+            return  (<EditDocument fileId={window.location.pathname.split('/')[2]}/>);
+        }
+        else if(window.location.pathname.endsWith('/download')){
+            window.location.href = `http://localhost:4009/files/${window.location.pathname.split('/')[2]}/download`;
+        }
+        else {
+            return (<div>404</div>);
+        }
 };
 
 export default LandingPage;

@@ -151,10 +151,26 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: rootpassword
     volumes:
       - fc-mongo-data:/data/db
+  #fileservice:
+    #build: fileservice
+    #ports:
+      #- "4009:4009"
   fileservice:
     build: fileservice
     ports:
       - "4009:4009"
+    depends_on:
+      - fileservice-mongo
+    environment:
+      DATABASE_URL: mongodb://root:rootpassword@fileservice-mongo:27017/mydb?directConnection=true&authSource=admin
+  fileservice-mongo:
+    image: mongo:latest
+    container_name: fileservice-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    volumes:
+      - fileservice-mongo-data:/data/db
   timelogger:
     build: timelogger
     ports:
@@ -202,3 +218,4 @@ volumes:
   auth-mongo-data:
   moderator_mongo-data:
   mongodb_data_container:
+  fileservice-mongo-data:
