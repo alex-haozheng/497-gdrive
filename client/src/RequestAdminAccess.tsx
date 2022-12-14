@@ -17,16 +17,6 @@ const RequestAdminAccess = (data) => {
       fetchRequested();
     }, []);
 
-    const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-    
-        await axios.post(`http://localhost:4013/addRequest`, {
-            uid: uid
-        });
-    
-        fetchRequested();
-    };
-
     const renderedRequest = 
         (
             <div>
@@ -36,7 +26,7 @@ const RequestAdminAccess = (data) => {
                     style={{ backgroundColor: 'pink', margin: '5%', border: '1px solid black'}}
                 >
                     <h1>You are not an admin. Click below to request admin access.</h1>
-                    <form onSubmit={onSubmit}>
+                    <form onSubmit={data.onSubmit}>
                         <button className="btn btn-primary">Send Request</button>
                     </form>
                 </div>
