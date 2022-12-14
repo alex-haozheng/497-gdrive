@@ -167,10 +167,10 @@ async function start() {
 			// user deleted, password changed
 			if (req.body.type === 'AdminAdded') {
 				const uid = req.body.data.uId;
-				await auth.findOneAndUpdate({ uid: uid }, {$set: { admin: true } });
+				await auth.findOneAndUpdate({ uid: uid }, { $set: { admin: true } });
 			} else if (req.body.type === 'AdminRemoved') {
 				const uid = req.body.data.uId;
-				await auth.findOneAndUpdate({ uid: uid }, {$set: { admin: false } });
+				await auth.findOneAndUpdate({ uid: uid }, { $set: { admin: false } });
 			} else if (req.body.type === 'ChangePassword') {
 				console.log('AUTH CHANGE PASSWORD');
 				console.log(`auth change password uid: ${req.body.data.uid}`);
@@ -178,7 +178,7 @@ async function start() {
 				const uid = req.body.data.uid;
 				const password = req.body.data.otp;
 				const { hash, salt } = generatePassword(password);
-				await auth.findOneAndUpdate({ uid: uid }, {$set: { hash: hash, salt: salt} });
+				await auth.findOneAndUpdate({ uid: uid }, { $set: { hash: hash, salt: salt} });
 				console.log('Successful Password Change');
 			}
 		} catch (e) {
