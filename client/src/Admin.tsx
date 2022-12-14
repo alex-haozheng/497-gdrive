@@ -24,16 +24,18 @@ const Admin = (data) => {
     const removeMeAdmin = async () => {
         await axios.delete(`http://localhost:4000/removeAdmin/${uid}`);
         const check = await axios.get(`http://localhost:4000/checkAdmin/${uid}`);
-        setIsAdmin(check.data);
-        console.log(check.data);
+        console.log("This should be false");
+        setIsAdmin(false);
     };
 
     const addMeAdmin = async () => {
+        const check = await axios.get(`http://localhost:4013/checkRequest/${uid}`);
+        if(check.data){
+            await axios.delete(`http://localhost:4013/removeRequest/${uid}`);
+        }
         await axios.post(`http://localhost:4000/addAdmin`, {uid: uid});
-        await axios.delete(`http://localhost:4013/removeRequest/${uid}`);
-        const check = await axios.get(`http://localhost:4000/checkAdmin/${uid}`);
-        setIsAdmin(check.data);
-        console.log(check.data);
+        console.log("This should be true");
+        setIsAdmin(true);
     };
 
     return ( isAdmin ?
