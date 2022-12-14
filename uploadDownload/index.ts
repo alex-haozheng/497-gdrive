@@ -25,6 +25,13 @@ interface FileUpload {
     content: string;
 }
 
+type FileEvent = 'FileCreated' | 'FileUpdated' | 'FileDeleted' | 'ShootFileAnalytics' | 'GetFileAnalytics';
+
+interface FileEventMessage {
+    type: FileEvent;
+    data: File | { files: File[] };
+}
+
 const downloadFile = async (fileId : string) => {
     const file = await axios.get(`http://fileservice:4009/files/${fileId}`) as { data : File };
     fs.writeFileSync(`./tempFiles/${fileId}.txt`, JSON.stringify(file.data));
@@ -70,8 +77,21 @@ app.post('/files/upload', async (req : express.Request, res : express.Response) 
     }
 });
 
-app.post('/events', (req, res) => {
-    res.send({});
+app.post('/events', (req : express.Request, res : express.Response) => {
+    const { type, data } = req.body as FileEventMessage;
+    if(type === 'FileCreated'){
+        axios.post('http://event-bus:4012/events', {
+            type: 'FileCreated',
+            data,
+        } as FileEventMessage);
+    }
+    if(type === 'FileUpdated'){
+        axios.post('http://event-bus:4012/events', {
+            type: 'FileUpdated',
+            data,
+        } as FileEventMessage);
+    }
+    res.status(200).send({});
 });
 
 app.listen(4011, () => {

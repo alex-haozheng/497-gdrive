@@ -43,7 +43,7 @@ async function connectDB(): Promise<MongoClient>{
     await mongo.connect();
     return await Promise.resolve(mongo);
 }
-//new file service
+
 async function initDB(mongo: MongoClient) {
     const db = mongo.db();
 
@@ -151,7 +151,7 @@ async function start(){
     const mongo = await connectDB();
     await initDB(mongo);
     
-    app.get('/files', async (req : any , res : any) => {
+    app.get('/files', async (req : express.Request, res : express.Response) => {
         try{
             const files = await getFiles(mongo);
             res.status(200).send({files} as {files: File[]});
@@ -160,7 +160,7 @@ async function start(){
         }
     });
 
-    app.get('/files/:fileId', async (req : any , res : any) => {
+    app.get('/files/:fileId', async (req : express.Request, res : express.Response) => {
         try {
             const file = await getFileById(mongo, req.params.fileId);
             res.status(200).send(file as File);
@@ -169,7 +169,7 @@ async function start(){
         }
     });
 
-    app.post('/files', async (req : any , res : any) => {
+    app.post('/files', async (req : express.Request, res : express.Response) => {
         const {name, content} : FileUpload = req.body;
         try{
             if(name && content){
@@ -184,7 +184,7 @@ async function start(){
         }
     });
 
-    app.put('/files/:fileId', async (req : any , res : any) => {
+    app.put('/files/:fileId', async (req : express.Request, res : express.Response) => {
         const {name, content} : FileUpload = req.body;
         try{
             if(name && content){
@@ -205,7 +205,7 @@ async function start(){
         }
     });
 
-    app.delete('/files/:fileId', async (req : any , res : any) => {
+    app.delete('/files/:fileId', async (req : express.Request, res : express.Response) => {
         try{
             const file = await deleteFile(mongo, req.params.fileId);
             res.status(200).send(file as File);
@@ -215,7 +215,7 @@ async function start(){
         }
     });
 
-    app.post('/events', async (req : any , res : any) => {
+    app.post('/events', async (req : express.Request, res : express.Response) => {
         const {type, data} : {type: FileEvent, data: File} = req.body;
         if(type === 'FileCreated'){
             axios.post('http://event-bus:4012/events', {
