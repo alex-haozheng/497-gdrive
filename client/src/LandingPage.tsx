@@ -53,7 +53,7 @@ const DownloadButton = ({ fileId, fileName } : { fileId: string, fileName: strin
     );
 };
 
-const ZipButton = ( { fileId }: { fileId: string}) => {
+/* const ZipButton = ( { fileId }: { fileId: string}) => {
     const handleDownload = async () => {
         const res = await axios.get(`http://localhost:4008/user/file/zip`, {
             data: {
@@ -75,7 +75,7 @@ const ZipButton = ( { fileId }: { fileId: string}) => {
     return (
         <Button variant="outlined" color="primary" onClick={handleDownload} sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 72}} startIcon={<img src="https://img.icons8.com/ios/50/000000/download.png" alt="download" width="20" height="20"/>}>Zip</Button>
     );
-};
+}; */
 
 const handleDelete = async (fileId : string) => {
     await axios.delete(`http://localhost:4009/files/${fileId}`).then((res) => {
@@ -119,7 +119,7 @@ const ListFiles = () => {
                             <Button variant="contained" color="success" sx={{ width:200, textTransform: "none", position: 'relative', top: 77, marginBottom: 2}} onClick={() => {window.location.href = `/files/${file.fileId}/edit`}}>Edit</Button>
                             <Button variant="outlined" color="error" sx={{ width:200, textTransform: "none", position: 'relative', top: 73, marginBottom: 2}} onClick={() => {handleDelete(file.fileId)}}>Delete</Button>
                             <DownloadButton fileId={file.fileId} fileName={file.name}/>
-                            <ZipButton fileId = {file.fileId} />
+                            {/* <ZipButton fileId = {file.fileId} /> */}
                         </Box>
                     );                      
             })}
