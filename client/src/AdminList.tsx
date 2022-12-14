@@ -15,6 +15,12 @@ const AdminList = (data) => {
       fetchAdmins();
     }, []);
 
+    const onSubmit = async (uidval) => {  
+      await axios.delete(`http://localhost:4000/removeAdmin/${uidval}`);
+
+      fetchAdmins();
+  };
+  
     const renderedAdmins = Object.values(admins).map((p) => {
         return (
           <div
@@ -26,7 +32,7 @@ const AdminList = (data) => {
                 className="card-body"  
                 style={{ backgroundColor: 'pink', margin: '5%', border: '1px solid black'}}
             >
-              <AdminCard uid={p} edit={data.edit}/>
+              <AdminCard uid={p} edit={data.edit} onSubmit={() => onSubmit(p)}/>
             </div>
           </div>
         );

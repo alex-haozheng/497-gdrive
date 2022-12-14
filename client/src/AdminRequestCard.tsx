@@ -16,6 +16,7 @@ const AdminRequestCard = (data) => {
       fetchProfile();
     }, []);
 
+    /*
     const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
     
@@ -25,11 +26,12 @@ const AdminRequestCard = (data) => {
     
         fetchProfile();
     };
+    */
 
     const renderedProfile = 
         ( data.edit ?
           <div>
-            <form onSubmit={onSubmit}>
+            <form onSubmit={data.onSubmit}>
                 <button className="btn btn-primary">Add as Admin</button>
             </form>
               <h3>Username: {uid}</h3>

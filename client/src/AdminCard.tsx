@@ -16,18 +16,18 @@ const AdminCard = (data) => {
       fetchProfile();
     }, []);
 
+    /*
     const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
     
         await axios.delete(`http://localhost:4000/removeAdmin/${uid}`);
-    
-        fetchProfile();
     };
+    */
 
     const renderedProfile = 
         ( data.edit ?
           <div>
-            <form onSubmit={onSubmit}>
+            <form onSubmit={data.onSubmit}>
                 <button className="btn btn-primary">Remove Admin</button>
             </form>
               <h3>Username: {uid}</h3>
