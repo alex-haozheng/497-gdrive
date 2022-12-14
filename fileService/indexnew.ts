@@ -33,7 +33,7 @@ app.use(express.json());
 app.use(cors());
 
 async function connectDB(): Promise<MongoClient>{
-    const uri = process.env.DATABASE_URL || "mongodb://root:rootpassword@fileservice-mongo:27017/mydb?directConnection=true&authSource=admin";
+    const uri = process.env.DATABASE_URL;
 
     if (uri === undefined) {
         throw Error('DATABASE_URL environment variable is not specified');
@@ -150,98 +150,99 @@ async function deleteFile(mongo: MongoClient, fileId: string): Promise<File>{
 async function start(){
     const mongo = await connectDB();
     await initDB(mongo);
-app.get('/files', async (req : any , res : any) => {
-    try{
-        const files = await getFiles(mongo);
-        res.status(200).send({files} as {files: File[]});
-    } catch (err) {
-        res.status(500).send(err);
-    }
-});
+    
+    app.get('/files', async (req : any , res : any) => {
+        try{
+            const files = await getFiles(mongo);
+            res.status(200).send({files} as {files: File[]});
+        } catch (err) {
+            res.status(500).send(err);
+        }
+    });
 
-app.get('/files/:fileId', async (req : any , res : any) => {
-    try {
-        const file = await getFileById(mongo, req.params.fileId);
-        res.status(200).send(file as File);
-    } catch (err) {
-        res.status(500).send(err);
-    }
-});
+    app.get('/files/:fileId', async (req : any , res : any) => {
+        try {
+            const file = await getFileById(mongo, req.params.fileId);
+            res.status(200).send(file as File);
+        } catch (err) {
+            res.status(500).send(err);
+        }
+    });
 
-app.post('/files', async (req : any , res : any) => {
-    const {name, content} : FileUpload = req.body;
-    try{
-        if(name && content){
-            const file = await createFile(mongo, {name, content});
+    app.post('/files', async (req : any , res : any) => {
+        const {name, content} : FileUpload = req.body;
+        try{
+            if(name && content){
+                const file = await createFile(mongo, {name, content});
+                res.status(200).send(file as File);
+            }
+            else{
+                res.status(400).send('Bad request');
+            }
+        } catch (err) {
+            res.status(500).send(err);
+        }
+    });
+
+    app.put('/files/:fileId', async (req : any , res : any) => {
+        const {name, content} : FileUpload = req.body;
+        try{
+            if(name && content){
+                const file = await updateFile(mongo, req.params.fileId, {name, content});
+                res.status(200).send(file as File);
+                axios.post('http://event-bus:4012/events', {
+                    type: 'FileUpdated',
+                    data: {
+                        file: await getFileById(mongo, req.params.fileId) as File
+                    },
+                });
+            }
+            else{
+                res.status(400).send('Bad request');
+            }
+        } catch (err) {
+            res.status(500).send(err);
+        }
+    });
+
+    app.delete('/files/:fileId', async (req : any , res : any) => {
+        try{
+            const file = await deleteFile(mongo, req.params.fileId);
             res.status(200).send(file as File);
         }
-        else{
-            res.status(400).send('Bad request');
+        catch (err) {
+            res.status(500).send(err);
         }
-    } catch (err) {
-        res.status(500).send(err);
-    }
-});
+    });
 
-app.put('/files/:fileId', async (req : any , res : any) => {
-    const {name, content} : FileUpload = req.body;
-    try{
-        if(name && content){
-            const file = await updateFile(mongo, req.params.fileId, {name, content});
-            res.status(200).send(file as File);
+    app.post('/events', async (req : any , res : any) => {
+        const {type, data} : {type: FileEvent, data: File} = req.body;
+        if(type === 'FileCreated'){
             axios.post('http://event-bus:4012/events', {
-                type: 'FileUpdated',
+                type: 'FileCreated',
+                data,
+            } as FileEventMessage);
+        }
+        if(type === 'ShootFileAnalytics'){
+            axios.post('http://event-bus:4012/events', {
+                type: 'GetFileAnalytics',
                 data: {
-                    file: await getFileById(mongo, req.params.fileId) as File
+                    files: await getFiles(await connectDB()) as File[]
                 },
-            });
+            } as FileEventMessage);
         }
-        else{
-            res.status(400).send('Bad request');
+        else if(type === 'FileDeleted'){
+            axios.post('http://event-bus:4012/events', {
+                type: 'FileDeleted',
+                data,
+            } as FileEventMessage);
         }
-    } catch (err) {
-        res.status(500).send(err);
-    }
-});
+        res.status(200).send({});
+    });
 
-app.delete('/files/:fileId', async (req : any , res : any) => {
-    try{
-        const file = await deleteFile(mongo, req.params.fileId);
-        res.status(200).send(file as File);
-    }
-    catch (err) {
-        res.status(500).send(err);
-    }
-});
-
-app.post('/events', async (req : any , res : any) => {
-    const {type, data} : {type: FileEvent, data: File} = req.body;
-    if(type === 'FileCreated'){
-        axios.post('http://event-bus:4012/events', {
-            type: 'FileCreated',
-            data,
-        } as FileEventMessage);
-    }
-    if(type === 'ShootFileAnalytics'){
-        axios.post('http://event-bus:4012/events', {
-            type: 'GetFileAnalytics',
-            data: {
-                files: await getFiles(await connectDB()) as File[]
-            },
-        } as FileEventMessage);
-    }
-    else if(type === 'FileDeleted'){
-        axios.post('http://event-bus:4012/events', {
-            type: 'FileDeleted',
-            data,
-        } as FileEventMessage);
-    }
-    res.status(200).send({});
-});
-
-app.listen(4009, () => {
-    console.log('new fileSevice listening on port 4009');
-});
+    app.listen(4009, () => {
+        console.log('new fileSevice listening on port 4009');
+    });
 }
 
 start();

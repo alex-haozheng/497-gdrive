@@ -61,5 +61,5 @@ Kays
 - Logout
 
 Justin
-- Component 1
-- Component 2
+- Files Page
+- Edit File
