@@ -3,7 +3,7 @@ import * as cors from 'cors';
 import axios from 'axios';
 const app = express();
 import { Analytics, File } from './interfaces.js';
-import { isAdmin, processFiles, condense } from './utils.js';
+import { processFiles, condense } from './utils.js';
 import { MongoClient } from 'mongodb';
 import { convertTypeAcquisitionFromJson } from 'typescript';
 
@@ -57,55 +57,48 @@ async function start() {
 	if (analytics === null) throw Error('Database initialization failed');
 	//const authDB = await initAuthDB(mongo);
 
-	setTimeout(() => {
-	setInterval(() => {
-		try {
-			Promise.all([
-				axios.post('http://event-bus:4012/events', {
-					type: 'ShootFileAnalytics'
-				}),
-				axios.post('http://event-bus:4012/events', {
-					type: 'ShootWordAnalytics'
-				})
-			]);
-			console.log('SENT SHOOT MESSAGES');
-		} catch (e) {
-			console.log(e);
-			return;
-		}
-
-		try {
-			analytics = mongo.db().collection('analytics');
-		} catch (e) {
-			console.log(e);
-			return;
-		}
-
-		setTimeout(async () => {
+	/* setTimeout(() => {
+		setInterval(() => {
 			try {
-				const indexes = processFiles(files);
-				await analytics.updateOne(
-					{ key: 'analytics' },
-					{
-						$set: {
-							numFiles: files.length,
-							readability: condense(indexes),
-							badfiles: badfiles
-						}
-					}
-				);
+				Promise.all([
+					axios.post('http://event-bus:4012/events', {
+						type: 'ShootFileAnalytics'
+					}),
+					axios.post('http://event-bus:4012/events', {
+						type: 'ShootWordAnalytics'
+					})
+				]);
+				console.log('SENT SHOOT MESSAGES');
 			} catch (e) {
 				console.log(e);
 				return;
 			}
-		}, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly.
-	}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
-	}, 1000 * 60);
+
+			setTimeout(async () => {
+				try {
+					const indexes = processFiles(files);
+					await analytics.updateOne(
+						{ key: 'analytics' },
+						{
+							$set: {
+								numFiles: files.length,
+								readability: condense(indexes),
+								badfiles: badfiles
+							}
+						}
+					);
+				} catch (e) {
+					console.log(e);
+					return;
+				}
+			}, 1000 * 60); // wait for ShootAnalytics events to get to other services, and for GetAnalytics events to come in. No rush, we'll wait one minute. This is a completely backend async service, not worried about responding to client quickly.
+		}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
+	}, 1000 * 60); */
 
 	async function isAuth(req, res, next) {
 		console.log('isAuth2');
 		console.log('Checking Authorization');
-		const { uid, accessToken }: { uid: string, accessToken: string } = req.body;
+		const { uid, accessToken }: { uid: string; accessToken: string } = req.body;
 		console.log(`isAuth uid: ${uid}, isAuth accessToken: ${accessToken}`);
 		try {
 			if (!uid || !accessToken) {
@@ -127,7 +120,7 @@ async function start() {
 			} else {
 				next();
 			}
-		} catch(e) {
+		} catch (e) {
 			console.log('isAuth Error');
 			console.log(e);
 		}
@@ -137,21 +130,45 @@ async function start() {
 	app.post('/analytics', isAuth, async (req, res) => {
 		console.log('Made it to analytics service!');
 		try {
+			Promise.all([
+				axios.post('http://event-bus:4012/events', {
+					type: 'ShootFileAnalytics'
+				}),
+				axios.post('http://event-bus:4012/events', {
+					type: 'ShootWordAnalytics'
+				})
+			]);
+			const indexes = processFiles(files);
+			console.log(`Analytics: ${indexes}`);
+			await analytics.updateOne(
+				{ key: 'analytics' },
+				{
+					$set: {
+						numFiles: files.length,
+						readability: condense(indexes),
+						badfiles: badfiles
+					}
+				}
+			);
 			const results = await analytics.findOne({ key: 'analytics' });
 			res.status(200).send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
-		} catch(e) {
+		} catch (e) {
 			console.log(e);
 			res.status(500).send({});
 		}
 	});
 
 	app.post('/events', (req, res) => {
-		if (req.body.type === 'GetWordAnalytics') {
-			console.log('GOT MODERATOR MESSAGE');
-			badfiles = req.body.files;
-		} else if (req.body.type === 'GetFileAnalytics') {
-			console.log('GOT FILE MESSAGE');
-			files = req.body.files;
+		try {
+			if (req.body.type === 'GetWordAnalytics') {
+				console.log('GOT MODERATOR MESSAGE');
+				badfiles = req.body.data.files;
+			} else if (req.body.type === 'GetFileAnalytics') {
+				console.log('GOT FILE MESSAGE');
+				files = req.body.data.files;
+			}
+		} catch(e) {
+			console.log(e);
 		}
 		res.send({});
 	});

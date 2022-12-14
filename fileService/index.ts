@@ -155,6 +155,14 @@ app.put('/files/:fileId', async (req : any , res : any) => {
                     file: await readFromFileById(fileId)
                 },
             });
+            // alex changes
+            axios.post('http://event-bus:4012/events', {
+                type:   'FileModified',
+                data: {
+                    fileId,
+                    content
+                }
+            });
            
         }
         else{

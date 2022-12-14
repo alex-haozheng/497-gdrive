@@ -1,13 +1,5 @@
 import { File } from './interfaces.js';
 
-export function isAdmin(req, res, next) {
-	if (req.isAuthenticated !== undefined && req.user !== undefined && req.isAuthenticated() && req.user.admin) {
-		next();
-	} else {
-		res.status(401).send('Unauthorized admin access');
-	}
-}
-
 export function processFiles(files: File[]): number[] {
 	const indexes: number[] = [];
 	for (const file of files) {
