@@ -24,6 +24,13 @@ async function connectDB(): Promise<MongoClient>{
 async function initDB(mongo: MongoClient) {
   const db = mongo.db();
 
+    /* UNCOMMENT IF YOU WANT DATABASE TO NOT RESET EVERY TIME YOU DOCKER COMPOSE UP
+  if (await db.listCollections({ name: 'admins' }).hasNext()) {
+    console.log('Collection already exists. Skipping initialization.');
+    return;
+  }
+    */
+
   if (await db.listCollections({ name: 'admins' }).hasNext()) {
     db.collection('admins').drop(function(err, delOK) {
       if (err) throw err;
@@ -32,16 +39,10 @@ async function initDB(mongo: MongoClient) {
     console.log('Collection deleted.');
   }
 
-  if (await db.listCollections({ name: 'admins' }).hasNext()) {
-    console.log('Collection already exists. Skipping initialization.');
-    return;
-  }
-
   const admins = db.collection('admins');
   const result = await admins.insertMany([
     { uid: 'user0'},
-    { uid: 'user1'},
-    { uid: 'user2'},
+    { uid: 'user1'}
   ]);
 
   console.log(`Initialized ${result.insertedCount} admins`);

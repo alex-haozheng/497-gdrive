@@ -8,7 +8,7 @@ This service's author's Github is flffamlln.
 This service is the profile service.
 
 # Service Description: 
-This profile service contains profiles of user accounts. It stores information including userId, email, name, bio and a fun fact. This service can create, read, update and delete profile details of a user given a userId.
+This profile service contains profiles of users. It stores information including uid, email, name, bio and a fun fact. This service can get profiles of all profiles in database, get a profile details of a specific uid, check if a specific user has a profile stored in database, update a specific user's profile details, create a profile, delete a profile and delete a profile when the associated uid's account is deleted.
 
 # Interaction with other services: 
 This profile service interacts with the auth service because it listens for an AccountDeleted event. If it hears one, it removes that user from profile database if the user has a profile because the user's account has been deleted.
@@ -27,41 +27,41 @@ This service runs on port 4002.
  ```
  - Response:
  ```
-[{
-	"uId": "[unique identifier string]",
+"[{
+	"uid": "[unique identifier string]",
     "name": "[string]",
     "email": "[unicode 64 characters max]",
     "bio": "[String]",
     "funFact": "[String]"
-}, ...]
+}, ...]"
  ```
  - HTTP Status Codes:   
-    - 201: [{
-	"uId": "[unique identifier string]",
+    - 201: "[{
+	"uid": "[unique identifier string]",
     "name": "[string]",
     "email": "[unicode 64 characters max]",
     "bio": "[String]",
     "funFact": "[String]"
-}, ...]
+}, ...]"
     - 400: { message: 'BAD REQUEST' }
     - 500: { message: 'INTERNAL SERVER ERROR' }
 
 ---
 
 
-## GET /getProfile:uId
+## GET /getProfile/:uid
 
 - Gets a user's profile information.
 - Request: 
 ```
 {
-	"uId": unique identifier string
+	"uid": "[unique identifier string]"
 }
  ```
  - Response:
  ```
 {
-	"uId": "[unique identifier string]",
+	"uid": "[unique identifier string]",
     "name": "[string]",
     "email": "[unicode 64 characters max]",
     "bio": "[String]",
@@ -70,7 +70,7 @@ This service runs on port 4002.
  ```
  - HTTP Status Codes:   
     - 201: {
-	"uId": "[unique identifier string]",
+	"uid": "[unique identifier string]",
     "name": "[string]",
     "email": "[unicode 64 characters max]",
     "bio": "[String]",
@@ -82,32 +82,32 @@ This service runs on port 4002.
 
 ---
 
-## GET /hasProfile:uId
+## GET /hasProfile/:uid
 
 - Returns whether that user has a profile in profiles database.
 - Request: 
 ```
 {
-	"uId": "[unique identifier string]"
+	"uid": "[unique identifier string]"
 }
  ```
  - Response:
  ```
-boolean
+"[boolean]"
  ```
  - HTTP Status Codes:   
-    - 201: boolean
+    - 201: "[boolean]"
     - 400: { message: 'BAD REQUEST' }
     - 500: { message: 'INTERNAL SERVER ERROR' }
 
 --- 
-## PUT /updateProfile/:uId:name:email:bio:funFact
+## PUT /updateProfile/:uid/:name/:email/:bio/:funFact
 
-- Updates user's profile information using uId.
+- Updates user's profile information using uid.
 - Request: 
 ```
 {
-	"uId": "[unique identifier string]",
+	"uid": "[unique identifier string]",
     "name": "[string]",
     "email": "[unicode 64 characters max]",
     "bio": "[String]",
@@ -124,13 +124,13 @@ boolean
     - 404: { message: 'User does not have a profile' }
     - 500: { message: 'INTERNAL SERVER ERROR' }
 ---
-## POST /addProfile/:uId
+## POST /addProfile/:uid/:name/:email/:bio/:funFact
 
-- Adds new profile to database for user given uId.
+- Adds new profile to database for user given uid.
 - Request:
 ```
 {
-	"uId": "[unique identifier string]",
+	"uid": "[unique identifier string]",
     "name": "[string]",
     "email": "[unicode 64 characters max]",
     "bio": "[String]",
@@ -147,13 +147,13 @@ boolean
     - 304: { message: 'User already has a profile' }
     - 500: { message: 'INTERNAL SERVER ERROR' }
 ---
-## DELETE /deleteProfile/:uId
+## DELETE /deleteProfile/:uid
 
-- Deletes a user's profile from database given uId.
+- Deletes a user's profile from database given uid.
 - Request:
 ```
 {
-	"uId": "[unique identifier string]"
+	"uid": "[unique identifier string]"
 }
 ```
 - Response:
@@ -174,7 +174,7 @@ boolean
 {
 	"type": "AccountDeleted",
     "data": {
-        "uId": "[unique identifier string]"
+        "uid": "[unique identifier string]"
     }
 }
 ```
@@ -218,43 +218,17 @@ boolean
     ```bash
     $ cd name-of-cloned-repository
     ```
-### **Step 3: Comment out other service running code in docker-compose.yml**
 
-- Uncommented code in docker-compose.yml should just have admin service, event-bus service and mongodbcontainer.
-
-```
-version: '3.9'
-services:
-  profile:
-    build: profile
-    ports:
-      - "4002:4002"
-    depends_on:
-      - mongodb_container
-    environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
-  event-bus:
-    build: event-bus
-    ports:
-      - "4012:4012"
-  mongodb_container:
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
-    volumes:
-      - mongodb_data_container:/data/db     
-volumes:
-  mongodb_data_container:
-```
-
-### **Step 4: Run docker-compose up --build**
+### **Step 3: Run docker-compose up --build**
 
 - Run the application using the `docker-compose up --build` command.
 
     ```bash
     $ docker-compose up --build
     ```
-### **Step 5: Test endpoints with Thunder Client**
-- The command from Step 4 will locally host the website on `http://localhost:4002`.
-- Exceeds the expectation of this assignment portion: There is a ThunderClient test collection called thunder-collection-profile.json in profile directory. Open this with ThunderClient extension and test endpoints with them.
+- The command will locally host the website on `http://localhost:3000`.
+
+### **Exceeds expectation of this assignment**
+- Included a ThunderClient test collection called thunder-collection-profile.json in profile directory for testing of endpoints
+- Added details of status codes sent for endpoints
+- Have four services and expanded 2 react components to include many calls to backend services

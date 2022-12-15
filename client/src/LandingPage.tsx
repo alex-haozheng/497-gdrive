@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Button, Typography, Grid } from '@mui/material';
 import EditDocument from './EditDocument';
+import JSZip from 'jszip';
+import * as fs from 'fs';
+import { saveAs } from 'file-saver';
 
 const UploadFile = () => {
     const [file, setFile] = useState(null);
@@ -56,22 +59,23 @@ const ZipButton = ( { fileId, fileName } : { fileId: string, fileName: string })
         // How to make this work:
         // TODO 0: do not change the front end code unless specified. it will work once the todo's are completed
         // TODO1: return this code to the fileCompression service
-        
-        const res = await axios.get(`http://localhost:4008/user/file/zip`, {
+        console.log(`fileId from zip button ${fileId}`);
+        console.log(`zipbutton received request`);
+        /* const res = (await axios.get(`http://localhost:4008/user/file/zip`, {
             data: {
                 fileId
             }
+        })).data; */
+        var zip = new JSZip();
+        // zip.file(`${fileId}`, 'testing testing');
+        console.log(fileId);
+        zip.file(`${fileId}`, 'tim richard is a goat');
+        zip.generateAsync({ type: 'blob' }).then(function (c) {
+            saveAs(c, 'file.zip');
         });
-        const ret = res.data.content;
-        // const url = window.URL.createObjectURL(new Blob([JSON.stringify(ret)]));
-        // const link = document.createElement('a');
-        // link.href = url;
-        // link.setAttribute('download', `${fileName}`);
-        // document.body.appendChild(link);
-        // link.click();
-        
+
         // TODO5: make the handleZip function async
-        console.log(`Zip button clicked: ${ret}`);
+        console.log(`Zip button clicked: ${fileName}`);
     } 
     return (
         <Button variant="outlined" onClick={handleZip} color="secondary" sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 35}} startIcon={<img src="https://img.icons8.com/ios/50/000000/zip.png" alt="zip" width="20" height="20"/>}>Zip</Button>
