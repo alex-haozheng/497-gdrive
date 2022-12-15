@@ -47,33 +47,54 @@ const DownloadButton = ({ fileId, fileName } : { fileId: string, fileName: strin
         link.click();
     };
     return (
-        <Button variant="outlined" color="primary" onClick={handleDownload} sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 72}} startIcon={<img src="https://img.icons8.com/ios/50/000000/download.png" alt="download" width="20" height="20"/>}>Download</Button>
+        <Button variant="outlined" color="primary" onClick={handleDownload} sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 30}} startIcon={<img src="https://img.icons8.com/ios/50/000000/download.png" alt="download" width="20" height="20"/>}>Download</Button>
     );
 };
 
-/* const ZipButton = ( { fileId }: { fileId: string}) => {
-    const handleDownload = async () => {
+const ZipButton = ( { fileId, fileName } : { fileId: string, fileName: string }) => {
+    const handleZip = () => {
+        // How to make this work:
+        // TODO 0: do not change the front end code unless specified. it will work once the todo's are completed
+        // TODO1: return this code to the fileCompression service
+        /*
         const res = await axios.get(`http://localhost:4008/user/file/zip`, {
             data: {
                 fileId
             }
         });
-        const ret = res.data.content;
-        var zip = new JSZip();
-        zip.file(`${fileId}`, ret.content);
-        zip
-        .generateNodeStream({type:'nodebuffer',streamFiles:true})
-        .pipe(fs.createWriteStream('out.zip'))
-        .on('finish', function () {
+        //const ret = res.data.content;
+        
+        //var zip = new JSZip();
+        //zip.file(`${fileId}`, ret.content);
+        //zip
+        //.generateNodeStream({type:'nodebuffer',streamFiles:true})
+        //.pipe(fs.createWriteStream('out.zip'))
+        //.on('finish', function () {
                 // JSZip generates a readable stream with a "end" event,
                 // but is piped here in a writable stream which emits a "finish" event.
-                console.log("out.zip written.");
-        });
-    } // what does this do ?
+                //console.log("out.zip written.");
+        });*/
+
+        // TODO2: fix the above code if necessary and file compression service by importing axios, communicating with the fileService microservice using axios, and returning the zipped file
+        
+        // TODO3: once the file compression service is fixed, uncomment the code below
+        /*
+        // TODO4: insert the get request to the const res = await axios.get() line
+        const res = await axios.get(insert get request to file compression service here);
+        const url = window.URL.createObjectURL(new Blob([JSON.stringify(res.data.content)]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${fileName}`);
+        document.body.appendChild(link);
+        link.click();
+        */
+        // TODO5: make the handleZip function async
+        console.log("Zip button clicked");
+    } 
     return (
-        <Button variant="outlined" color="secondary" onClick={handleZip} sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 72}} startIcon={<img src="https://img.icons8.com/ios/50/000000/zip.png" alt="zip" width="20" height="20"/>}>Zip</Button>
+        <Button variant="outlined" onClick={handleZip} color="secondary" sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 35}} startIcon={<img src="https://img.icons8.com/ios/50/000000/zip.png" alt="zip" width="20" height="20"/>}>Zip</Button>
     );
-}; */
+};
 
 const handleDelete = async (fileId : string) => {
     await axios.delete(`http://localhost:4009/files/${fileId}`).then((res) => {
@@ -111,13 +132,13 @@ const ListFiles = () => {
                             <Typography variant="body2" gutterBottom sx={{fontFamily: "Helvetica Neue"}}>
                                 {file.content.length < 25 ? file.content : file.content.slice(0, 25) + "..."}
                             </Typography>
-                            <Typography variant="body2" gutterBottom sx={{ position: 'relative', top: 70, fontFamily: "Helvetica Neue", color: "grey"}}>
+                            <Typography variant="body2" gutterBottom sx={{ position: 'relative', top: 45, fontFamily: "Helvetica Neue", color: "grey"}}>
                                 Last Modified {file.date.toLocaleString().slice(0, 10)}
                             </Typography>
-                            <Button variant="contained" color="success" sx={{ width:200, textTransform: "none", position: 'relative', top: 77, marginBottom: 2}} onClick={() => {window.location.href = `/files/${file.fileId}/edit`}}>Edit</Button>
-                            <Button variant="outlined" color="error" sx={{ width:200, textTransform: "none", position: 'relative', top: 73, marginBottom: 2}} onClick={() => {handleDelete(file.fileId)}}>Delete</Button>
+                            <Button variant="contained" color="success" sx={{ width:200, textTransform: "none", position: 'relative', top: 47, marginBottom: 2}} onClick={() => {window.location.href = `/files/${file.fileId}/edit`}}>Edit</Button>
+                            <Button variant="outlined" color="error" sx={{ width:200, textTransform: "none", position: 'relative', top: 42, marginBottom: 2}} onClick={() => {handleDelete(file.fileId)}}>Delete</Button>
                             <DownloadButton fileId={file.fileId} fileName={file.name}/>
-                            {/* <ZipButton fileId = {file.fileId} /> */}
+                            <ZipButton fileId = {file.fileId} fileName = {file.name}/>
                         </Box>
                     );                      
             })}
@@ -127,7 +148,6 @@ const ListFiles = () => {
 
 const LandingPage = () => {
         if ((window.location.pathname === '/files' || window.location.pathname === '/files/*')){
-            //return ( <div> <UploadFile /> <ListFiles /> </div> );
             return (
                 <>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3, m: 3, bgcolor: 'white', borderRadius: 2, boxShadow: 2, width: '95%', height: 80}}>
