@@ -131,6 +131,7 @@ This service runs on port 4013.
     ```bash
     $ docker-compose up --build
     ```
+- The command will locally host the website on `http://localhost:3000`.
 
 ### **Exceeds expectation of this assignment**
 - Included a ThunderClient test collection called thunder-collection-requests.json in profile directory for testing of endpoints

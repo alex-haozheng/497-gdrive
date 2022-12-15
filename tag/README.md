@@ -172,6 +172,7 @@ String
     ```bash
     $ docker-compose up --build
     ```
+- The command will locally host the website on `http://localhost:3000`.
 
 ### **Exceeds expectation of this assignment**
 - Included a ThunderClient test collection called thunder-collection-tag.json in tag directory for testing of endpoints
