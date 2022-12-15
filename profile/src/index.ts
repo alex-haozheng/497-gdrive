@@ -136,6 +136,7 @@ async function start(){
         const uid = req.params.uid;
         console.log(req.params.uid);
         if(
+            Object.keys(req.params).length !== 1 ||
             uid === "" ||
             uid === undefined ||
             typeof uid !== "string"
