@@ -155,14 +155,6 @@ app.put('/files/:fileId', async (req : any , res : any) => {
                     file: await readFromFileById(fileId)
                 },
             });
-            // alex changes
-            axios.post('http://event-bus:4012/events', {
-                type:   'FileModified',
-                data: {
-                    fileId,
-                    content
-                }
-            });
            
         }
         else{
@@ -189,12 +181,12 @@ app.delete('/files/:fileId', (req : any , res : any) => {
 
 app.post('/events', async (req : any , res : any) => {
     const {type, data} : {type: FileEvent, data: File} = req.body;
-    if(type === 'FileCreated'){
+    /* if(type === 'FileCreated'){
         axios.post('http://event-bus:4012/events', {
             type: 'FileCreated',
             data,
         } as FileEventMessage);
-    }
+    } */
     if(type === 'ShootFileAnalytics'){
         axios.post('http://event-bus:4012/events', {
             type: 'GetFileAnalytics',
@@ -202,13 +194,13 @@ app.post('/events', async (req : any , res : any) => {
                 files: await readFromFile() as File[]
             },
         } as FileEventMessage);
-    }
+    }/* 
     else if(type === 'FileDeleted'){
         axios.post('http://event-bus:4012/events', {
             type: 'FileDeleted',
             data,
         } as FileEventMessage);
-    }
+    } */
     res.status(200).send({});
 });
 
