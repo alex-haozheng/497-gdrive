@@ -61,15 +61,15 @@ const ZipButton = ( { fileId, fileName } : { fileId: string, fileName: string })
         // TODO1: return this code to the fileCompression service
         console.log(`fileId from zip button ${fileId}`);
         console.log(`zipbutton received request`);
-        /* const res = (await axios.get(`http://localhost:4008/user/file/zip`, {
+        const res = (await axios.get(`http://localhost:4008/user/file/zip`, {
             data: {
                 fileId
             }
-        })).data; */
+        })).data;
         var zip = new JSZip();
         // zip.file(`${fileId}`, 'testing testing');
         console.log(fileId);
-        zip.file(`${fileId}`, 'tim richard is a goat');
+        zip.file(`${fileId}`, res);
         zip.generateAsync({ type: 'blob' }).then(function (c) {
             saveAs(c, 'file.zip');
         });
