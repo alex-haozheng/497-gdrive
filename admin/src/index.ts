@@ -40,8 +40,7 @@ async function initDB(mongo: MongoClient) {
   const admins = db.collection('admins');
   const result = await admins.insertMany([
     { uid: 'user0'},
-    { uid: 'user1'},
-    { uid: 'user2'},
+    { uid: 'user1'}
   ]);
 
   console.log(`Initialized ${result.insertedCount} admins`);
