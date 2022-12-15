@@ -51,20 +51,29 @@ const DownloadButton = ({ fileId, fileName } : { fileId: string, fileName: strin
     );
 };
 
-const ZipButton = ( { fileId, fileName } : { fileId: string, fileName: string }) => {
-    const handleZip = async () => {
-        const res = await axios.get(`http://filecompression:4008/files/${fileId}/zip`);
-        const url = window.URL.createObjectURL(new Blob([JSON.stringify(res.data.content)]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${fileName}`);
-        document.body.appendChild(link);
-        link.click();
-    };
+/* const ZipButton = ( { fileId }: { fileId: string}) => {
+    const handleDownload = async () => {
+        const res = await axios.get(`http://localhost:4008/user/file/zip`, {
+            data: {
+                fileId
+            }
+        });
+        const ret = res.data.content;
+        var zip = new JSZip();
+        zip.file(`${fileId}`, ret.content);
+        zip
+        .generateNodeStream({type:'nodebuffer',streamFiles:true})
+        .pipe(fs.createWriteStream('out.zip'))
+        .on('finish', function () {
+                // JSZip generates a readable stream with a "end" event,
+                // but is piped here in a writable stream which emits a "finish" event.
+                console.log("out.zip written.");
+        });
+    } // what does this do ?
     return (
         <Button variant="outlined" color="secondary" onClick={handleZip} sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 72}} startIcon={<img src="https://img.icons8.com/ios/50/000000/zip.png" alt="zip" width="20" height="20"/>}>Zip</Button>
     );
-};  
+}; */
 
 const handleDelete = async (fileId : string) => {
     await axios.delete(`http://localhost:4009/files/${fileId}`).then((res) => {
@@ -108,6 +117,7 @@ const ListFiles = () => {
                             <Button variant="contained" color="success" sx={{ width:200, textTransform: "none", position: 'relative', top: 77, marginBottom: 2}} onClick={() => {window.location.href = `/files/${file.fileId}/edit`}}>Edit</Button>
                             <Button variant="outlined" color="error" sx={{ width:200, textTransform: "none", position: 'relative', top: 73, marginBottom: 2}} onClick={() => {handleDelete(file.fileId)}}>Delete</Button>
                             <DownloadButton fileId={file.fileId} fileName={file.name}/>
+                            {/* <ZipButton fileId = {file.fileId} /> */}
                         </Box>
                     );                      
             })}

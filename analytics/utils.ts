@@ -3,9 +3,9 @@ import { File } from './interfaces.js';
 export function processFiles(files: File[]): number[] {
 	const indexes: number[] = [];
 	for (const file of files) {
-		const sentences: string[] = file.content.split('[\\p{Punct}\\s]+');
-		const words: string[] = file.content.split(/[^a-zA-Z\d]/);
-		const letters: string[] = words.join('').split('');
+		const sentences: string[] = file.content.split('[\\p{Punct}\\s]+').filter(w => w !== '');
+		const words: string[] = file.content.split(/[^a-zA-Z\d]/).filter(w => w !== '');
+		const letters: string[] = words.join('').split('').filter(w => w !== '');
 		const L: number = (letters.length / words.length) * 100;
 		const S: number = (sentences.length / letters.length) * 100;
 		// uses Coleman-Liau index https://en.wikipedia.org/wiki/Coleman–Liau_index

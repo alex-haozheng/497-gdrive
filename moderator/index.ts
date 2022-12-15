@@ -57,15 +57,8 @@ async function start() {
 	app.post('/events', async (req, res) => {
 		try {
 			const type: string = req.body.type;
-			console.log(`Moderator req.body: ${Object.entries(req.body)}`);
-			if (req.body.data) {
-				console.log(`Moderator data: ${Object.entries(req.body.data)}`);
-			}
 			if (type === 'FileUpdated') {
 				const file: File = req.body.data.file;
-				console.log(`Moderator data file: ${Object.entries(req.body.data.file)}`);
-				console.log(`Moderator data file fileId: ${req.body.data.file.fileId}`);
-				console.log(`Moderator data file content: ${req.body.data.file.content}`);
 				const badfile = await badfilesDB.findOne({ fileId: file.fileId });
 				for (let fword of file.content.split(/[^a-zA-Z\d]/)) {
 					// split file string by punctuation or whitespace
@@ -83,8 +76,6 @@ async function start() {
 				console.log('Moderator Executed');
 			} else if (type === 'ShootWordAnalytics') {
 				const badfiles = await getBadfiles(badfilesDB);
-				console.log(`Moderator badfiles: ${badfiles}`);
-				console.log(`Moderator badfiles: ${typeof badfiles}`);
 				axios.post('http://event-bus:4012/events', {
 					type: 'GetWordAnalytics',
 					data: {

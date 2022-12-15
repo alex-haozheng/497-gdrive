@@ -95,8 +95,9 @@ async function start() {
 		}, 1000 * 60 * 60 * 24); // night job. Run once every 24 hours for data analytics to be presented to admin.
 	}, 1000 * 60); */
 
+	// future considerations: not safe for auth databse to send accessToken to random services or in a response. Must verify accessToken INSIDE auth service and respond with success/failure.
 	async function isAuth(req, res, next) {
-		console.log('isAuth2');
+		console.log('isAuth2.0');
 		console.log('Checking Authorization');
 		const { uid, accessToken }: { uid: string; accessToken: string } = req.body;
 		console.log(`isAuth uid: ${uid}, isAuth accessToken: ${accessToken}`);
@@ -118,6 +119,7 @@ async function start() {
 				console.log(admin);
 				res.status(400).send('Unauthorized Access');
 			} else {
+				console.log('Successful Authentication');
 				next();
 			}
 		} catch (e) {
@@ -138,20 +140,22 @@ async function start() {
 					type: 'ShootWordAnalytics'
 				})
 			]);
-			const indexes = processFiles(files);
-			console.log(`Analytics: ${indexes}`);
-			await analytics.updateOne(
-				{ key: 'analytics' },
-				{
-					$set: {
-						numFiles: files.length,
-						readability: condense(indexes),
-						badfiles: badfiles
+			setTimeout(async () => {
+				const indexes = processFiles(files);
+				console.log(`Analytics: ${indexes}`);
+				await analytics.updateOne(
+					{ key: 'analytics' },
+					{
+						$set: {
+							numFiles: files.length,
+							readability: condense(indexes),
+							badfiles: badfiles
+						}
 					}
-				}
-			);
-			const results = await analytics.findOne({ key: 'analytics' });
-			res.status(200).send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
+				);
+				const results = await analytics.findOne({ key: 'analytics' });
+				res.status(200).send({ numFiles: results.numFiles, readability: results.readability, badfiles: results.badfiles });
+			}, 2500);
 		} catch (e) {
 			console.log(e);
 			res.status(500).send({});
@@ -167,7 +171,7 @@ async function start() {
 				console.log('GOT FILE MESSAGE');
 				files = req.body.data.files;
 			}
-		} catch(e) {
+		} catch (e) {
 			console.log(e);
 		}
 		res.send({});
