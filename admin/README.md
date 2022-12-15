@@ -8,7 +8,7 @@ This service's author's Github is flffamlln.
 This service is the admin service.
 
 # Service Description: 
-This admin service contains which users are admins. It has endpoints to give a user admin access, remove admin access from a user, check if a user has admin access, removing a user from admin db if a user has been deleted and more. Admins have the abilities including changing admin access for other users, removing posts, etc.
+This admin service contains which users are admins. It has endpoints to give a user admin access, remove admin access from a user, check if a user has admin access, removing a user from admin db if a user has been deleted and more. Admins have abilities to give other users admin access as well as remove admin access from users.
 
 # Interaction with other services: 
 This admin service listens for an AccountDeleted event. If it hears one, it removes that user from admin database if the user is in admin database because the user's account has been deleted.
@@ -17,7 +17,7 @@ This admin service listens for an AccountDeleted event. If it hears one, it remo
 This service runs on port 4000.
 
 # Endpoint Information: 
-## POST events
+## POST /events
 
 - This endpoint listens for a user deleted event message. If a user's account has been deleted, it removes user from admins database if it is there.
 - Request: 
@@ -41,7 +41,7 @@ This service runs on port 4000.
     - 400: { message: 'BAD REQUEST' }
     - 500: { message: 'INTERNAL SERVER ERROR' }
 ---
-## GET checkAdmin:uId
+## GET /checkAdmin/:uId
 
 - Returns whether a specific user is an admin or not.
 - Request: 
@@ -52,14 +52,14 @@ This service runs on port 4000.
 ```
 - Response:
 ```
-boolean value
+"[boolean value]"
 ```
 - HTTP Status Codes: 
-    - 201: boolean value
+    - 201: "[boolean value]"
     - 400: { message: 'BAD REQUEST' }
     - 500: { message: 'INTERNAL SERVER ERROR' }
 ---
-## GET getAdmins
+## GET /getAdmins
 
 - Returns all users that are admins.
 - Request: 
@@ -70,16 +70,14 @@ boolean value
 ```
 - Response:
 ```
-{
-	"data": array of unique identifier Strings
-}
+"[array of unique identifier Strings]"
 ```
 - HTTP Status Codes: 
-    - 201: array of unique identifier Strings
+    - 201: "[array of unique identifier Strings]"
     - 400: { message: 'BAD REQUEST' }
     - 500: Internal Server Error
 ---
-## POST addAdmin/:uId
+## POST /addAdmin
 
 - Adds a user as an admin using uId.
 - Request:
@@ -100,7 +98,7 @@ boolean value
     - 400: { message: 'BAD REQUEST' }
     - 500: { message: 'INTERNAL SERVER ERROR' }
 --- 
-## DELETE removeAdmin/:userId
+## DELETE /removeAdmin/:userId
 
 - Removes a user as an admin using userId.
 - Request: 
@@ -151,43 +149,16 @@ boolean value
     ```bash
     $ cd name-of-cloned-repository
     ```
-### **Step 3: Comment out other service running code in docker-compose.yml**
 
-- Uncommented code in docker-compose.yml should just have admin service, event-bus service and mongodbcontainer.
-
-```
-version: '3.9'
-services:
-  admin:
-    build: admin
-    ports:
-      - "4000:4000"
-    depends_on:
-      - mongodb_container
-    environment:
-      DATABASE_URL: mongodb://root:rootpassword@mongodb_container:27017/mydb?directConnection=true&authSource=admin
-  event-bus:
-    build: event-bus
-    ports:
-      - "4012:4012"
-  mongodb_container:
-    image: mongo:latest
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
-    volumes:
-      - mongodb_data_container:/data/db     
-volumes:
-  mongodb_data_container:
-```
-
-### **Step 4: Run docker-compose up --build**
+### **Step 3: Run docker-compose up --build**
 
 - Run the application using the `docker-compose up --build` command.
 
     ```bash
     $ docker-compose up --build
     ```
-### **Step 5: Test endpoints with Thunder Client**
-- The command from Step 4 will locally host the website on `http://localhost:4000`.
-- Exceeds the expectation of this assignment portion: there is a ThunderClient test collection called thunder-collection-admin.json in admin directory. Open this with ThunderClient extension and test endpoints with them.
+
+### **Exceeds expectation of this assignment**
+- Included a ThunderClient test collection called thunder-collection-admin.json in admin directory for testing of endpoints
+- Added details of status codes sent for endpoints
+- Have four services and expanded 2 react components to include many calls to backend services
