@@ -47,38 +47,30 @@ async function connectDB(): Promise<MongoClient>{
 async function initDB(mongo: MongoClient) {
     const db = mongo.db();
 
-    if (await db.listCollections({ name: 'files' }).hasNext()) {
-        db.collection('files').drop(function(err, delOK) {
-            if (err) throw err;
-            if (delOK) console.log("Collection deleted");
-        });
-        console.log('Collection deleted.');
-    }
-
-    if (await db.listCollections({ name: 'files' }).hasNext()) {
-        console.log('Collection already exists. Skipping initialization.');
-        return;
-    }
-
     const files = db.collection('files');
 
-    const result = await files.insertMany([
-        { fileId: 'ab03b4c5', name: 'ab03b4c5.txt', size: 44, tags: [], type: 'text/plain', date: '2022-12-12T23:37:39.326Z', content: 'The quick brown fox jumps over the lazy dog.'},
-        { fileId: 'd8c06f28519efa8b', name: 'uploadedfile.txt', size: 6, tags: [], type: 'text/plain', date: '2022-12-08T22:52:51.769Z', content: 'sample'},
-        { fileId: 'eb76596b5aa7c290', name: 'ab03b4c5 (1).txt.txt', size: 23, tags: [], type: 'text/plain', date: '2022-12-11T04:03:02.638Z', content: '"This is file content."'},
-        { fileId: 'e2c9b7639ea927f4', name: 'newfile.txt', size: 13, tags: [], type: 'text/plain', date: '2022-12-12T03:22:18.823Z', content: '"lorem ipsum"'}
-    ]);
-
-    console.log(`Initialized ${result.insertedCount} files`);
-
-    console.log(`Initialized:`);
-
-    for (let key in result.insertedIds) {
-        console.log(`  Inserted files with ID ${result.insertedIds[key]}`);
+    if (await files.countDocuments() === 0) {
+        const result = await files.insertMany([
+            { fileId: 'ab03b4c5', name: 'ab03b4c5.txt', size: 44, tags: [], type: 'text/plain', date: '2022-12-12T23:37:39.326Z', content: 'The quick brown fox jumps over the lazy dog.'},
+            { fileId: 'd8c06f28519efa8b', name: 'uploadedfile.txt', size: 6, tags: [], type: 'text/plain', date: '2022-12-08T22:52:51.769Z', content: 'sample'},
+            { fileId: 'eb76596b5aa7c290', name: 'test.txt', size: 21, tags: [], type: 'text/plain', date: '2022-12-11T04:03:02.638Z', content: 'This is file content.'},
+            { fileId: 'e2c9b7639ea927f4', name: 'newfile.txt', size: 11, tags: [], type: 'text/plain', date: '2022-12-12T03:22:18.823Z', content: 'lorem ipsum'}
+        ]);
+        console.log(`Initialized ${result.insertedCount} files`);
+        console.log(`Initialized:`);
+        for (let key in result.insertedIds) {
+            console.log(`  Inserted files with ID ${result.insertedIds[key]}`);
+        }
     }
-
+    else {
+        console.log(`There are already ${await files.countDocuments()} files in the collection.`);
+        const file = await files.find().toArray();
+        console.log('Files:');
+        for (let i = 0; i < file.length; i++) {
+            console.log(`  ${file[i].fileId} ${file[i].name} ${file[i].size} ${file[i].tags} ${file[i].type} ${file[i].date} ${file[i].content}`);
+        }
+    }
     console.log('Done.');
-
     return;
 }
 
@@ -190,12 +182,14 @@ async function start(){
             if(name && content){
                 const file = await updateFile(mongo, req.params.fileId, {name, content});
                 res.status(200).send(file as File);
+                /*
                 axios.post('http://event-bus:4012/events', {
                     type: 'FileUpdated',
                     data: {
                         file: await getFileById(mongo, req.params.fileId) as File
                     },
                 });
+                */
             }
             else{
                 res.status(400).send('Bad request');
