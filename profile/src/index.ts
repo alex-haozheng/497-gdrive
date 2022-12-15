@@ -22,6 +22,13 @@ async function connectDB(): Promise<MongoClient>{
 
 async function initDB(mongo: MongoClient) {
     const db = mongo.db();
+
+    /* UNCOMMENT IF YOU WANT DATABASE TO NOT RESET EVERY TIME YOU DOCKER COMPOSE UP
+    if (await db.listCollections({ name: 'profiles' }).hasNext()) {
+      console.log('Collection already exists. Skipping initialization.');
+      return;
+    }
+    */
   
     if (await db.listCollections({ name: 'profiles' }).hasNext()) {
       db.collection('profiles').drop(function(err, delOK) {
@@ -31,16 +38,12 @@ async function initDB(mongo: MongoClient) {
       console.log('Collection deleted.');
     }
   
-    if (await db.listCollections({ name: 'profiles' }).hasNext()) {
-      console.log('Collection already exists. Skipping initialization.');
-      return;
-    }
-  
     const profiles = db.collection('profiles');
     const result = await profiles.insertMany([
       { uid: 'user0', name: 'Shell', email: 'shell@gmail.com', bio: 'hi my name is shell', funFact: 'i like chips'},
       { uid: 'user1', name: 'Fred', email: 'fred@gmail.com', bio: 'hi my name is fred', funFact: 'i like fruit'},
       { uid: 'user2', name: 'May', email: 'may@gmail.com', bio: 'hi my name is may', funFact: 'spring is my favorite season'},
+      { uid: 'user3', name: 'Water', email: 'water@gmail.com', bio: 'hi my name is water', funFact: 'i love the ocean'},
     ]);
   
     console.log(`Initialized ${result.insertedCount} profiles`);
