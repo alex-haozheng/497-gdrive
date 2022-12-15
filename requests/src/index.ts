@@ -24,17 +24,19 @@ async function connectDB(): Promise<MongoClient>{
 async function initDB(mongo: MongoClient) {
   const db = mongo.db();
 
+      /* UNCOMMENT IF YOU WANT DATABASE TO NOT RESET EVERY TIME YOU DOCKER COMPOSE UP
+  if (await db.listCollections({ name: 'requests' }).hasNext()) {
+    console.log('Collection already exists. Skipping initialization.');
+    return;
+  }
+    */
+
   if (await db.listCollections({ name: 'requests' }).hasNext()) {
     db.collection('requests').drop(function(err, delOK) {
       if (err) throw err;
       if (delOK) console.log("Collection deleted");
     });
     console.log('Collection deleted.');
-  }
-
-  if (await db.listCollections({ name: 'requests' }).hasNext()) {
-    console.log('Collection already exists. Skipping initialization.');
-    return;
   }
 
   const admins = db.collection('requests');
