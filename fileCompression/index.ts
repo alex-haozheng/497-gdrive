@@ -1,8 +1,11 @@
 import * as express from 'express';
 import { Request, Response } from 'express';
 import * as cors from 'cors';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ServerHeartbeatStartedEvent } from 'mongodb';
 import { encode, decode } from 'lossless-text-compression';
+import * as JSZip from 'jszip';
+import * as fs from 'fs';
+import { saveAs } from 'file-saver';
 
 const app = express();
 
@@ -15,7 +18,6 @@ async function connectDB(): Promise<MongoClient>{
 	if (uri === undefined) {
 			throw Error('DATABASE_URL environment variable is not specified');
 	}
-	
 	const mongo = new MongoClient(uri);
 	await mongo.connect();
 	return await Promise.resolve(mongo);
@@ -82,6 +84,20 @@ async function start() {
 		try {
 			const ret = await getFile(mongo, fileId);
 			if (ret) {
+				var zip = new JSZip();
+				// zip.file(`${fileId}`, 'testing testing');
+				zip.file(`${fileId}`, ret.content);
+				zip.generateAsync({type:'blob'}).then(function(c) {
+					saveAs(c, 'file.zip');
+				});
+				// zip
+				// .generateNodeStream({type:'nodebuffer',streamFiles:true})
+				// .pipe(fs.createWriteStream('out.zip'))
+				// .on('finish', function () {
+				// 				// JSZip generates a readable stream with a "end" event,
+				// 				// but is piped here in a writable stream which emits a "finish" event.
+				// 				console.log("out.zip written.");
+				// });
 				res.status(200).send(ret);
 			} else {
 				res.status(400).json({message: 'NOT FOUND'});
@@ -105,7 +121,7 @@ async function start() {
 			} catch (e) {
 				res.status(500).send(e);
 			}
-		} else if (type === 'FileModified') { //todo
+		} else if (type === 'FileModified') { 
 			try {
 				const { fileId, content } = data;
 				const ret = await modifyFile(mongo, fileId, content);
