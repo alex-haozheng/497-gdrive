@@ -68,6 +68,33 @@ The `uploadDownload` microservice interacts with the `fileService` microservice 
     - **HTTP Status Codes**
         - 200: OK
         - 500: Internal Server Error
+- `POST /events`
+    - **Description:** Sends events to the event bus. This endpoint should send events to the event bus and handle them accordingly.
+    - **Request**
+    ```json
+    {
+        "type": "FileCreated",
+        "data": {
+            "fileId": "ab03b4c5",
+            "name": "file",
+            "size": 21,
+            "tags": [
+                "tag1",
+                "tag2"
+            ],
+            "type": "text/plain",
+            "date": "2019-01-01T00:00:00.000Z",
+            "content": "This is file content."
+        }
+    }
+    ```
+    - **Response**
+    ```json
+    {}
+    ```
+    - **HTTP Status Codes**
+        - 200: OK
+        - 500: Internal Server Error
 
 ## **Installation and Usage**
 

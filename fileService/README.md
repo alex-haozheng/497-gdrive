@@ -156,7 +156,7 @@ The `fileService` microservice interacts with the `timeLogger` microservice to g
         - 404: Not Found
         - 500: Internal Server Error
 - `POST /events`
-    - **Description:** Receives events from the event bus. This endpoint should receive events from the event bus and handle them accordingly.
+    - **Description:** Sends events to the event bus. This endpoint should send events to the event bus and handle them accordingly.
     - **Request** 
     ```json
     {
