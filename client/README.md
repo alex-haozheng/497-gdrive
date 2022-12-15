@@ -31,9 +31,9 @@ Analytics UI will allow admins to see aggregate data about all files in the app.
 # Interaction with other services: 
 Client service interacts with other services to create UI components. For example:
 
-Admin UI interacts with admin service to show who are admins and who are not admins.
+Admin UI interacts with admin service to show who are admins and who are not admins. It also has children components to add admins / remove admins and view admin requests.
 
-Profile UI interacts with profile service to show user's profile details.
+Profile UI interacts with profile service to show user's profile details and allows editing a user's profile details.
 
 FileCompression UI interacts with the file service to update the status (opened / closed) of current selected files.
 
