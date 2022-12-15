@@ -42,6 +42,7 @@ export default function Analytics({ uid, accessToken }: { uid: string, accessTok
 	return (
         <div>
 			<button onClick={e => fetchAnalytics()}>Fetch Analytics</button>
+			<div>*fetch analytics may take up to 5 seconds to respond*</div>
             <div>NumFiles: {numFiles}</div>
             <div>Readability: {renderedReadability}</div>
             <div>Bad Files: {renderedBadfiles}</div>

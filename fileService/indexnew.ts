@@ -182,14 +182,14 @@ async function start(){
             if(name && content){
                 const file = await updateFile(mongo, req.params.fileId, {name, content});
                 res.status(200).send(file as File);
-                /*
+                
                 axios.post('http://event-bus:4012/events', {
                     type: 'FileUpdated',
                     data: {
                         file: await getFileById(mongo, req.params.fileId) as File
                     },
                 });
-                */
+               
             }
             else{
                 res.status(400).send('Bad request');
