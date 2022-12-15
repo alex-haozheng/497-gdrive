@@ -49,7 +49,7 @@ Team
 
 # Front-end Components Implemented #
 Yuri
-- Admin
+- Admin + Requests
 - Profile
 
 Alex
