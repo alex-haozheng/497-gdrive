@@ -78,6 +78,26 @@ const ZipButton = ( { fileId, fileName } : { fileId: string, fileName: string })
     );
 };
 
+const LogOutButton = () => {
+    const handleLogOut = () => {
+        localStorage.removeItem('uid');
+        localStorage.removeItem('accessToken');
+        window.location.href = '/';
+    };
+    return (
+        <Button variant="contained" onClick={handleLogOut} color="error" sx={{ width:125, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 40}} startIcon={<img src="https://img.icons8.com/ios/50/000000/logout-rounded-left.png" alt="logout" width="20" height="20"/>}>Log Out</Button>
+    );
+};
+
+const DashBoardButton = () => {
+    const handleDashBoard = () => {
+        window.location.href = '/dashboard';
+    };
+    return (        
+        <Button variant="contained" onClick={handleDashBoard} color="secondary" sx={{ width:125, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 45}}>Dashboard</Button>
+    );
+};
+
 const handleDelete = async (fileId : string) => {
     await axios.delete(`http://localhost:4009/files/${fileId}`).then((res) => {
         window.location.reload();
@@ -137,6 +157,10 @@ const LandingPage = () => {
                             Files
                         </Typography>
                         <UploadFile />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 10}}>
+                            <LogOutButton />
+                            <DashBoardButton />
+                        </Box>
                     </Box>
                     <ListFiles />
                 </> 
