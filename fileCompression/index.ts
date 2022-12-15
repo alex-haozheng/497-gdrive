@@ -6,17 +6,18 @@ import { encode, decode } from 'lossless-text-compression';
 import * as JSZip from 'jszip';
 import * as fs from 'fs';
 import { saveAs } from 'file-saver';
+import { isConstructorDeclaration } from 'typescript';
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
-async function connectDB(): Promise<MongoClient>{
+async function connectDB(): Promise<MongoClient> {
 	const uri = process.env.DATABASE_URL;
 
 	if (uri === undefined) {
-			throw Error('DATABASE_URL environment variable is not specified');
+		throw Error('DATABASE_URL environment variable is not specified');
 	}
 	const mongo = new MongoClient(uri);
 	await mongo.connect();
@@ -27,9 +28,9 @@ async function initDB(mongo: MongoClient) {
 	const db = mongo.db();
 
 	if (await db.listCollections({ name: 'filecompression' }).hasNext()) {
-		db.collection('filecompression').drop(function(err, delOK) {
+		db.collection('filecompression').drop(function (err, delOK) {
 			if (err) throw err;
-			if (delOK) console.log("Collection deleted");
+			if (delOK) console.log('Collection deleted');
 		});
 		console.log('Collection deleted.');
 	}
@@ -41,9 +42,9 @@ async function initDB(mongo: MongoClient) {
 
 	const query = db.collection('filecompression');
 	const result = await query.insertMany([
-		{ fileId: 'a', content: 'testtext'},
-		{ fileId: 'b', content: 'testtext'},
-		{ fileId: 'c', content: 'testtext'}
+		{ fileId: 'a', content: 'testtext' },
+		{ fileId: 'b', content: 'testtext' },
+		{ fileId: 'c', content: 'testtext' }
 	]);
 
 	console.log(`Initialized ${result.insertedCount} query`);
@@ -57,58 +58,46 @@ async function initDB(mongo: MongoClient) {
 //db crud operations
 async function insertFile(mongo: MongoClient, fileId: string, content: string) {
 	const fc = mongo.db().collection('filecompression');
-	return fc.insertOne({fileId, content});
+	return fc.insertOne({ fileId, content });
 }
 
 async function getFile(mongo: MongoClient, fileId: string) {
 	const fc = mongo.db().collection('filecompression');
-	return fc.findOne({fileId});
+	return fc.findOne({ fileId });
 }
 
 async function deleteFile(mongo: MongoClient, fileId: string, content: string) {
 	const fc = mongo.db().collection('filecompression');
-	return fc.deleteOne({fileId, content});
+	return fc.deleteOne({ fileId, content });
 }
 
 async function modifyFile(mongo: MongoClient, fileId: string, content: string) {
 	const fc = mongo.db().collection('filecompression');
-	return fc.updateOne({fileId}, {$set: {content}});
+	return fc.updateOne({ fileId }, { $set: { content } });
 }
 
 async function start() {
 	const mongo = await connectDB();
 	await initDB(mongo);
-
+	
 	app.get('/user/file/zip', async (req: Request, res: Response) => {
-		const { fileId }: { fileId: string } = req.body.data;
+		const { fileId } = req.params as {fileId: string};
 		try {
 			const ret = await getFile(mongo, fileId);
+			console.log(ret);
 			if (ret) {
-				var zip = new JSZip();
-				// zip.file(`${fileId}`, 'testing testing');
-				zip.file(`${fileId}`, ret.content);
-				zip.generateAsync({type:'blob'}).then(function(c) {
-					saveAs(c, 'file.zip');
-				});
-				// zip
-				// .generateNodeStream({type:'nodebuffer',streamFiles:true})
-				// .pipe(fs.createWriteStream('out.zip'))
-				// .on('finish', function () {
-				// 				// JSZip generates a readable stream with a "end" event,
-				// 				// but is piped here in a writable stream which emits a "finish" event.
-				// 				console.log("out.zip written.");
-				// });
+				console.log(`zipbutton received content: ${ret.content}`);
 				res.status(200).send(ret);
 			} else {
-				res.status(400).json({message: 'NOT FOUND'});
+				res.status(400).json({ message: 'NOT FOUND' });
 			}
 		} catch (e) {
 			res.status(500).send(e);
 		}
 	});
-	
+
 	app.post('/events', async (req: Request, res: Response) => {
-		const {type, data}: {type: string, data: { fileId: string, content?: string }} = req.body;
+		const { type, data }: { type: string; data: { fileId: string; content?: string } } = req.body;
 		if (type === 'FileOpened') {
 			try {
 				const { fileId }: { fileId: string } = data;
@@ -116,12 +105,12 @@ async function start() {
 				if (ret) {
 					res.status(200).send(ret.content);
 				} else {
-					res.status(400).json({message: 'NOT FOUND'});
+					res.status(400).json({ message: 'NOT FOUND' });
 				}
 			} catch (e) {
 				res.status(500).send(e);
 			}
-		} else if (type === 'FileModified') { 
+		} else if (type === 'FileUpdated') {
 			try {
 				const { fileId, content } = data;
 				const ret = await modifyFile(mongo, fileId, content);
@@ -143,7 +132,7 @@ async function start() {
 					res.status(400).send(ret);
 				}
 			} catch (e) {
-				res.send(500).send(e)
+				res.send(500).send(e);
 			}
 		} else if (type === 'FileCreated') {
 			try {
@@ -155,11 +144,11 @@ async function start() {
 					res.status(400).send(ret);
 				}
 			} catch (e) {
-				res.send(500).send(e)
+				res.send(500).send(e);
 			}
 		}
 	});
-	
+
 	app.listen(4008, () => {
 		console.log('Listening on 4008');
 	});

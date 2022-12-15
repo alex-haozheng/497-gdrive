@@ -17,6 +17,25 @@ This server will handle opening and closing files and handling the changes made 
 
     - Description: Listens to file events and returns the compressed version (or updates on a file)
 
+- `POST /user/file/zip`
+    
+    - Description: Listens to this endpoint where it will zip the file stored on the compressed version (the database along this endpoint)
+    option to download uncompressed and compressed file
+
+- Request:
+```json
+{
+    "fileId": "ab33322" 
+}
+```
+- Response:
+```json
+{
+    "fileId": "ab333",
+    "content": "text text hola"
+}
+```
+
 ### **Events:**
 - `fileOpened`
     Description: decompress whats in the database and return it

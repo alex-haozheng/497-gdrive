@@ -211,12 +211,12 @@ async function start(){
 
     app.post('/events', async (req : express.Request, res : express.Response) => {
         const {type, data} : {type: FileEvent, data: File} = req.body;
-        if(type === 'FileCreated'){
+        /* if(type === 'FileCreated'){
             axios.post('http://event-bus:4012/events', {
                 type: 'FileCreated',
                 data,
             } as FileEventMessage);
-        }
+        } */
         if(type === 'ShootFileAnalytics'){
             axios.post('http://event-bus:4012/events', {
                 type: 'GetFileAnalytics',
@@ -225,12 +225,12 @@ async function start(){
                 },
             } as FileEventMessage);
         }
-        else if(type === 'FileDeleted'){
+        /* else if(type === 'FileDeleted'){
             axios.post('http://event-bus:4012/events', {
                 type: 'FileDeleted',
                 data,
             } as FileEventMessage);
-        }
+        } */
         res.status(200).send({});
     });
 

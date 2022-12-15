@@ -29,7 +29,7 @@ type FileEvent = 'FileCreated' | 'FileUpdated' | 'FileDeleted' | 'ShootFileAnaly
 
 interface FileEventMessage {
     type: FileEvent;
-    data: File | { files: File[] };
+    data: File | { files: File[] } | { fileId: string, content: string };
 }
 
 const downloadFile = async (fileId : string) => {
@@ -71,6 +71,16 @@ app.post('/files/upload', async (req : express.Request, res : express.Response) 
             content
         };
         const response = await uploadFile(file) as { data : File };
+        
+        //! NEW
+        axios.post('http://event-bus:4012/events', {
+            type: 'FileCreated',
+            data: {
+                fileId: response.data.fileId,
+                content
+            },
+        } as FileEventMessage);
+        
         res.status(200).send(response.data as File);
     } catch (err) {
         res.status(500).send(err);
@@ -79,12 +89,12 @@ app.post('/files/upload', async (req : express.Request, res : express.Response) 
 
 app.post('/events', (req : express.Request, res : express.Response) => {
     const { type, data } = req.body as FileEventMessage;
-    if(type === 'FileCreated'){
+    /* if(type === 'FileCreated'){
         axios.post('http://event-bus:4012/events', {
             type: 'FileCreated',
             data,
         } as FileEventMessage);
-    }
+    } */
     /* if(type === 'FileUpdated'){
         axios.post('http://event-bus:4012/events', {
             type: 'FileUpdated',
