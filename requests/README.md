@@ -17,7 +17,7 @@ This service does not interact with other services.
 This service runs on port 4013.
 
 # Endpoint Information: 
-## GET /checkRequest:uid
+## GET /checkRequest/:uid
 
 - Returns whether a specific user is has an actie request or not.
 - Request: 
