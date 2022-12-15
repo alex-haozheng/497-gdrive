@@ -52,47 +52,49 @@ const DownloadButton = ({ fileId, fileName } : { fileId: string, fileName: strin
 };
 
 const ZipButton = ( { fileId, fileName } : { fileId: string, fileName: string }) => {
-    const handleZip = () => {
+    const handleZip = async () => {
         // How to make this work:
         // TODO 0: do not change the front end code unless specified. it will work once the todo's are completed
         // TODO1: return this code to the fileCompression service
-        /*
+        
         const res = await axios.get(`http://localhost:4008/user/file/zip`, {
             data: {
                 fileId
             }
         });
-        //const ret = res.data.content;
+        const ret = res.data.content;
+        // const url = window.URL.createObjectURL(new Blob([JSON.stringify(ret)]));
+        // const link = document.createElement('a');
+        // link.href = url;
+        // link.setAttribute('download', `${fileName}`);
+        // document.body.appendChild(link);
+        // link.click();
         
-        //var zip = new JSZip();
-        //zip.file(`${fileId}`, ret.content);
-        //zip
-        //.generateNodeStream({type:'nodebuffer',streamFiles:true})
-        //.pipe(fs.createWriteStream('out.zip'))
-        //.on('finish', function () {
-                // JSZip generates a readable stream with a "end" event,
-                // but is piped here in a writable stream which emits a "finish" event.
-                //console.log("out.zip written.");
-        });*/
-
-        // TODO2: fix the above code if necessary and file compression service by importing axios, communicating with the fileService microservice using axios, and returning the zipped file
-        
-        // TODO3: once the file compression service is fixed, uncomment the code below
-        /*
-        // TODO4: insert the get request to the const res = await axios.get() line
-        const res = await axios.get(insert get request to file compression service here);
-        const url = window.URL.createObjectURL(new Blob([JSON.stringify(res.data.content)]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${fileName}`);
-        document.body.appendChild(link);
-        link.click();
-        */
         // TODO5: make the handleZip function async
-        console.log("Zip button clicked");
+        console.log(`Zip button clicked: ${ret}`);
     } 
     return (
         <Button variant="outlined" onClick={handleZip} color="secondary" sx={{ width:200, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 35}} startIcon={<img src="https://img.icons8.com/ios/50/000000/zip.png" alt="zip" width="20" height="20"/>}>Zip</Button>
+    );
+};
+
+const LogOutButton = () => {
+    const handleLogOut = () => {
+        localStorage.removeItem('uid');
+        localStorage.removeItem('accessToken');
+        window.location.href = '/';
+    };
+    return (
+        <Button variant="contained" onClick={handleLogOut} color="error" sx={{ width:125, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 40}} startIcon={<img src="https://img.icons8.com/ios/50/000000/logout-rounded-left.png" alt="logout" width="20" height="20"/>}>Log Out</Button>
+    );
+};
+
+const DashBoardButton = () => {
+    const handleDashBoard = () => {
+        window.location.href = '/dashboard';
+    };
+    return (        
+        <Button variant="contained" onClick={handleDashBoard} color="secondary" sx={{ width:125, position: 'relative', textTransform: "none", fontFamily: "Helvetica Neue", top: 45}}>Dashboard</Button>
     );
 };
 
@@ -155,6 +157,10 @@ const LandingPage = () => {
                             Files
                         </Typography>
                         <UploadFile />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 10}}>
+                            <LogOutButton />
+                            <DashBoardButton />
+                        </Box>
                     </Box>
                     <ListFiles />
                 </> 
