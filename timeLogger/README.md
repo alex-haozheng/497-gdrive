@@ -11,7 +11,7 @@ The `timeLogger` microservice is a RESTful API that allows other microservices t
 
 ### **Microservice Interaction**
 
-The `timeLogger` microservice interacts with the fileService microservice to get the file by `fileId` and update the time stamp. The `timeLogger` microservice also interacts with the `uploadDownload` microservice to get the file by `fileId` and update the time stamp each time a `.txt` file is uploaded or downloaded.
+The `timeLogger` microservice interacts with the fileService microservice to get the file by `fileId` and update the time stamp. The `timeLogger` microservice also interacts with the `uploadDownload` microservice to get the file by `fileId` and update the time stamp each time a `.txt` file is uploaded or downloaded. The service is hosted on port `4010`.
 
 ## **Endpoints**
 - `GET /files/:fileId/time`
@@ -26,12 +26,7 @@ The `timeLogger` microservice interacts with the fileService microservice to get
     ```json
     {
         "fileId": "ab03b4c5",
-        "name": "file.txt",
-        "size": 21,
-        "tags": [],
-        "type": "text/plain",
         "date": "2019-01-01T00:00:00.000Z",
-        "content": "This is file content."
     }
     ```
     - **HTTP Status Codes**
@@ -46,22 +41,56 @@ The `timeLogger` microservice interacts with the fileService microservice to get
         "fileId": "ab03b4c5"
     }
     ```
-    - **Response:**
+    - **Response**
     ```json
     {
         "fileId": "ab03b4c5",
-        "name": "file.txt",
-        "size": 21,
-        "tags": [],
-        "type": "text/plain",
         "date": "2019-01-01T00:00:00.000Z",
-        "content": "This is file content."
     }
     ```
     - **HTTP Status Codes**
         - 200: OK
         - 304: Not Modified
         - 404: Not Found
+        - 500: Internal Server Error
+
+- `GET /files/:fileId/time/parse`
+    - **Description:** Gets the time of a file by `fileId` and parses it into a human-readable format. This endpoint is a `GET` request to the server that queries the database for the file and then returns the file with the difference between the current time and the time stamp in a human-readable format.
+    - **Request**
+    ```json
+    {
+        "fileId": "ab03b4c5"
+    }
+    ```
+    - **Response**
+    ```json
+    {
+        "fileId": "ab03b4c5",
+        "date": "2019-01-01T00:00:00.000Z",
+        "dateStr": "3 years, 11 months"
+    }
+    ```
+    - **HTTP Status Codes**
+        - 200: OK
+        - 404: Not Found
+        - 500: Internal Server Error
+-  `POST /events`
+    - **Description:** Exists only to maintain compatibility with the `event-bus` microservice. This endpoint is a `POST` request to the server that does nothing.
+    - **Request**
+    ```json
+    {
+        "type": "FileCreated",
+        "data": {
+            "fileId": "ab03b4c5"
+        }
+    }
+    ```
+    - **Response**
+    ```json
+    {}
+    ```
+    - **HTTP Status Codes**
+        - 200: OK
         - 500: Internal Server Error
 
 ## **Installation and Usage**
@@ -80,9 +109,16 @@ git clone
 
 ### **Step 2: Install Dependencies**
 
+Install global dependencies.
+
+```bash
+npm install
+```
+
 Install the dependencies for the `timeLogger` microservice.
 
 ```bash
+cd ./timeLogger
 npm install
 ```
 
@@ -94,9 +130,18 @@ npm install
 npm start
 ```
 
+### **Step 4: Start the `event-bus` microservice**
+
+```bash
+cd ../event-bus
+npm install
+npm start
+```
+
 ### **Step 5: Start the `timeLogger` microservice**
 
 ```bash
+cd ./timeLogger
 npm start
 ```
 
@@ -115,5 +160,5 @@ git clone
 ### **Step 2: Start the `timeLogger` microservice**
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
