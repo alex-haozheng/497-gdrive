@@ -85,12 +85,6 @@ app.post('/events', (req : express.Request, res : express.Response) => {
             data,
         } as FileEventMessage);
     }
-    /* if(type === 'FileUpdated'){
-        axios.post('http://event-bus:4012/events', {
-            type: 'FileUpdated',
-            data,
-        } as FileEventMessage);
-    } */
     res.status(200).send({});
 });
 
