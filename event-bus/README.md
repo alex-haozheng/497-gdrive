@@ -159,45 +159,11 @@ $ git clone https://github.com/umass-cs-497s-F22/milestone-2-implementation-team
 $ cd name-of-cloned-repository
 ```
 
-### **Step 3: Install Dependencies**
-
-- Check that the terminal is in the correct directory.
-
-```bash
-$ pwd
-```
-
-# TODO: ADD DATABASE INFO ONCE DONE IN THIS FILE
-create a docker compose file with the following contents. Use docker compose to automatically install dependencies and start up a running containerized service
-
-```
-version: '3.9'
-services:
-  event-bus:
-    build: event-bus
-    ports:
-      - "4012:4012"
-```
-
-### OR
-
-- manually install the dependencies using the `npm install` command and run the service using the `npm start` command.
-
-```bash
-$ npm install
-```
-
-### **Step 4: Run the Application**
+### **Step 3: Run the Application**
 
 ```bash
 $ docker compose up --build
 ```
 
-### OR
-
-```bash
-$ npm start
-```
-
 ### **Step 5: View the Application**
-- The command from Step 4 will locally host the website on `http://localhost:4012`.
+- The command will locally host the website on `http://localhost:3000`.
